@@ -72,6 +72,8 @@ def norm(url: str, base_host: str = "en.nissan-saudiarabia.com") -> str:
         return "//" + url[len("http://"):].split("?")[0]
     if url.startswith("/"):
         return "//" + base_host + url.split("?")[0]
+    if re.search(r"\.(png|jpe?g|webp|svg|gif|css|woff2?)$", url.split("?")[0], re.I) and ":" not in url:
+        return "//" + base_host + "/" + url.split("?")[0]
     return ""
 
 

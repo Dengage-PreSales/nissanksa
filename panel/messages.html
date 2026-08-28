@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nissan demo channel copy</title>
+<style>
+  body { margin: 0; padding: 28px 20px 70px; background: #f6f6f4; color: #17181a; font-family: Arial, sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.note { color: #6b6e72; font-size: 13.5px; margin: 0 0 26px; line-height: 1.5; }
+  h2 { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: #c3002f; margin: 30px 0 10px; }
+  .msg { background: #fff; border: 1px solid #e3e3df; padding: 12px 14px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; align-items: start; }
+  .msg b { font-size: 12.5px; color: #6b6e72; font-weight: 600; }
+  .msg span { font-size: 14.5px; line-height: 1.5; white-space: pre-wrap; }
+  .msg button { grid-row: span 2; align-self: center; font: 12px Arial; padding: 7px 14px; cursor: pointer; background: #17181a; color: #fff; border: 0; border-radius: 3px; }
+  .msg button.did { background: #10633f; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Channel copy for the Nissan demo</h1>
+<p class="note">Every message the Monday journeys and rehearsals need, with a copy
+button that puts the exact text on the clipboard. All of it is pre-purchase;
+nothing here services, renews or reminds an owner. SMS bodies stay inside one
+segment and carry the STOP opt-out.</p>
+
+<h2>Web push</h2>
+<div class="msg"><b>Booking confirmed (the "seconds later" moment)</b><span>Title: Your test drive is booked
+Body: We have your X-TRAIL drive request. The branch will call to set the exact time. See you soon.</span><button>Copy</button></div>
+<div class="msg"><b>Abandoned booking rescue</b><span>Title: One step left
+Body: Your test drive was almost booked. It takes under a minute to finish, and the form remembered where you stopped.</span><button>Copy</button></div>
+<div class="msg"><b>Welcome</b><span>Title: Welcome to Nissan KSA
+Body: You are set. New offers and arrivals will reach you here first.</span><button>Copy</button></div>
+<div class="msg"><b>No-show re-invite</b><span>Title: Your drive is still waiting
+Body: Thursday did not work out, no problem. Pick any new time and the keys will be ready.</span><button>Copy</button></div>
+<div class="msg"><b>Post test drive, same evening</b><span>Title: How did it feel?
+Body: The X-TERRA you drove today is available in your colour. Your quote is one tap away.</span><button>Copy</button></div>
+<div class="msg"><b>Win-back after quiet days</b><span>Title: Still thinking about the X-TRAIL?
+Body: It is still here, and so is your saved progress. Come take another look.</span><button>Copy</button></div>
+<div class="msg"><b>Tekton launch day</b><span>Title: TEKTON has landed
+Body: You asked to be first. Book your look at the all-new TEKTON today.</span><button>Copy</button></div>
+
+<h2>SMS</h2>
+<div class="msg"><b>Booking confirmed</b><span>Nissan KSA: your test drive request is in. The branch will call to confirm the time. Reply STOP to opt out.</span><button>Copy</button></div>
+<div class="msg"><b>Hot lead same-day follow-up</b><span>Nissan KSA: thanks for your interest. A product specialist will call you today to arrange everything. Reply STOP to opt out.</span><button>Copy</button></div>
+<div class="msg"><b>Quote follow-up</b><span>Nissan KSA: your quote is ready at the branch. Questions? Call 920009058. Reply STOP to opt out.</span><button>Copy</button></div>
+
+<h2>App inbox</h2>
+<div class="msg"><b>Welcome card</b><span>Title: Your Nissan inbox
+Body: Offers, arrivals and booking updates collect here, so nothing gets lost.</span><button>Copy</button></div>
+<div class="msg"><b>Offer card</b><span>Title: X-TRAIL from SAR 999 monthly
+Body: The published installment campaign, with 0% admin fees and 0% down payment. See the offer page for conditions.</span><button>Copy</button></div>
+
+<h2>Email subject lines</h2>
+<div class="msg"><b>Booking confirmation</b><span>Your Nissan test drive is booked</span><button>Copy</button></div>
+<div class="msg"><b>Rescue</b><span>One step left on your test drive</span><button>Copy</button></div>
+<div class="msg"><b>Brochure follow-up</b><span>Your X-TRAIL brochure, and what to read first</span><button>Copy</button></div>
+
+<h2>WhatsApp (sent on Value First's channel)</h2>
+<div class="msg"><b>Intent follow-up</b><span>Hi! You asked about PATROL financing. A specialist can walk you through the plans, or book you straight into a test drive. What suits you better?</span><button>Copy</button></div>
+<div class="msg"><b>Booking handoff</b><span>Your test drive is confirmed. Share your location when you set out and the branch will have everything ready.</span><button>Copy</button></div>
+</div>
+<script>
+  document.addEventListener('click', function (e) {
+    if (e.target.tagName !== 'BUTTON') return;
+    var text = e.target.parentElement.querySelector('span').textContent;
+    navigator.clipboard.writeText(text).then(function () {
+      e.target.textContent = 'Copied';
+      e.target.className = 'did';
+      setTimeout(function () { e.target.textContent = 'Copy'; e.target.className = ''; }, 1400);
+    });
+  });
+</script>
+</body>
+</html>

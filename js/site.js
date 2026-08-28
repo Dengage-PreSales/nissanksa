@@ -293,11 +293,20 @@
         var form = modelSelect ? modelSelect.closest('form') : null;
         if (!form) return;
         form.__dpsBooking = true;
+        /* The demo owns validation: the source form's required flags would
+           block the submit event on fields this flow does not need. */
+        form.setAttribute('novalidate', '');
 
         var begun = false;
+        /* The source form's option values are internal ids; the model name
+           lives in the option text and its data-name attribute. */
+        function optionName(option) {
+            return (option.getAttribute('data-name') || option.textContent || '').trim();
+        }
         function chosen() {
-            var car = modelFromName(modelSelect.value) || null;
-            return car;
+            var option = modelSelect.selectedOptions && modelSelect.selectedOptions[0];
+            if (!option || !option.value) return null;
+            return modelFromName(optionName(option));
         }
 
         /* Arriving from a model page's own Book button preselects that car
@@ -308,7 +317,7 @@
             var car0 = window.Catalog.get(preset);
             if (car0) {
                 $$('option', modelSelect).forEach(function (o) {
-                    if (o.value.toUpperCase() === car0.nameEn.toUpperCase()) modelSelect.value = o.value;
+                    if (optionName(o).toUpperCase() === car0.nameEn.toUpperCase()) modelSelect.value = o.value;
                 });
                 var line0 = { id: car0.id, quantity: 1, price: car0.price };
                 setPending(line0);
@@ -657,7 +666,11 @@
             if (el && el.tagName === 'IMG') el.style.visibility = 'hidden';
         }, true);
         $$('img').forEach(function (img) {
-            if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) {
+            var src = img.getAttribute('src') || '';
+            /* An SVG can legitimately report naturalWidth 0, so only raster
+               sources are judged by it. */
+            if (/\.svg(\?|$)/i.test(src)) return;
+            if (img.complete && img.naturalWidth === 0 && src) {
                 img.style.visibility = 'hidden';
             }
         });

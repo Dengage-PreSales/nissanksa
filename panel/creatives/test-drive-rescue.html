@@ -1,0 +1,26 @@
+<!-- nissan_demo_test-drive-rescue | Content type: Popup (custom HTML).
+     Fired when a booking is started and abandoned. No script tags; links
+     carry target=_top; the dismiss reports its click and closes. -->
+<style>
+  #nkx-tdr { font-family: 'Nissan Brand', Arial, sans-serif; color: #111; background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.22); max-width: 460px; }
+  #nkx-tdr .m { background: #f4f4f4; }
+  #nkx-tdr .m img { display: block; width: 100%; height: auto; }
+  #nkx-tdr .b { padding: 20px 22px; }
+  #nkx-tdr .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #c3002f; font-weight: 700; }
+  #nkx-tdr h2 { margin: 6px 0 8px; font-size: 20px; line-height: 1.25; color: #111; }
+  #nkx-tdr p { margin: 0 0 14px; font-size: 13.5px; line-height: 1.55; color: #3a3f43; }
+  #nkx-tdr .cta { display: inline-block; background: #111; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: .06em; font-weight: 600; padding: 12px 24px; border-radius: 999px; }
+  #nkx-tdr .later { display: inline-block; margin-inline-start: 12px; color: #6e7275; font-size: 12.5px; text-decoration: underline; cursor: pointer; background: none; border: 0; font-family: inherit; }
+</style>
+<div id="nkx-tdr">
+  <div class="m">
+    <img src="https://dengage-presales.github.io/nissanksa/assets/img/side-x-trail.jpg" alt="Nissan X-TRAIL">
+  </div>
+  <div class="b">
+    <span class="k">Before you go</span>
+    <h2>Your X-TRAIL test drive is one click away</h2>
+    <p>The form remembers where you stopped. Finish it in under a minute and pick the branch and time that suit you.</p>
+    <a class="cta" target="_top" href="https://dengage-presales.github.io/nissanksa/book-a-test-drive/index.html?model=x-trail">FINISH MY BOOKING</a>
+    <button type="button" class="later" onclick="Dn.sendClick('later'); Dn.closePopup && Dn.closePopup();">Maybe later</button>
+  </div>
+</div>

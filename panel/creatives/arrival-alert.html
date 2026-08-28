@@ -1,0 +1,36 @@
+<!-- nissan_demo_arrival-alert | Content type: Popup (custom HTML).
+     A capture form. The engine's native mechanism does the work: inputs are
+     read through data-dn-form-id, Dn.postSubscription validates and creates
+     the contact with its consent flags. No script tags, no form post. -->
+<style>
+  #nkx-arr { font-family: 'Nissan Brand', Arial, sans-serif; background: #fff; color: #111; border-radius: 4px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.22); max-width: 420px; }
+  #nkx-arr .m img { display: block; width: 100%; height: auto; }
+  #nkx-arr .b { padding: 20px 22px; }
+  #nkx-arr .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #c3002f; font-weight: 700; }
+  #nkx-arr h2 { margin: 6px 0 8px; font-size: 19px; color: #111; }
+  #nkx-arr p { margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: #3a3f43; }
+  #nkx-arr input { width: 100%; box-sizing: border-box; border: 1px solid #d9dde1; border-radius: 3px; padding: 11px 12px; font: inherit; font-size: 13.5px; margin-bottom: 10px; }
+  #nkx-arr input[data-dn-invalid="true"] { border-color: #c3002f; }
+  #nkx-arr .cta { width: 100%; border: 0; background: #111; color: #fff; font: inherit; font-size: 13px; letter-spacing: .06em; font-weight: 600; padding: 12px 16px; border-radius: 999px; cursor: pointer; }
+  #nkx-arr .fine { font-size: 11px; color: #6e7275; margin-top: 8px; }
+  #nkx-arr .done { display: none; padding: 8px 0 2px; color: #10633f; font-size: 13.5px; }
+  #nkx-arr .container[data-dn-is-submitted="true"] .done { display: block; }
+  #nkx-arr .container[data-dn-is-submitted="true"] .hide-after { display: none; }
+</style>
+<div id="nkx-arr">
+  <div class="m">
+    <img src="https://dengage-presales.github.io/nissanksa/assets/img/side-tekton.jpg" alt="Nissan TEKTON">
+  </div>
+  <div class="b container">
+    <span class="k">Arrival alert</span>
+    <h2>Be first when the TEKTON lands</h2>
+    <div class="hide-after">
+      <p>Leave your details and we will message you the moment it reaches your branch.</p>
+      <input type="email" data-dn-form-id="email" placeholder="Email address" data-dn-validation="email" data-dn-required="true">
+      <input type="tel" data-dn-form-id="phone" placeholder="Mobile (+9665...)" dir="ltr">
+      <button type="button" class="cta" onclick="Dn.postSubscription(); Dn.sendClick('subscribe');">NOTIFY ME</button>
+      <p class="fine">By subscribing you agree to receive updates from this demo. Unsubscribe any time.</p>
+    </div>
+    <p class="done">Done. You will know the moment it arrives.</p>
+  </div>
+</div>

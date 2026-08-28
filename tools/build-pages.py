@@ -153,6 +153,8 @@ def map_route(href: str, rel: str):
 
 def asset_local(url: str, rel: str, host: str = "en.nissan-saudiarabia.com"):
     key = url.strip()
+    if key and not key.startswith(("http", "//", "/", "data:", "#")) and re.search(r"\.(png|jpe?g|webp|svg|gif|css|woff2?)$", key.split("?")[0], re.I):
+        key = "/" + key
     if key.startswith("https://"):
         key = "//" + key[len("https://"):]
     elif key.startswith("http://"):
@@ -555,6 +557,57 @@ def author_magnite(soup, rel):
         body.insert(0, main)
 
 
+BRANCHES = [
+    ("Olaya Showroom", "Riyadh", "Showroom"),
+    ("Exit 5 Showroom", "Riyadh", "Showroom"),
+    ("Madinah Road Showroom", "Jeddah", "Showroom"),
+    ("Corniche Showroom", "Jeddah", "Showroom"),
+    ("King Fahd Road Showroom", "Dammam", "Showroom"),
+    ("Khobar Showroom", "Khobar", "Showroom"),
+    ("Makkah Showroom", "Makkah", "Showroom"),
+    ("Madinah Showroom", "Madinah", "Showroom"),
+]
+
+
+def replace_showroom(soup, rel):
+    """The source page hosts a scripted dealer locator that arrives as a dead
+    grey pane. An authored directory stands in: the same eight sample branches
+    the ni_branch dataset seeds, each with a real map link, plus the QR that
+    demonstrates offline capture: scanning it opens this demo tagged with its
+    showroom source, so the visit lands attributed."""
+    dead = None
+    for el in soup.select("[class*=dealer-locator], [class*=locator], [class*=map]"):
+        if el.find_parent("header") is None and el.find_parent("footer") is None:
+            dead = dead or el
+    cards = "".join(
+        f'<div class="dps-branch"><b>{name}</b><span>{city} · Petromin Nissan network</span>'
+        f'<a href="https://www.google.com/maps/search/?api=1&query={("Petromin Nissan " + city).replace(" ", "+")}"'
+        f' target="_blank" rel="noopener">Get directions</a></div>'
+        for name, city, _ in BRANCHES)
+    block = BeautifulSoup(
+        '<section class="dps-branches"><div class="dps-branches-inner">'
+        '<h2>Showrooms</h2><p class="dps-branches-note">Sample branches for this '
+        'demonstration; each is a row in the dealer table the CDP holds.</p>'
+        f'<div class="dps-branch-grid">{cards}</div>'
+        '<div class="dps-qr"><img src="' + rel + 'assets/brand/showroom-qr.svg" alt="QR code opening this demo tagged showroom-qr">'
+        '<div><b>The QR at the stand</b><p>Scanning it opens this site tagged '
+        '<code>showroom-qr</code>, so the walk-in becomes an attributed, targetable '
+        'visit the moment their phone opens the page. Print it on a stand, a desk, '
+        'a windscreen card.</p></div></div>'
+        '</div></section>', "html.parser")
+    if dead is not None:
+        target = dead
+        for _ in range(4):
+            parent = target.parent
+            if parent is not None and parent.name not in ("main", "body") and len(parent.find_all(recursive=False)) == 1:
+                target = parent
+            else:
+                break
+        target.replace_with(block)
+    else:
+        (soup.find("main") or soup.body).insert(0, block)
+
+
 def replace_finance_calculator(soup):
     """The source calculator is scripted upstream and arrives dead; a working
     one (drawn by js/site.js into #dps-finance) stands where it stood."""
@@ -577,6 +630,13 @@ def replace_finance_calculator(soup):
         soup.main.insert(0, host)
     else:
         soup.body.insert(0, host)
+
+
+def strip_dashes(soup):
+    """House style for everything published: no em or en dashes. Captured
+    copy gets the same treatment so the whole site reads one way."""
+    for node in soup.find_all(string=re.compile(r"[\u2013\u2014]")):
+        node.replace_with(str(node).replace("\u2013", "-").replace("\u2014", "-"))
 
 
 def footer_notice(soup):
@@ -733,6 +793,8 @@ def build(out_path: str, spec: dict):
         replace_finance_calculator(soup)
     if out_path == "offers/index.html":
         replace_offers_listing(soup, rel)
+    if out_path == "find-a-showroom/index.html":
+        replace_showroom(soup, rel)
     if spec.get("authored") == "magnite":
         author_magnite(soup, rel)
     host = spec.get("host", "en.nissan-saudiarabia.com")
@@ -743,6 +805,7 @@ def build(out_path: str, spec: dict):
     if out_path == "index.html":
         add_hearts(soup)
     inject_slots(soup, spec)
+    strip_dashes(soup)
     footer_notice(soup)
 
     html = soup.find("html")
@@ -778,6 +841,9 @@ def build(out_path: str, spec: dict):
 </body>
 </html>
 """
+    # House style, applied to the final document so escaped attribute values
+    # are covered too: no em or en dashes anywhere published.
+    doc = doc.replace("\u2013", "-").replace("\u2014", "-")
     out = ROOT / out_path
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(doc)

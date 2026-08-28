@@ -1,0 +1,27 @@
+<!-- nissan_demo_test-drive-invite | Content type: Popup (custom HTML).
+     Fired for the repeat visitor who keeps returning to a model page without
+     booking. Renders in the engine's iframe: no script tags, links carry
+     target=_top, clicks reported with Dn.sendClick where nothing navigates. -->
+<style>
+  #nkx-tdi { font-family: 'Nissan Brand', Arial, sans-serif; color: #111; background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.22); max-width: 460px; }
+  #nkx-tdi .m { background: #f4f4f4; }
+  #nkx-tdi .m img { display: block; width: 100%; height: auto; }
+  #nkx-tdi .b { padding: 20px 22px; }
+  #nkx-tdi .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #c3002f; font-weight: 700; }
+  #nkx-tdi h2 { margin: 6px 0 8px; font-size: 20px; line-height: 1.25; color: #111; }
+  #nkx-tdi p { margin: 0 0 14px; font-size: 13.5px; line-height: 1.55; color: #3a3f43; }
+  #nkx-tdi .cta { display: inline-block; background: #111; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: .06em; font-weight: 600; padding: 12px 24px; border-radius: 999px; }
+  #nkx-tdi .later { display: inline-block; margin-inline-start: 12px; color: #6e7275; font-size: 12.5px; text-decoration: underline; cursor: pointer; background: none; border: 0; font-family: inherit; }
+</style>
+<div id="nkx-tdi">
+  <div class="m">
+    <img src="https://dengage-presales.github.io/nissanksa/assets/img/side-patrol.webp" alt="Nissan PATROL">
+  </div>
+  <div class="b">
+    <span class="k">Still thinking it over?</span>
+    <h2>The PATROL reads better from the driver's seat</h2>
+    <p>You have been back a few times. The next step takes a minute to book, and the keys will be waiting at your branch.</p>
+    <a class="cta" target="_top" href="https://dengage-presales.github.io/nissanksa/book-a-test-drive/index.html?model=patrol">BOOK A TEST DRIVE</a>
+    <button type="button" class="later" onclick="Dn.sendClick('later'); Dn.closePopup && Dn.closePopup();">Maybe later</button>
+  </div>
+</div>

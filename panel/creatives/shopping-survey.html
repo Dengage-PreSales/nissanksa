@@ -1,0 +1,28 @@
+<!-- nissan_demo_shopping-survey | Content type: Popup (custom HTML).
+     A pre-purchase micro survey on the engine's native question mechanism:
+     radios named with data-dn-name, Dn.postQuestion() stores the answer. -->
+<style>
+  #nkx-svy { font-family: 'Nissan Brand', Arial, sans-serif; background: #fff; color: #111; border-radius: 4px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.22); max-width: 420px; }
+  #nkx-svy .b { padding: 24px 22px; }
+  #nkx-svy .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #c3002f; font-weight: 700; }
+  #nkx-svy h2 { margin: 6px 0 12px; font-size: 19px; color: #111; }
+  #nkx-svy label { display: flex; gap: 10px; align-items: center; font-size: 13.5px; padding: 9px 12px; border: 1px solid #e3e3e3; border-radius: 3px; margin-bottom: 8px; cursor: pointer; }
+  #nkx-svy .cta { width: 100%; border: 0; background: #111; color: #fff; font: inherit; font-size: 13px; letter-spacing: .06em; font-weight: 600; padding: 12px 16px; border-radius: 999px; cursor: pointer; margin-top: 6px; }
+  #nkx-svy .done { display: none; padding: 8px 0 2px; color: #10633f; font-size: 13.5px; }
+  #nkx-svy .container[data-dn-is-submitted="true"] .done { display: block; }
+  #nkx-svy .container[data-dn-is-submitted="true"] .hide-after { display: none; }
+</style>
+<div id="nkx-svy">
+  <div class="b container">
+    <span class="k">30 seconds, one question</span>
+    <h2>What would help you decide today?</h2>
+    <div class="hide-after" data-dn-min-selection="1" data-dn-max-selection="1">
+      <label><input type="radio" name="decide" data-dn-name="pre_purchase_blocker" value="price"> Clear pricing and offers</label>
+      <label><input type="radio" name="decide" data-dn-name="pre_purchase_blocker" value="test-drive"> A test drive</label>
+      <label><input type="radio" name="decide" data-dn-name="pre_purchase_blocker" value="finance"> Finance options</label>
+      <label><input type="radio" name="decide" data-dn-name="pre_purchase_blocker" value="compare"> Comparing models side by side</label>
+      <button type="button" class="cta" onclick="Dn.postQuestion(); Dn.sendClick('answer');">SEND</button>
+    </div>
+    <p class="done">Thank you. That helps more than you would think.</p>
+  </div>
+</div>
