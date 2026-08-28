@@ -665,6 +665,8 @@
             if (!body) return;
             toggler.__dps = true;
             toggler.setAttribute('data-dps-wired', '1');
+            var link = head.querySelector('a');
+            if (link) link.setAttribute('data-dps-wired', '1');
             toggler.addEventListener('click', function (e) {
                 e.preventDefault();
                 body.style.display = body.style.display === 'none' ? '' : 'none';

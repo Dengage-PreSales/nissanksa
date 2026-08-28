@@ -106,6 +106,14 @@ TRACKER = re.compile(
     r"licdn|linkedin|twitter|oracleinfinity|adobedtm|omtrdc|treasuredata|teads|"
     r"bing\.com|clarity|hotjar|krxd|bat\.js|analytics", re.I)
 
+def _wa_glyph():
+    svg = (ROOT / "assets" / "brand" / "whatsapp.svg").read_text()
+    svg = svg.replace("<svg ", '<svg width="30" height="30" aria-hidden="true" ', 1)
+    return svg.replace("<path ", '<path fill="currentColor" ', 1)
+
+
+WA_GLYPH = _wa_glyph()
+
 DENGAGE_LOGO = """<span class="dps-brand" aria-label="Dengage Auto Demo">
 <svg viewBox="0 0 38 38" role="img" aria-hidden="true"><path fill="currentColor" d="M11.3821 34.8307H6.61521V28.0187H11.3821C16.4408 27.824 20.4293 23.6395 20.2348 18.5791C20.1375 13.7133 16.1489 9.82066 11.3821 9.72334H6.61521V15.5623H12.3549V22.3744H0V2.91125H11.3821C20.2348 3.2032 27.1418 10.5019 26.85 19.3576C26.6554 27.824 19.8456 34.6361 11.3821 34.8307Z"/><path fill="currentColor" d="M36.9964 15.9687C38.288 17.303 38.3802 19.5905 36.9964 20.9248C35.6126 22.2591 33.3986 22.2591 32.0148 20.9248C31.369 20.2576 31 19.3045 31 18.4468C31 16.5406 32.476 14.9203 34.4134 14.9203C34.4134 14.9203 34.4134 14.9203 34.5056 14.9203C35.4281 14.9203 36.3507 15.3015 36.9964 15.9687Z"/></svg>
 <span class="dps-brand-text"><b>DENGAGE</b><i>Auto Demo</i></span></span>"""
@@ -191,8 +199,12 @@ def pick_srcset(srcset: str):
 def strip_scripts(soup):
     for tag in soup.find_all(["script", "noscript"]):
         tag.decompose()
+    # A captured page keeps no embedded frames at all: the hydrate pass brings
+    # along live third party widgets (reCAPTCHA, audience pixels) that a demo
+    # must not load at runtime.
     for tag in soup.find_all("iframe"):
-        if TRACKER.search(tag.get("src") or "") or not tag.get("src"):
+        src = tag.get("src") or ""
+        if not src or src.startswith(("http://", "https://", "//")) or TRACKER.search(src):
             tag.decompose()
     for tag in soup.find_all("link"):
         rels = " ".join(tag.get("rel") or [])
@@ -234,12 +246,44 @@ def strip_furniture(soup):
         for el in trailing:
             el.decompose()
         row.decompose()
+    # The forms travelled with their live reCAPTCHA, a third party gate this
+    # demo cannot honour and must not load: the whole apparatus goes, and the
+    # demo's own submit handling answers instead.
+    for el in soup.select(
+            ".captcha-validation, [id^='captcha-widget'], .g-recaptcha-response, "
+            "input.captcha-token, .g-recaptcha-bubble-arrow, .grecaptcha-badge"):
+        el.decompose()
+    # The Tekton secondary navigation is a script driven accordion; captured
+    # without its script, its collapsed label paints across the header brand,
+    # and its one real link duplicates the page itself.
+    for el in soup.select(".c_010D-secondary-nav"):
+        el.decompose()
+    # The Patrol microsite's mobile burger opened a drawer that only existed
+    # in script; the header's Book a Test Drive and Buy Now stay and work.
+    for el in soup.select(".burgerMenu"):
+        el.decompose()
+    # The Kicks page repeats its reserve pill as an unstyled floating link
+    # that lands on top of the styled row carrying the same destination.
+    for a in list(soup.find_all("a")):
+        if not a.get("class") and a.get_text(strip=True).lower() == "reserve now":
+            a.decompose()
+    # The Kicks sticky bottom bar was a script driven menu; captured without
+    # its script, its collapsed overlay paints over the hero pills that
+    # already carry every one of its destinations.
+    for el in soup.select(".StickyBottomNav"):
+        el.decompose()
     # The source site's WhatsApp floater stays visible, because the channel is
     # part of this demo's story, but it answers with the partnership note
-    # instead of opening Nissan's real line.
+    # instead of opening Nissan's real line. Its icon font never shipped with
+    # the capture, so the glyph is inlined from the committed SVG.
     for a in soup.select("a.whatsapp-button, a[href*='api.whatsapp.com'], a[href*='wa.me']"):
         a["href"] = "#"
         a["data-demo-dead"] = "whatsapp"
+        a["aria-label"] = "WhatsApp"
+        a.clear()
+        frag = BeautifulSoup(WA_GLYPH, "html.parser").find("svg")
+        if frag:
+            a.append(frag)
     # No Arabic mirror is built yet, so the language switch would dead-end.
     for a in soup.select("a[href*='ar.nissan-saudiarabia.com']"):
         holder = a.find_parent("li") or a

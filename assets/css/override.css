@@ -21,6 +21,14 @@
 }
 .c_007_v2 .slick-slide:first-child { position: relative !important; }
 .c_007_v2 .slick-cloned { display: none !important; }
+/* The hero's thumbnail dots were laid out by script; on small screens they
+   land mid hero as cropped tiles, and the crossfade advances on its own.
+   The source sheet pins them with a more specific important rule, so this
+   selector outranks it. */
+@media (max-width: 640px) {
+  div.c_007_v2 section.carousel.slick-slider ul.slick-dots,
+  .c_007_v2 .slick-dots { display: none !important; }
+}
 
 /* Empty inline slots take no room until a campaign renders into them. */
 .dn-inline-slot { min-height: 0; }
@@ -248,6 +256,33 @@ header.c_010D .c_010D-meganav .categories > li.active { font-weight: 700; }
 #dps-finance .fin-out span { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #555; }
 #dps-finance .fin-out strong { font-size: 30px; color: #111; }
 #dps-finance .fin-out small { color: #777; line-height: 1.5; }
+
+/* The WhatsApp floater draws its glyph inline; the source icon font never
+   shipped with the capture. */
+a.whatsapp-button svg { width: 30px; height: 30px; display: block; }
+
+/* The Patrol microsite reserved a square for a small logo mark; the Dengage
+   wordmark needs its natural width, in white on that dark header. */
+.headerTopHolder .logo-link { width: auto !important; aspect-ratio: auto !important; }
+.headerTopHolder .dps-brand { color: #ffffff; }
+
+/* The Patrol hero writes its name as two touching spans. */
+h1.headTop span + span { margin-inline-start: 0.24em; }
+
+/* Small screens: the floater shrinks clear of form buttons, and the closing
+   notice leaves room so a page's last controls scroll above the fixed
+   corner buttons. */
+@media (max-width: 640px) {
+  a.whatsapp-button { width: 48px !important; height: 48px !important; left: 16px !important; bottom: 16px !important; }
+  a.whatsapp-button svg { width: 22px; height: 22px; }
+  .dps-notice { padding-bottom: 108px; }
+  /* Pages with their own sticky bottom bar keep it usable: the demo's fixed
+     buttons and the floater lift above the bar. */
+  body:has(.c_255) .dps-controls,
+  body:has([class*="StickyBottomNav"]) .dps-controls { bottom: 92px; }
+  body:has(.c_255) a.whatsapp-button,
+  body:has([class*="StickyBottomNav"]) a.whatsapp-button { bottom: 92px !important; }
+}
 
 /* The price watch on every model page: the price_drop_alert audience. */
 .dps-price-watch-host { display: flex; justify-content: center; padding: 6px 20px 26px; }
