@@ -1,0 +1,12 @@
+# Captured source material: raw page dumps, screenshots and mirrored assets
+# used only while building. Never published in this public repository.
+reference/
+
+# Internal pre-sales material: never published in this public repository.
+docs/
+deck/
+
+# Local scratch
+node_modules/
+__pycache__/
+.DS_Store

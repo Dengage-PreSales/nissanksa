@@ -1,0 +1,31 @@
+.c_130 .secondary-cta{
+    box-shadow: inset 0 0 0 2px #000 !important;
+    border-radius: 40px !important;
+    border: 0 !important;
+    text-align: center !important;
+    text-decoration: none !important;
+}
+.vehiclelisting .grid-row .list-item li a.secondary-cta {
+    box-shadow: inset 0 0 0 2px #000 !important;
+    border-radius: 40px !important;
+    border: 0 !important;
+    text-align: center !important;
+    text-decoration: none !important;
+}
+@media (max-width: 667px) {
+    .vehiclelisting .grid-row .list-item li a.primary-cta.cta-explore{
+        font-size: 13px!important;
+    }
+    .vehiclelisting .grid-row .list-item li a.secondary-cta::after {
+        padding-left: 1px !important
+    }
+    .vehiclelisting .grid-row .list-item li a.secondary-cta{
+        font-size: 12px !important;
+        padding: 12px 0 !important;
+        letter-spacing: .2px !important
+    }
+    .vehiclelisting .grid-row .list-item li a.secondary-cta span{
+        position: relative;
+        left: 1.5px;
+    }
+}

@@ -1,0 +1,18 @@
+.linksPanel.section .link-group li.tertiary a{
+    padding: 5px 0px!important;
+    border-radius: 40px !important;
+    background: #000;
+    color: #fff;
+    text-align: center;
+    font-size: 14px;
+}
+.linksPanel.section .link-group li.tertiary a:active, .linksPanel.section .link-group li.tertiary a:hover {
+    color: #fff !important;
+    background-color: #4c4c4c !important
+}
+.linksPanel.section .link-group li.tertiary a:focus{
+    color: #fff !important;
+}
+.c_012 ul li.tertiary {
+    display: flex;
+}

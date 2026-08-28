@@ -1,0 +1,578 @@
+/* ============================================================================
+   The Dengage demo controls, skinned for the Nissan KSA demo site. Everything is
+   namespaced (dps-*, or under an id this stylesheet owns) so nothing collides
+   with the site's own utility classes. Logical properties throughout, so the
+   same rules mirror correctly under dir="rtl".
+   ========================================================================== */
+
+:root {
+  --hy-blue: #111111;
+  --hy-navy: #000000;
+  --hy-red: #c3002f;
+  --hy-link: #066fef;
+  --hy-line: #ebebeb;
+  --hy-muted: #6e7275;
+  --hy-surface: #ffffff;
+  --hy-tint: #f4f4f4;
+  --dps-shadow: 0 12px 32px rgba(0, 0, 0, .18);
+  --dps-radius: 6px;
+  --dps-font: 'Nissan Brand', Arial, sans-serif;
+  --dps-font-medium: 'Nissan Brand', Arial, sans-serif;
+}
+
+html.dps-locked { overflow: hidden; }
+
+/* ---- floating control cluster ------------------------------------------ */
+
+.dps-controls {
+  position: fixed;
+  inset-inline-end: 18px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 2147482000;
+  font-family: var(--dps-font);
+}
+.dps-controls button {
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .28);
+  position: relative;
+  transition: transform .15s ease;
+}
+.dps-controls button:hover { transform: translateY(-2px); }
+.dps-controls .dps-launch { background: var(--hy-blue); color: #fff; }
+.dps-controls .dps-bell { background: #fff; color: var(--hy-blue); border: 1px solid var(--hy-line); }
+.dps-controls svg { width: 24px; height: 24px; fill: currentColor; }
+.dps-controls .dps-badge {
+  position: absolute;
+  top: -3px;
+  inset-inline-end: -3px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--hy-red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* display:flex would defeat the hidden attribute, so restate it. */
+.dps-controls .dps-badge[hidden] { display: none; }
+
+/* ---- scrim, drawers, modals -------------------------------------------- */
+
+#scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 18, 26, .5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  z-index: 2147482100;
+}
+#scrim.open { opacity: 1; pointer-events: auto; }
+
+.dps-drawer {
+  position: fixed;
+  top: 0;
+  inset-inline-end: 0;
+  width: min(420px, 94vw);
+  height: 100%;
+  background: var(--hy-surface);
+  z-index: 2147482200;
+  transform: translateX(calc(var(--dps-flip, 1) * 105%));
+  transition: transform .25s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--dps-shadow);
+  font-family: var(--dps-font);
+  color: #14181b;
+}
+[dir="rtl"] .dps-drawer { --dps-flip: -1; }
+.dps-drawer.open { transform: translateX(0); }
+
+.dps-modal {
+  position: fixed;
+  top: 50%;
+  inset-inline-start: 50%;
+  transform: translate(calc(var(--dps-flip, 1) * -50%), -50%) scale(.98);
+  width: min(560px, 94vw);
+  max-height: 88vh;
+  background: var(--hy-surface);
+  z-index: 2147482300;
+  border-radius: 10px;
+  box-shadow: var(--dps-shadow);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--dps-font);
+  color: #14181b;
+}
+[dir="rtl"] .dps-modal { --dps-flip: -1; }
+.dps-modal.open { display: flex; transform: translate(calc(var(--dps-flip, 1) * -50%), -50%) scale(1); }
+
+/* The property's stylesheet blanks every [role=dialog]'s background and shadow
+   with !important (its own dialogs paint on an inner node). These dialogs
+   paint on the root node, so the surface is restored at higher priority. */
+.dps-modal[role="dialog"], .dps-drawer[role="dialog"], #dengage-panel, #inbox, #test-drive {
+  background: #ffffff !important;
+  background: var(--hy-surface) !important;
+  box-shadow: var(--dps-shadow) !important;
+}
+
+.dps-modal-head, .dps-drawer-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--hy-line);
+  background: var(--hy-blue);
+  color: #fff;
+}
+.dps-modal-head h2, .dps-drawer-head h2 {
+  font-family: var(--dps-font-medium);
+  font-size: 16px;
+  margin: 0;
+  flex: 1;
+}
+.dps-x {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+.dps-modal-body, .dps-drawer-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+.dps-note { font-size: 12.5px; color: var(--hy-muted); margin: 0 0 12px; }
+
+/* ---- launcher ----------------------------------------------------------- */
+
+.launcher-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.launcher-group {
+  grid-column: 1 / -1;
+  font-family: var(--dps-font-medium);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--hy-navy);
+  margin: 14px 0 2px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.launcher-group:first-child { margin-top: 0; }
+.launcher-group span { color: var(--hy-muted); font-size: 11px; }
+.scenario {
+  border: 1px solid var(--hy-line);
+  border-radius: var(--dps-radius);
+  background: #fff;
+  padding: 10px 12px;
+  text-align: start;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: border-color .15s ease, background .15s ease;
+}
+.scenario:hover { border-color: var(--hy-blue); background: var(--hy-tint); }
+.scenario .name { font-family: var(--dps-font-medium); font-size: 13px; color: #14181b; }
+.scenario .slug {
+  font-size: 10.5px;
+  color: var(--hy-muted);
+  font-family: ui-monospace, monospace;
+  overflow-wrap: anywhere;
+}
+.scenario.brand { border-inline-start: 3px solid var(--hy-blue); }
+.scenario.gesture, .scenario.elsewhere { opacity: .72; }
+.scenario.gesture .slug, .scenario.elsewhere .slug { font-family: var(--dps-font); }
+.scenario.action { border-inline-start: 3px solid var(--hy-red); }
+
+/* ---- rebuilt site furniture (selects, rails, showroom map) --------------- */
+
+.dps-rail { scrollbar-width: none; cursor: grab; }
+.dps-rail::-webkit-scrollbar { display: none; }
+.dps-rail:active { cursor: grabbing; }
+
+.dps-select-menu {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  top: calc(100% + 4px);
+  background: #ffffff;
+  border: 1px solid var(--hy-line);
+  border-radius: 4px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .14);
+  z-index: 60;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.dps-select-opt {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: start;
+  padding: 11px 14px;
+  font-size: 14px;
+  color: #14181b;
+  cursor: pointer;
+}
+.dps-select-opt:hover { background: var(--hy-tint); color: var(--hy-blue); }
+
+.dps-map {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, .55) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(0deg, rgba(255, 255, 255, .55) 1px, transparent 1px) 0 0 / 56px 56px,
+    #e3e7ea;
+}
+.dps-map-pin { width: 46px; height: 46px; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .25)); }
+.dps-map-name {
+  background: #ffffff;
+  border: 1px solid var(--hy-line);
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-family: var(--dps-font-medium);
+  font-size: 13px;
+  color: var(--hy-navy);
+  max-width: 82%;
+  text-align: center;
+}
+
+/* ---- gallery lightbox ---------------------------------------------------- */
+
+#dps-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 12, 18, .92);
+  z-index: 2147482400;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#dps-lightbox.open { display: flex; }
+#dps-lightbox img {
+  max-width: 92vw;
+  max-height: 88vh;
+  object-fit: contain;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .5);
+  border-radius: 4px;
+}
+#dps-lightbox button {
+  position: absolute;
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: 46px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: .85;
+  padding: 10px 18px;
+}
+#dps-lightbox button:hover { opacity: 1; }
+#dps-lightbox .lb-x { top: 12px; inset-inline-end: 16px; }
+#dps-lightbox .lb-prev { inset-inline-start: 8px; top: 50%; transform: translateY(-50%); }
+#dps-lightbox .lb-next { inset-inline-end: 8px; top: 50%; transform: translateY(-50%); }
+
+/* ---- site map drawer (behind the header burger) -------------------------- */
+
+#site-menu .dps-menu-group { margin: 0 0 16px; }
+#site-menu .dps-menu-group h3 {
+  font-family: var(--dps-font-medium);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--hy-navy);
+  margin: 0 0 6px;
+}
+#site-menu a.dps-menu-link {
+  display: block;
+  padding: 8px 10px;
+  border-radius: var(--dps-radius);
+  color: #14181b;
+  text-decoration: none;
+  font-size: 14px;
+}
+#site-menu a.dps-menu-link:hover { background: var(--hy-tint); color: var(--hy-blue); }
+
+/* ---- quick reference ---------------------------------------------------- */
+
+.ref-details { margin: 0 0 12px; border: 1px solid var(--hy-line); border-radius: var(--dps-radius); }
+.ref-details summary {
+  cursor: pointer;
+  padding: 9px 12px;
+  font-family: var(--dps-font-medium);
+  font-size: 13px;
+  color: var(--hy-navy);
+}
+.ref-details[open] summary { border-bottom: 1px solid var(--hy-line); }
+#ref-grid { padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+.ref-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.ref-label { color: var(--hy-muted); min-width: 96px; }
+.ref-value {
+  flex: 1;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: ltr;
+  text-align: start;
+}
+.ref-row.empty .ref-value { color: var(--hy-muted); font-style: italic; }
+.ref-copy {
+  border: 1px solid var(--hy-line);
+  background: #fff;
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+  color: var(--hy-blue);
+}
+
+/* ---- event panel, buttons, log ------------------------------------------ */
+
+.dps-field { display: flex; flex-direction: column; gap: 5px; margin: 10px 0; font-size: 13px; }
+.dps-field select, .dps-field input {
+  border: 1px solid var(--hy-line);
+  border-radius: var(--dps-radius);
+  padding: 9px 10px;
+  font: inherit;
+}
+.dps-h { font-family: var(--dps-font-medium); font-size: 14px; margin: 20px 0 6px; color: var(--hy-navy); }
+.btn-dps {
+  border: 0;
+  border-radius: var(--dps-radius);
+  background: var(--hy-blue);
+  color: #fff;
+  font-family: var(--dps-font-medium);
+  font-size: 13px;
+  padding: 11px 16px;
+  cursor: pointer;
+  width: 100%;
+}
+.btn-dps.quiet { background: #fff; color: var(--hy-blue); border: 1px solid var(--hy-line); }
+.btn-dps + .btn-dps { margin-top: 8px; }
+/* The ported reset control uses the factory's class names. */
+.btn, .btn-quiet, .btn-block { font: inherit; }
+#reset-display {
+  margin-top: 10px;
+  width: 100%;
+  border-radius: var(--dps-radius);
+  padding: 11px 16px;
+  cursor: pointer;
+  font-family: var(--dps-font-medium);
+  font-size: 13px;
+  border: 1px solid var(--hy-line);
+  background: #fff;
+  color: var(--hy-navy);
+}
+.log {
+  margin-top: 14px;
+  background: #0e1215;
+  color: #c7d2da;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  padding: 12px;
+  border-radius: var(--dps-radius);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 200px;
+  overflow-y: auto;
+  direction: ltr;
+  text-align: left;
+}
+#event-note { font-size: 12px; color: var(--hy-muted); margin: 6px 0 10px; }
+#event-note code { font-family: ui-monospace, monospace; font-size: 11px; }
+
+/* ---- inbox -------------------------------------------------------------- */
+
+#inbox-count { font-size: 12px; color: #cfe0f4; }
+#inbox-refresh {
+  border: 0;
+  background: transparent;
+  color: #cfe0f4;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.inbox-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hy-line);
+}
+.inbox-media { width: 56px; flex: none; }
+.inbox-media img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; }
+#inbox-body:not(.with-media) .inbox-media { display: none; }
+.inbox-text { flex: 1; min-width: 0; }
+.inbox-top { display: flex; align-items: baseline; gap: 8px; }
+.inbox-top h3 { font-family: var(--dps-font-medium); font-size: 13.5px; margin: 0; flex: 1; }
+.inbox-top .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hy-red);
+  margin-inline-end: 6px;
+}
+.inbox-when { font-size: 11px; color: var(--hy-muted); white-space: nowrap; }
+.inbox-item p { font-size: 12.5px; color: #3a3f43; margin: 4px 0 8px; }
+.inbox-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.inbox-actions .btn-small {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  background: var(--hy-blue);
+  color: #fff;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+}
+.inbox-actions .btn-quiet { background: #fff; color: var(--hy-blue); border: 1px solid var(--hy-line); }
+.inbox-actions .dismiss {
+  border: 0;
+  background: transparent;
+  color: var(--hy-muted);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-inline-start: auto;
+}
+.empty { color: var(--hy-muted); font-size: 13px; }
+.empty-hint { color: var(--hy-muted); font-size: 12px; }
+
+/* ---- test drive modal --------------------------------------------------- */
+
+.td-car { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.td-car img { width: 120px; height: auto; }
+.td-car strong { font-family: var(--dps-font-medium); font-size: 16px; display: block; }
+.td-price { color: var(--hy-muted); font-size: 13px; }
+.td-step h3 { font-family: var(--dps-font-medium); font-size: 14px; margin: 0 0 10px; }
+.td-trim {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--hy-line);
+  border-radius: var(--dps-radius);
+  margin-bottom: 6px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.td-field { display: flex; flex-direction: column; gap: 5px; font-size: 13px; margin-bottom: 10px; }
+.td-field input, .td-field select {
+  border: 1px solid var(--hy-line);
+  border-radius: var(--dps-radius);
+  padding: 10px;
+  font: inherit;
+}
+.td-btn {
+  border: 0;
+  border-radius: var(--dps-radius);
+  background: var(--hy-blue);
+  color: #fff;
+  font-family: var(--dps-font-medium);
+  font-size: 14px;
+  padding: 12px 16px;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 6px;
+}
+.td-thanks { font-size: 14px; color: var(--hy-navy); }
+
+/* ---- toast -------------------------------------------------------------- */
+
+#dps-toast {
+  position: fixed;
+  bottom: 84px;
+  inset-inline-start: 50%;
+  transform: translateX(calc(var(--dps-flip, 1) * -50%));
+  background: #0e1215;
+  color: #fff;
+  font-family: var(--dps-font);
+  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  z-index: 2147482400;
+}
+[dir="rtl"] #dps-toast { --dps-flip: -1; }
+#dps-toast.show { opacity: .95; }
+
+/* ---- save-car hearts injected into the replica -------------------------- */
+
+[data-save-car] { cursor: pointer; }
+[data-save-car] svg { fill: none; stroke: currentColor; }
+[data-save-car].saved svg { fill: var(--hy-red); stroke: var(--hy-red); }
+
+/* ==================== Authored content bands ==================== */
+/* The aftercare band (service page), the offers grid (offers page), the
+   company page and the contact-info column: native-looking sections built
+   by the demo, styled once here. */
+.dps-band { max-width: 1240px; margin: 0 auto; padding: 72px 24px 40px; }
+.dps-band-head { max-width: 640px; margin: 0 0 28px; }
+.dps-band-head h2 { font-size: 30px; line-height: 1.2; color: #0e1215; margin: 0 0 10px; font-weight: 700; }
+.dps-band-head p { color: #5b6166; font-size: 15px; line-height: 1.55; margin: 0; }
+.dps-band-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 22px; margin-bottom: 26px; }
+.dps-care-card, .dps-offer-card { background: #fff; border: 1px solid #ebebeb; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; scroll-margin-top: 110px; }
+.dps-care-card > img, .dps-offer-card > img { width: 100%; height: 172px; object-fit: cover; display: block; }
+.dps-care-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.dps-care-body h3 { margin: 0; font-size: 18px; color: #0e1215; font-weight: 700; }
+.dps-care-body p { margin: 0; font-size: 13.5px; line-height: 1.55; color: #5b6166; flex: 1; }
+.dps-kicker { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #e63312; font-weight: 700; }
+.dps-care-cta { align-self: flex-start; background: #002c5f; color: #fff !important; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 18px; border-radius: 4px; }
+.dps-care-cta:hover { background: #013c7e; }
+.dps-price-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dps-price-table td { padding: 6px 4px; border-bottom: 1px solid #f0f0f0; color: #0e1215; }
+.dps-price-table td:last-child { text-align: end; font-weight: 600; }
+
+/* Company page */
+.dps-page { max-width: 1080px; margin: 0 auto; padding: 118px 24px 56px; }
+.dps-page-hero { position: relative; border-radius: 12px; overflow: hidden; margin-bottom: 40px; }
+.dps-page-hero img { width: 100%; height: 340px; object-fit: cover; display: block; filter: brightness(.62); }
+.dps-page-hero-text { position: absolute; inset-inline-start: 36px; bottom: 30px; color: #fff; max-width: 560px; }
+.dps-page-hero-text h1 { margin: 0 0 8px; font-size: 34px; font-weight: 800; }
+.dps-page-hero-text p { margin: 0; font-size: 15px; line-height: 1.5; opacity: .92; }
+.dps-page-section { padding: 26px 0; border-bottom: 1px solid #eee; scroll-margin-top: 110px; }
+.dps-page-section:last-child { border-bottom: 0; }
+.dps-page-section h2 { font-size: 24px; margin: 0 0 12px; color: #0e1215; font-weight: 700; }
+.dps-page-section p { font-size: 15px; line-height: 1.6; color: #444a4f; max-width: 720px; margin: 0 0 14px; }
+.dps-page-img { width: 100%; max-width: 720px; border-radius: 10px; display: block; margin: 6px 0 4px; }
+
+/* Contact page: the unpinned info column */
+.dps-contact-info { margin-top: 26px; border: 1px solid #ebebeb; border-radius: 10px; overflow: hidden; background: #fff; max-width: 420px; }
+.dps-contact-info img { width: 100%; height: 160px; object-fit: cover; display: block; }
+.dps-contact-info ul { list-style: none; margin: 0; padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+.dps-contact-info li { font-size: 14px; color: #0e1215; }
+.dps-contact-info a { color: #002c5f; text-decoration: none; font-weight: 600; }
+.dps-contact-info a:hover { text-decoration: underline; }
+
+/* Anchored home sections land below the fixed header */
+#models, #dealers, #about, #aftercare, #aftersales, #offers-grid { scroll-margin-top: 110px; }
