@@ -432,14 +432,18 @@ def inject_slots(soup, spec):
 
 
 OFFER_CARDS = [
-    {"src": "offer-x-trail-999.en", "out": "offers/x-trail-999/index.html", "model": "X-TRAIL"},
-    {"src": "offer-kicks-aug.en", "out": "offers/kicks-august/index.html", "model": "KICKS"},
-    {"src": "offer-magnite-aug.en", "out": "offers/magnite-august/index.html", "model": "MAGNITE"},
+    {"src": "offer-x-trail-999.en", "out": "offers/x-trail-999/index.html", "model": "X-TRAIL",
+     "hero_hint": ("x-trail-999", "999")},
+    {"src": "offer-kicks-aug.en", "out": "offers/kicks-august/index.html", "model": "KICKS",
+     "hero_hint": ("kicks-august", "kicks_")},
+    {"src": "offer-magnite-aug.en", "out": "offers/magnite-august/index.html", "model": "MAGNITE",
+     "hero_hint": ("magnite-august", "magnite_")},
 ]
 
 
-def offer_summary(src_name):
-    """Title line and hero image of a captured offer page, its own words."""
+def offer_summary(src_name, hero_hint=()):
+    """Title line and hero image of a captured offer page, its own words. The
+    hero is the campaign's own banner, matched by its asset name."""
     page = HYD / f"{src_name}.html"
     if not page.exists():
         return None, None
@@ -447,15 +451,24 @@ def offer_summary(src_name):
     title = None
     for hd in sub.find_all(["h1", "h2"]):
         text = hd.get_text(" ", strip=True)
-        if 6 < len(text) < 80:
+        if 6 < len(text) < 90:
             title = text
             break
-    hero = None
+    candidates = []
     for img in sub.find_all("img"):
         src = img.get("src") or ""
         if "www-europe.nissan-cdn.net" in src or src.startswith("//www-europe"):
-            hero = src
+            candidates.append(src)
+    hero = None
+    for hint in hero_hint:
+        for src in candidates:
+            if hint in src:
+                hero = src
+                break
+        if hero:
             break
+    if not hero and candidates:
+        hero = candidates[0]
     return title, hero
 
 
@@ -463,19 +476,21 @@ def replace_offers_listing(soup, rel):
     """Their live offers module reads an API and shows '0 Matching Offers'.
     The demo's hub lists the site's own three current campaign pages, and the
     inline slot beside them is where Dengage personalizes the page."""
+    # The source module is two components: the filter sidebar (c_195) and
+    # the API-driven results pane (c_194). Both leave; the grid stands where
+    # the results stood.
     anchor = None
-    for el in soup.find_all(string=re.compile(r"Matching Offers", re.I)):
-        holder = el.find_parent("div")
-        for _ in range(6):
-            if holder and holder.find(string=re.compile(r"Model filter|Filtering by", re.I)):
-                break
-            holder = holder.find_parent("div")
-        if holder:
-            anchor = holder
-            break
+    for el in soup.select(".c_194-0, .offersContainer"):
+        if anchor is None:
+            anchor = soup.new_tag("div")
+            el.replace_with(anchor)
+        else:
+            el.decompose()
+    for el in soup.select(".c_195-0, .offer-filters"):
+        el.decompose()
     cards = []
     for card in OFFER_CARDS:
-        title, hero = offer_summary(card["src"])
+        title, hero = offer_summary(card["src"], card.get("hero_hint", ()))
         if not title:
             continue
         local = asset_local(hero, rel) if hero else None
@@ -486,7 +501,8 @@ def replace_offers_listing(soup, rel):
             f'<span class="dps-offer-title">{title}</span>'
             f'<span class="dps-offer-cta">View offer</span></a>')
     grid = BeautifulSoup(
-        '<section class="dps-offers"><div class="dps-offers-grid">'
+        '<section class="dps-offers"><h1 class="dps-offers-title">Current offers</h1>'
+        '<div class="dps-offers-grid">'
         + "".join(cards) + "</div></section>", "html.parser")
     if anchor:
         anchor.replace_with(grid)
@@ -611,6 +627,8 @@ def replace_showroom(soup, rel):
 def replace_finance_calculator(soup):
     """The source calculator is scripted upstream and arrives dead; a working
     one (drawn by js/site.js into #dps-finance) stands where it stood."""
+    for el in soup.select(".c_309"):
+        el.decompose()
     for el in soup.select(".finance-calculator, .financeSummary, .finance-summary"):
         holder = el
         for _ in range(3):

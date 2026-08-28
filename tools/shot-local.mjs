@@ -18,19 +18,16 @@ mkdirSync(OUT, { recursive: true });
 
 const DEFAULT_PAGES = [
   'index.html',
-  'vehicles/x-trail/index.html',
-  'vehicles/patrol/index.html',
-  'vehicles/altima/index.html',
-  'vehicles/magnite/index.html',
-  'vehicles/kicks/index.html',
-  'vehicles/tekton/index.html',
-  'book-a-test-drive/index.html',
-  'request-a-quote/index.html',
-  'offers/index.html',
-  'offers/x-trail-999/index.html',
-  'finance-calculator/index.html',
-  'find-a-showroom/index.html',
-  'shop-at-home/index.html',
+  'vehicles/x-trail/index.html', 'vehicles/pathfinder/index.html',
+  'vehicles/altima/index.html', 'vehicles/x-terra/index.html',
+  'vehicles/z/index.html', 'vehicles/patrol-pro4x/index.html',
+  'vehicles/magnite/index.html', 'vehicles/patrol/index.html',
+  'vehicles/kicks/index.html', 'vehicles/tekton/index.html',
+  'book-a-test-drive/index.html', 'request-a-quote/index.html',
+  'offers/index.html', 'offers/x-trail-999/index.html',
+  'offers/kicks-august/index.html', 'offers/magnite-august/index.html',
+  'finance-calculator/index.html', 'find-a-showroom/index.html',
+  'shop-at-home/index.html', 'dealer/index.html',
 ];
 
 const pages = process.argv.length > 2 ? process.argv.slice(2) : DEFAULT_PAGES;

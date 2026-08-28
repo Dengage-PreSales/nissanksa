@@ -177,6 +177,7 @@
             }
             dots.forEach(function (d, i) {
                 d.style.cursor = 'pointer';
+                d.setAttribute('data-dps-wired', '1');
                 d.addEventListener('click', function (e) { e.preventDefault(); show(i); auto(); });
             });
             root.__dpsCarousel = {
@@ -186,8 +187,10 @@
             $$('button', scope).forEach(function (b) {
                 var al = (b.getAttribute('aria-label') || '') + ' ' + (b.className || '');
                 if (/slick-prev|previous/i.test(al)) {
+                    b.setAttribute('data-dps-wired', '1');
                     b.addEventListener('click', function (e) { e.preventDefault(); root.__dpsCarousel.prev(); });
                 } else if (/slick-next|next/i.test(al)) {
+                    b.setAttribute('data-dps-wired', '1');
                     b.addEventListener('click', function (e) { e.preventDefault(); root.__dpsCarousel.next(); });
                 }
             });
@@ -214,6 +217,7 @@
 
         var burger = $('.burger', header);
         if (burger) {
+            burger.setAttribute('data-dps-wired', '1');
             burger.addEventListener('click', function (e) {
                 e.preventDefault();
                 header.classList.toggle('dps-menu-open');
@@ -226,11 +230,38 @@
             });
         }
 
+        /* The header's own top links arrive as script toggles; each one
+           now answers for itself. */
+        $$('a[href^="javascript"], a:not([href])', header).forEach(function (a) {
+            if (a.__dps) return;
+            var label = (a.textContent || '').trim().toUpperCase();
+            var act = null;
+            if (label.indexOf('VEHICLES') === 0) {
+                act = function () { header.classList.toggle('dps-menu-open'); };
+            } else if (label.indexOf('SHOP@HOME') === 0) {
+                act = function () { window.location.href = sitePrefix() + 'shop-at-home/index.html'; };
+            } else if (label.indexOf('OWNERS') === 0 || label.indexOf('OWNE') === 0) {
+                act = function () { toast(t('postSale')); };
+            } else if (label.indexOf('WHY NISSAN') === 0) {
+                act = function () { window.location.href = sitePrefix() + 'index.html#models'; };
+            } else if (label === 'ENGLISH') {
+                act = function () { toast('This demonstration is in English; the Arabic mirror is a later phase.'); };
+            } else if (label.indexOf('OPEN MENU') === 0) {
+                return; /* the burger, wired above */
+            } else {
+                act = function () { toast(t('notPart')); };
+            }
+            a.__dps = true;
+            a.setAttribute('data-dps-wired', '1');
+            a.addEventListener('click', function (e) { e.preventDefault(); act(); });
+        });
+
         /* The meganav's category rail switches its vehicle panels. */
         var cats = $$('.c_010D-meganav .categories > li', header);
         var panels = $$('.c_010D-meganav .vehicles-container', header);
         cats.forEach(function (li, i) {
             li.style.cursor = 'pointer';
+            li.setAttribute('data-dps-wired', '1');
             li.addEventListener('click', function (e) {
                 var a = li.querySelector('a');
                 var label = (a ? a.textContent : li.textContent).trim().toUpperCase();
@@ -462,6 +493,7 @@
             if (!/^download( a)? brochure$/i.test(label)) return;
             if (el.__dps) return;
             el.__dps = true;
+            el.setAttribute('data-dps-wired', '1');
             el.addEventListener('click', function (e) {
                 e.preventDefault();
                 var car = null;
@@ -508,6 +540,162 @@
                 return;
             }
             toast(kind === 'postsale' ? t('postSale') : t('notPart'));
+        });
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Everything else that looks pressable answers for itself. The
+       contract: no control on screen is a dead placeholder. Labelled CTAs
+       route to their real destination; a control whose feature cannot exist
+       in a static demo either explains itself or leaves. */
+
+    function nearestHref(el) {
+        var n = el, hops = 0;
+        while (n && n !== document.body && hops < 4) {
+            if (n.tagName === 'A' && n.getAttribute('href') && n.getAttribute('href') !== '#') return n;
+            var a2 = n.querySelector && n.querySelector('a[href]:not([href^="#"]):not([href^="javascript"])');
+            if (a2 && a2 !== el) return a2;
+            n = n.parentElement; hops += 1;
+        }
+        return null;
+    }
+
+    function wireLabelledCtas() {
+        var pre = sitePrefix();
+        var product = currentModelId();
+        var modelParam = product && product !== 'tekton' ? '?model=' + product : '';
+        function go(url) { return function () { window.location.href = url; }; }
+        function scrollToGrades() {
+            var head = $$('h1,h2,h3,h4').filter(function (h) {
+                return /find your|grades|versions|prices/i.test(h.textContent);
+            })[0] || $('#dn_inline_target_pdp_below_price');
+            if (head) head.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        var CTA = [
+            [/^(book a test drive|book my .*test drive)$/i, go(pre + 'book-a-test-drive/index.html' + modelParam)],
+            [/^(get an online quote|request a quote)$/i, go(pre + 'request-a-quote/index.html')],
+            [/^(reserve now|reserve online|buy online|shop@home)$/i, go(pre + 'shop-at-home/index.html')],
+            [/^(prices & specs|prices and specs|compare grades|trim details|view specs and prices)$/i, scrollToGrades],
+            [/^(build your .*|configure your .*|configure)$/i, go(pre + 'book-a-test-drive/index.html' + modelParam)],
+            [/^(find a showroom|find a nissan center|find a dealer|get directions)$/i, go(pre + 'find-a-showroom/index.html')],
+            [/^(explore offers|view all offers|see the offers?)$/i, go(pre + 'offers/index.html')],
+            [/^(finance calculator|discover more)$/i, go(pre + 'finance-calculator/index.html')],
+            [/^(compare models( & grades)?|find your perfect nissan|start now|view all|explore more)$/i, go(pre + 'index.html#models')],
+            [/^(register interest|keep me informed|notify me)$/i, go(pre + 'vehicles/tekton/index.html')],
+            [/^(call center|call us|920009058)$/i, go('tel:920009058')]
+        ];
+        $$('main button, main [role="button"], body > div button').forEach(function (b) {
+            if (b.__dps || b.closest('#dengage-panel, #inbox, #test-drive, .dps-controls, #dps-debug, form')) return;
+            var label = (b.textContent || '').trim();
+            var aria = (b.getAttribute('aria-label') || '').trim();
+            for (var i = 0; i < CTA.length; i += 1) {
+                if (CTA[i][0].test(label) || CTA[i][0].test(aria)) {
+                    b.__dps = true;
+                    b.setAttribute('data-dps-wired', '1');
+                    var act = CTA[i][1];
+                    b.addEventListener('click', function (e) { e.preventDefault(); act(); });
+                    return;
+                }
+            }
+        });
+    }
+
+    /* Every model page gets a price watch: the SDK's own price_drop_alert
+       wishlist list, so "tell me when the price moves" is a real, targetable
+       audience the moment someone presses it. */
+    function wirePriceWatch() {
+        var product = currentModelId();
+        if (!product || product === 'tekton' || document.body.getAttribute('data-page-type') !== 'product') return;
+        var car = window.Catalog.get(product);
+        if (!car || !car.price) return;
+        var WATCH_KEY = 'dps:' + slug + ':pricewatch';
+        function watched() { return readJson(WATCH_KEY, []); }
+        function isWatched() { return watched().indexOf(car.id) !== -1; }
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'dps-price-watch';
+        btn.setAttribute('data-dps-wired', '1');
+        function paint() {
+            btn.innerHTML = isWatched()
+                ? '<b>Watching the ' + car.nameEn + ' price</b><span>You will hear the moment it moves. Press to stop.</span>'
+                : '<b>Watch the ' + car.nameEn + ' price</b><span>One press, and a price move reaches you first.</span>';
+            btn.classList.toggle('on', isWatched());
+        }
+        btn.addEventListener('click', function () {
+            var list = watched();
+            var at = list.indexOf(car.id);
+            if (at === -1) {
+                list.push(car.id);
+                mintIdentity();
+                window.DengageEvents.addToWishlist({ id: car.id, price: car.price }, 'price_drop_alert');
+                toast('Price watch on. A drop on the ' + car.nameEn + ' reaches you first.');
+            } else {
+                list.splice(at, 1);
+                window.DengageEvents.removeFromWishlist({ id: car.id }, 'price_drop_alert');
+                toast('Price watch off.');
+            }
+            writeJson(WATCH_KEY, list);
+            paint();
+        });
+        paint();
+        /* It stands beside the page's own next-step band, or rides above the
+           footer when a page has none. */
+        var band = $$('h1,h2,h3').filter(function (h) {
+            return /take the next step/i.test(h.textContent);
+        })[0];
+        var host = document.createElement('div');
+        host.className = 'dps-price-watch-host';
+        host.appendChild(btn);
+        if (band && band.parentElement) {
+            band.parentElement.insertBefore(host, band.nextSibling);
+        } else {
+            var slot = $('#dn_inline_target_above_footer');
+            if (slot) slot.parentElement.insertBefore(host, slot);
+        }
+    }
+
+    /* The footer's column headings carry mobile Toggle buttons; on any
+       screen they now fold their own list. */
+    function wireFooterToggles() {
+        $$('footer h3, footer h2').forEach(function (head) {
+            var btn = head.querySelector('button');
+            var toggler = btn || (/^toggle /i.test((head.textContent || '').trim()) ? head : null);
+            if (!toggler || toggler.__dps) return;
+            var body = head.nextElementSibling;
+            if (!body) return;
+            toggler.__dps = true;
+            toggler.setAttribute('data-dps-wired', '1');
+            toggler.addEventListener('click', function (e) {
+                e.preventDefault();
+                body.style.display = body.style.display === 'none' ? '' : 'none';
+            });
+        });
+    }
+
+    /* Whatever is still pressable and unwired after every pass above routes
+       to the nearest real link in its own card, and a control with no
+       destination at all leaves the stage rather than lying on it. */
+    function wireRemainingControls() {
+        $$('button, [role="button"]').forEach(function (b) {
+            if (b.__dps || b.closest('#dengage-panel, #inbox, #test-drive, .dps-controls, #dps-debug, #dps-lightbox, form, header, .slick-slider')) return;
+            if (b.hasAttribute('data-dps-wired') || b.hasAttribute('data-demo-dead') ||
+                b.hasAttribute('data-open') || b.hasAttribute('data-close') ||
+                b.hasAttribute('data-save-car')) return;
+            var a = nearestHref(b);
+            if (a) {
+                b.__dps = true;
+                b.setAttribute('data-dps-wired', '1');
+                b.addEventListener('click', function (e) { e.preventDefault(); a.click(); });
+            } else if (!(b.textContent || '').trim() && !b.querySelector('img')) {
+                b.style.display = 'none';
+            } else {
+                b.__dps = true;
+                b.setAttribute('data-dps-wired', '1');
+                b.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toast(t('notPart'));
+                });
+            }
         });
     }
 
@@ -690,8 +878,12 @@
         wireBookingForm();
         wireOtherLeadForms();
         wireCtas();
+        wireLabelledCtas();
+        wirePriceWatch();
+        wireFooterToggles();
         wireFinance();
         wireGallery();
+        wireRemainingControls();
         paintHearts();
 
         if (window.Panels) window.Panels.init();

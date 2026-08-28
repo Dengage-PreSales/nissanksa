@@ -108,6 +108,14 @@ Segments to build, with their exact seeded sizes:
 | WhatsApp intents from Value First | `stage = 'whatsapp_intent'` | 19 |
 | Upgrade audience | `ni_existing_customer.model_year` 2016 to 2020, model in altima, patrol, x-trail | 76 |
 
+Two more audiences build on the standard tables rather than the remote ones,
+so their size grows as the demo is used:
+
+| Segment | Filter |
+|---|---|
+| Price-drop watchers | `wishlist_events` where `list_name = 'price_drop_alert'` (the Watch the price control on every model page writes it) |
+| Saved-car audience | `wishlist_events` where `list_name = 'favorites'` (the hearts on the home grid) |
+
 ## 5. The eight personas
 
 Seeded in both `ni_showroom_lead` and the dealer cockpit
