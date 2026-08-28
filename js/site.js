@@ -420,11 +420,14 @@
                 var horizonSel = form.querySelector('select[name="purchaseOutlook"]');
                 var horizon = horizonSel ? horizonSel.value : undefined;
                 if (horizon && /select/i.test(horizon)) horizon = undefined;
+                var citySel = form.querySelector('select[name="City"]');
+                var city = citySel ? citySel.value : undefined;
+                if (city && /select/i.test(city)) city = undefined;
                 mintIdentity();
                 if (window.location.pathname.indexOf('request-a-quote') !== -1) {
                     if (car) window.DengageEvents.addToCart({ id: car.id, quantity: 1, price: car.price }, cartLines());
                     window.DengageEvents.leadEvent('quote_issued', {
-                        model: car ? car.id : undefined, purchase_horizon: horizon,
+                        model: car ? car.id : undefined, city: city, purchase_horizon: horizon,
                         source: 'website', note: 'online quote request'
                     });
                     success(form, 'Your quote request is in. It is on your profile, and the follow-up journey takes it from here.');
@@ -432,7 +435,7 @@
                 }
                 if (product === 'tekton' || window.location.pathname.indexOf('tekton') !== -1) {
                     window.DengageEvents.leadEvent('register_interest', {
-                        model: 'tekton', source: 'website'
+                        model: 'tekton', city: city, source: 'website'
                     });
                     success(form, 'You are on the TEKTON list. You will be among the first to know.');
                     return;
@@ -446,7 +449,7 @@
                         });
                     }
                     window.DengageEvents.leadEvent('register_interest', {
-                        model: car ? car.id : undefined, purchase_horizon: horizon,
+                        model: car ? car.id : undefined, city: city, purchase_horizon: horizon,
                         source: 'website', note: 'offer ' + promo
                     });
                     success(form, 'You are in. This offer now lives on your profile, and the follow-up reaches you before it ends.');
