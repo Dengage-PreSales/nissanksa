@@ -671,6 +671,26 @@
 
     /* The footer's column headings carry mobile Toggle buttons; on any
        screen they now fold their own list. */
+    /* The source site's dropdowns are styled facades over invisible native
+       selects, and the script that copied a choice onto the facade did not
+       survive capture. The facade now mirrors the native value at load,
+       which covers a preselected model, and on every change, which covers
+       the person picking with the real control. */
+    function wireSelectFacades() {
+        $$('.custom-selectbox').forEach(function (box) {
+            var select = box.querySelector('select');
+            var label = box.querySelector('.selectedValue');
+            if (!select || !label || box.__dpsFacade) return;
+            box.__dpsFacade = true;
+            function sync() {
+                var option = select.selectedOptions && select.selectedOptions[0];
+                if (option && option.textContent.trim()) label.textContent = option.textContent.trim();
+            }
+            select.addEventListener('change', sync);
+            sync();
+        });
+    }
+
     function wireFooterToggles() {
         $$('footer h3, footer h2').forEach(function (head) {
             var btn = head.querySelector('button');
@@ -894,6 +914,7 @@
         wireCarousels();
         wireBookingForm();
         wireOtherLeadForms();
+        wireSelectFacades();
         wireCtas();
         wireLabelledCtas();
         wirePriceWatch();
