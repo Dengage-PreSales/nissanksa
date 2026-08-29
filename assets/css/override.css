@@ -221,6 +221,11 @@ header.c_010D .c_010D-meganav .vehicles-container { display: none; }
 header.c_010D .c_010D-meganav .vehicles-container.active { display: block; }
 header.c_010D .c_010D-meganav .categories > li.active { font-weight: 700; }
 
+/* The booking form's model select matches its sibling fields in width. */
+.model-form-group,
+.model-form-group .custom-selectbox.select-model,
+.model-form-group .custom-selectbox.select-model select { width: 100%; }
+
 /* A submitted lead form is replaced by its confirmation. */
 .dps-form-done {
   margin: 24px auto;

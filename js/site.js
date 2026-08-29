@@ -340,28 +340,40 @@
             return modelFromName(optionName(option));
         }
 
+        var lastPickId = null;
+        function pick(car) {
+            if (!car || car.id === lastPickId) return;
+            lastPickId = car.id;
+            var line = { id: car.id, quantity: 1, price: car.price };
+            setPending(line);
+            window.DengageEvents.addToCart(line, cartLines());
+        }
+
         /* Arriving from a model page's own Book button preselects that car
-           and records the pick, exactly as the click promised. */
-        var preset = null;
-        try { preset = new URLSearchParams(window.location.search).get('model'); } catch (err) { /* old browser */ }
-        if (preset) {
-            var car0 = window.Catalog.get(preset);
+           and records the pick, exactly as the click promised. The demo's
+           links carry the catalogue id in model; the source site's captured
+           buttons carry its internal id in c020_model, and the option
+           values ARE those internal ids. */
+        var params = null;
+        try { params = new URLSearchParams(window.location.search); } catch (err) { /* old browser */ }
+        if (params) {
+            var preset = params.get('model');
+            var car0 = preset ? window.Catalog.get(preset) : null;
             if (car0) {
                 $$('option', modelSelect).forEach(function (o) {
                     if (optionName(o).toUpperCase() === car0.nameEn.toUpperCase()) modelSelect.value = o.value;
                 });
-                var line0 = { id: car0.id, quantity: 1, price: car0.price };
-                setPending(line0);
-                window.DengageEvents.addToCart(line0, cartLines());
+            } else if (params.get('c020_model')) {
+                modelSelect.value = params.get('c020_model');
             }
+            if (chosen()) pick(chosen());
+            else modelSelect.selectedIndex = 0;
         }
 
         modelSelect.addEventListener('change', function () {
-            var car = chosen();
-            if (!car) return;
-            var line = { id: car.id, quantity: 1, price: car.price };
-            setPending(line);
-            window.DengageEvents.addToCart(line, cartLines());
+            /* A browser autofill preview can flip this select and revert a
+               moment later; only a choice still standing counts as a pick. */
+            window.setTimeout(function () { pick(chosen()); }, 150);
         });
 
         form.addEventListener('input', function (e) {
