@@ -576,3 +576,93 @@ html.dps-locked { overflow: hidden; }
 
 /* Anchored home sections land below the fixed header */
 #models, #dealers, #about, #aftercare, #aftersales, #offers-grid { scroll-margin-top: 110px; }
+
+/* The ?debug=1 readout: what this page sent, newest first. Fixed to the
+   bottom start corner, under the launcher overlays in the stack. */
+#dps-debug {
+  position: fixed;
+  inset-inline-start: 12px;
+  bottom: 12px;
+  width: min(440px, calc(100vw - 24px));
+  max-height: 46vh;
+  display: flex;
+  flex-direction: column;
+  background: #101214;
+  color: #d6d9dd;
+  border: 1px solid #2a2e33;
+  border-radius: 8px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .5);
+  font: 11.5px/1.5 -apple-system, "Segoe UI", Arial, sans-serif;
+  z-index: 2147481900;
+  overflow: hidden;
+}
+#dps-debug .dps-debug-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #16191c;
+  border-bottom: 1px solid #2a2e33;
+}
+#dps-debug .dps-debug-head strong { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+#dps-debug #dps-debug-count {
+  background: #c3002f;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0 7px;
+  font-size: 10.5px;
+  line-height: 16px;
+}
+#dps-debug .dps-debug-head button {
+  margin-inline-start: auto;
+  background: none;
+  border: 1px solid #3a3f45;
+  color: #d6d9dd;
+  border-radius: 4px;
+  font-size: 10.5px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+#dps-debug .dps-debug-head button + button { margin-inline-start: 0; }
+#dps-debug .dps-debug-head button:hover { border-color: #c3002f; color: #fff; }
+#dps-debug ol {
+  margin: 0;
+  padding: 0 0 0 26px;
+  overflow: auto;
+  flex: 1;
+}
+#dps-debug li { padding: 7px 10px 7px 2px; border-bottom: 1px solid #1d2023; }
+#dps-debug li.dps-net { opacity: .82; }
+#dps-debug li.not-sent { background: rgba(195, 0, 47, .12); }
+#dps-debug .dps-debug-top { display: flex; gap: 10px; align-items: baseline; }
+#dps-debug .dps-debug-top code {
+  font: 11px/1.4 "SF Mono", Consolas, Menlo, monospace;
+  color: #ffffff;
+}
+#dps-debug li:not(.dps-net) .dps-debug-top code { color: #ff7a95; }
+#dps-debug .dps-debug-time { margin-inline-start: auto; color: #7c828a; font-size: 10.5px; }
+#dps-debug .dps-debug-table { color: #9aa0a7; font-size: 10.5px; }
+#dps-debug .dps-debug-warn { color: #ff8f8f; font-size: 10.5px; }
+#dps-debug pre {
+  margin: 4px 0 0;
+  padding: 5px 7px;
+  background: #0a0c0d;
+  border-radius: 4px;
+  font: 10px/1.5 "SF Mono", Consolas, Menlo, monospace;
+  color: #b7d7c2;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 96px;
+  overflow: auto;
+}
+#dps-debug .dps-debug-foot {
+  margin: 0;
+  padding: 7px 10px;
+  border-top: 1px solid #2a2e33;
+  color: #7c828a;
+  font-size: 10px;
+  line-height: 1.5;
+}
+@media (max-width: 640px) {
+  #dps-debug { max-height: 38vh; bottom: 8px; inset-inline-start: 8px; }
+}
