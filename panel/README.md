@@ -35,6 +35,31 @@ HTTP 200 means accepted, not stored. Until this table exists the sends are
 visible in the debug readout and simply not stored, which is the expected
 state, not a fault.
 
+## 1a. Contact fields on the card: decide how typed details reach it
+
+The web forms identify a visitor and record events. They do not send the
+typed name, surname, email or phone anywhere: the Web SDK documents two
+calls only, `setContactKey` and `sendDeviceEvent`, so a page cannot write
+contact attributes from the browser. Two real mechanisms fill the card
+instead, both on the panel side:
+
+1. **The engine's own capture.** The `newsletter-capture` and
+   `arrival-alert` campaigns store the email a visitor types through
+   `Dn.postSubscription`, which creates or enriches the contact. Pasting
+   section 2 turns this on with no further work.
+2. **The contact API or a table import.** Names, emails and numbers arrive
+   server side, the way the eight personas get theirs from the connected
+   remote tables. If typed form fields should appear on the card live
+   during the demo, the REST contact upsert is the mechanism; it needs an
+   account API key, and the proof is a stored contact, not an accepted
+   request.
+
+The decision for this session: keep live typed contacts key only (the
+personas already carry the human details the profile story needs), or
+wire the contact upsert and verify it in the Sunday rehearsal. Nothing on
+the website changes either way; the pages already capture everything the
+chosen mechanism would need.
+
 ## 2. Ten campaigns, one paste each. Content > On-Site
 
 Every campaign: content type **Custom HTML**, trigger **Data Layer Event**
