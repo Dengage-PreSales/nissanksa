@@ -204,6 +204,18 @@ page shows each request and its outcome, which works on a phone too.
 | Brochure, finance intent, register interest | `ni_lead_events` | same shape, Web SDK |
 | Vehicle sold | `ni_lead_events`; exits sales journeys | DMS batch feed |
 
+## 7a. Parked: model aware popups
+
+Parked on 29 August, demo owner's call, revisit after Monday. The popups
+can follow the visitor's model two ways: display rule variants per vehicle
+path (cheap, page based), or Dynamic Content `{% %}` creatives reading the
+visitor's history and a product table per contact, the way the shared
+ecommerce abandoned cart card already does on this account. The plan when
+picked up: an `ni_product` remote table seeded from the committed imagery,
+one flagship dynamic creative built against the factory's dynamic content
+playbook, display rule variants for the static ones. Not part of the
+Monday scope.
+
 ## 8. Channel coverage, one view
 
 | Channel | State for Monday |
