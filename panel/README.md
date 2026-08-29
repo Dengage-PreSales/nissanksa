@@ -104,7 +104,7 @@ disk.
 
 1. **Booking confirmation push** (the "seconds later" moment of the run of
    show): trigger on `order_events`, one Web Push step. Copy in
-   `messages.html` under Web push. This fires for website bookings and for
+   `CONTENT.md`, built in the push composer, never as HTML. This fires for website bookings and for
    the cockpit's offline booking alike, because both send the same order
    event.
 2. **Abandoned booking rescue**: `beginCheckout` with no `order` within the
@@ -223,6 +223,6 @@ Monday scope.
 | On-site messaging, inline slots | Live once section 2 is pasted |
 | Web push | Live on the published origin; worker already at the origin root |
 | App inbox | Live; send from a campaign or journey, Refresh in the drawer |
-| SMS, Email | Copy ready in `messages.html`; sender id needed for live sends |
+| SMS, Email | Composer field sheets in `CONTENT.md`; sender id needed for live sends |
 | WhatsApp | Value First's channel; journey step and copy shown, live send via their WABA in production |
 | RCS | Not offered. Say so if asked |
