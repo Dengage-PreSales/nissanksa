@@ -1,6 +1,29 @@
-<!-- nissan_demo_tekton-launch-bar | Content type: Sticky bar, top (custom HTML).
-     The TEKTON is announced as coming soon on the source site; the CTA lands
-     on its register-interest page. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nissan KSA demo | TEKTON launch bar (Dengage panel content)</title>
+<!-- =========================================================================
+     Campaign: nissan_demo_tekton-launch-bar. Paste this WHOLE FILE into
+     Content > On-Site > Custom HTML.
+
+     PANEL SETTINGS
+       Trigger              Data Layer Event
+       Event name           nissan_demo_tekton-launch-bar
+       Where to display     /nissanksa/
+       Status               Active
+       Show every X minutes 1
+       Max show count       100
+       Layout               Sticky bar, top
+       Design               padding 0, transparent background
+
+     Padding 0 and the transparent background are not style choices: without
+     them the engine draws its own white box around the card. Renders in the
+     engine's cross origin iframe: no script tags (the panel strips them on
+     save), links carry target=_top, imagery is absolute to the published
+     origin. -->
+</head>
+<body>
 <style>
   #nkx-tkb { font-family: 'Nissan Brand', Arial, sans-serif; background: #111; color: #fff; display: flex; align-items: center; gap: 14px; padding: 11px 18px; flex-wrap: wrap; justify-content: center; }
   #nkx-tkb .k { font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: #ff5f7e; font-weight: 700; }
@@ -12,5 +35,7 @@
   <span class="k">Coming soon</span>
   <span class="t">TEKTON is arriving by the end of 2026. More than you expect.</span>
   <a class="cta" target="_top" href="https://dengage-presales.github.io/nissanksa/vehicles/tekton/index.html">JOIN THE LIST</a>
-  <button type="button" class="x" onclick="Dn.sendClick('dismiss'); Dn.closePopup && Dn.closePopup();" aria-label="Close">&times;</button>
+  <button type="button" class="x" onclick="window.Dn&&Dn.sendClick&&Dn.sendClick('dismiss'); Dn.closePopup && Dn.closePopup();" aria-label="Close">&times;</button>
 </div>
+</body>
+</html>

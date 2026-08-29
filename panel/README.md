@@ -81,12 +81,24 @@ the matching file from `panel/creatives/`.
 | `nissan_demo_comeback-offer` | `comeback-offer.html` | Popup | no |
 | `nissan_demo_shopping-survey` | `shopping-survey.html` | Popup, survey | optional: scroll depth |
 
+**Paste each file WHOLE**, doctype to closing tag: every file now carries
+its own panel settings in a comment at the top, including layout and width.
+Two Design settings are not style choices: **padding 0** and a
+**transparent background**, or the engine draws its own white box around
+the card. Popups take the engine's close button via Layout > Close Button >
+Add close button to outside.
+
 The creatives render in the engine's cross-origin iframe: no script tags
 (the panel strips them on save), links carry `target="_top"`, imagery is
 absolute URLs to the published origin, so they only look right once GitHub
-Pages is live. Capture goes through the engine's own `data-dn-form-id` plus
-`Dn.postSubscription()`, and the survey through `Dn.postQuestion()`.
-`creatives/index.html` previews all ten from disk.
+Pages is live. The two capture files and the survey are built on the
+engine's native form contract: the SDK arms its handler only when the
+stored content contains the exact text `data-dn-form-id="subscription_form"`
+(or `question_form` for the survey), fields carry `data-dn-id` with
+`data-dn-type`, and the engine stamps `data-dn-is-submitted="true"` on
+`.container` when the post succeeds. Verify a capture against a stored
+contact, not a closed popup. `creatives/index.html` previews all ten from
+disk.
 
 ## 3. Three journeys, in priority order
 

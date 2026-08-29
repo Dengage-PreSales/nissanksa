@@ -1,5 +1,30 @@
-<!-- nissan_demo_ramadan-offer | Content type: Popup (custom HTML).
-     Seasonal moment: Ramadan. Marketing copy only, no invented figures. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nissan KSA demo | Ramadan offer (Dengage panel content)</title>
+<!-- =========================================================================
+     Campaign: nissan_demo_ramadan-offer. Paste this WHOLE FILE into
+     Content > On-Site > Custom HTML.
+
+     PANEL SETTINGS
+       Trigger              Data Layer Event
+       Event name           nissan_demo_ramadan-offer
+       Where to display     /nissanksa/
+       Status               Active
+       Show every X minutes 1
+       Max show count       100
+       Layout               Popup, width 440
+       Design               padding 0, transparent background
+       Close button         Layout > Close Button > Add close button to outside
+
+     Padding 0 and the transparent background are not style choices: without
+     them the engine draws its own white box around the card. Renders in the
+     engine's cross origin iframe: no script tags (the panel strips them on
+     save), links carry target=_top, imagery is absolute to the published
+     origin. -->
+</head>
+<body>
 <style>
   #nkx-rmd { font-family: 'Nissan Brand', Arial, sans-serif; color: #f5efe3; background: #1c1633; border-radius: 4px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.22); max-width: 440px; }
   #nkx-rmd .b { padding: 26px 24px; }
@@ -15,6 +40,8 @@
     <h2>Evenings get longer. Journeys get better.</h2>
     <p>Ramadan showroom hours and seasonal offers, gathered in one place for the month.</p>
     <a class="cta" target="_top" href="https://dengage-presales.github.io/nissanksa/offers/index.html">EXPLORE</a>
-    <button type="button" class="later" onclick="Dn.sendClick('later'); Dn.closePopup && Dn.closePopup();">Not now</button>
+    <button type="button" class="later" onclick="window.Dn&&Dn.sendClick&&Dn.sendClick('later'); Dn.closePopup && Dn.closePopup();">Not now</button>
   </div>
 </div>
+</body>
+</html>

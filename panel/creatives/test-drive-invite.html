@@ -1,7 +1,30 @@
-<!-- nissan_demo_test-drive-invite | Content type: Popup (custom HTML).
-     Fired for the repeat visitor who keeps returning to a model page without
-     booking. Renders in the engine's iframe: no script tags, links carry
-     target=_top, clicks reported with Dn.sendClick where nothing navigates. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nissan KSA demo | Test drive invite (Dengage panel content)</title>
+<!-- =========================================================================
+     Campaign: nissan_demo_test-drive-invite. Paste this WHOLE FILE into
+     Content > On-Site > Custom HTML.
+
+     PANEL SETTINGS
+       Trigger              Data Layer Event
+       Event name           nissan_demo_test-drive-invite
+       Where to display     /nissanksa/
+       Status               Active
+       Show every X minutes 1
+       Max show count       100
+       Layout               Popup, width 460
+       Design               padding 0, transparent background
+       Close button         Layout > Close Button > Add close button to outside
+
+     Padding 0 and the transparent background are not style choices: without
+     them the engine draws its own white box around the card. Renders in the
+     engine's cross origin iframe: no script tags (the panel strips them on
+     save), links carry target=_top, imagery is absolute to the published
+     origin. -->
+</head>
+<body>
 <style>
   #nkx-tdi { font-family: 'Nissan Brand', Arial, sans-serif; color: #111; background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.22); max-width: 460px; }
   #nkx-tdi .m { background: #f4f4f4; }
@@ -22,6 +45,8 @@
     <h2>The PATROL reads better from the driver's seat</h2>
     <p>You have been back a few times. The next step takes a minute to book, and the keys will be waiting at your branch.</p>
     <a class="cta" target="_top" href="https://dengage-presales.github.io/nissanksa/book-a-test-drive/index.html?model=patrol">BOOK A TEST DRIVE</a>
-    <button type="button" class="later" onclick="Dn.sendClick('later'); Dn.closePopup && Dn.closePopup();">Maybe later</button>
+    <button type="button" class="later" onclick="window.Dn&&Dn.sendClick&&Dn.sendClick('later'); Dn.closePopup && Dn.closePopup();">Maybe later</button>
   </div>
 </div>
+</body>
+</html>

@@ -1,6 +1,30 @@
-<!-- nissan_demo_comeback-offer | Content type: Popup (custom HTML).
-     Greets a returning visitor after days of silence; the win-back journey's
-     on-site half. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nissan KSA demo | Comeback offer (Dengage panel content)</title>
+<!-- =========================================================================
+     Campaign: nissan_demo_comeback-offer. Paste this WHOLE FILE into
+     Content > On-Site > Custom HTML.
+
+     PANEL SETTINGS
+       Trigger              Data Layer Event
+       Event name           nissan_demo_comeback-offer
+       Where to display     /nissanksa/
+       Status               Active
+       Show every X minutes 1
+       Max show count       100
+       Layout               Popup, width 460
+       Design               padding 0, transparent background
+       Close button         Layout > Close Button > Add close button to outside
+
+     Padding 0 and the transparent background are not style choices: without
+     them the engine draws its own white box around the card. Renders in the
+     engine's cross origin iframe: no script tags (the panel strips them on
+     save), links carry target=_top, imagery is absolute to the published
+     origin. -->
+</head>
+<body>
 <style>
   #nkx-cbk { font-family: 'Nissan Brand', Arial, sans-serif; color: #111; background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.22); max-width: 460px; }
   #nkx-cbk .m { background: #f4f4f4; }
@@ -21,6 +45,8 @@
     <h2>The X-TRAIL you looked at is still here</h2>
     <p>Pick up where you left off, or let a test drive settle it. Either way, it takes a minute.</p>
     <a class="cta" target="_top" href="https://dengage-presales.github.io/nissanksa/vehicles/x-trail/index.html">CONTINUE EXPLORING</a>
-    <button type="button" class="later" onclick="Dn.sendClick('later'); Dn.closePopup && Dn.closePopup();">Maybe later</button>
+    <button type="button" class="later" onclick="window.Dn&&Dn.sendClick&&Dn.sendClick('later'); Dn.closePopup && Dn.closePopup();">Maybe later</button>
   </div>
 </div>
+</body>
+</html>

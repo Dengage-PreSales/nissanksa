@@ -1,7 +1,29 @@
-<!-- nissan_demo_finance-teaser | Content type: Sticky bar, bottom (custom HTML).
-     The figure is the source site's own published campaign number: X-TRAIL
-     monthly installments starting from SAR 999, as advertised on its offer
-     page. Nothing here is invented. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nissan KSA demo | Finance teaser (Dengage panel content)</title>
+<!-- =========================================================================
+     Campaign: nissan_demo_finance-teaser. Paste this WHOLE FILE into
+     Content > On-Site > Custom HTML.
+
+     PANEL SETTINGS
+       Trigger              Data Layer Event
+       Event name           nissan_demo_finance-teaser
+       Where to display     /nissanksa/
+       Status               Active
+       Show every X minutes 1
+       Max show count       100
+       Layout               Sticky bar, bottom
+       Design               padding 0, transparent background
+
+     Padding 0 and the transparent background are not style choices: without
+     them the engine draws its own white box around the card. Renders in the
+     engine's cross origin iframe: no script tags (the panel strips them on
+     save), links carry target=_top, imagery is absolute to the published
+     origin. -->
+</head>
+<body>
 <style>
   #nkx-fin { font-family: 'Nissan Brand', Arial, sans-serif; background: #111; color: #fff; display: flex; align-items: center; gap: 16px; padding: 12px 18px; flex-wrap: wrap; justify-content: center; }
   #nkx-fin .k { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: #ff5f7e; font-weight: 700; }
@@ -14,5 +36,7 @@
   <span class="k">Finance offer</span>
   <span class="t">X-TRAIL monthly installments from <b>SAR 999</b>, 0% admin fees, 0% down payment</span>
   <a class="cta" target="_top" href="https://dengage-presales.github.io/nissanksa/offers/x-trail-999/index.html">SEE THE OFFER</a>
-  <button type="button" class="x" onclick="Dn.sendClick('dismiss'); Dn.closePopup && Dn.closePopup();" aria-label="Close">&times;</button>
+  <button type="button" class="x" onclick="window.Dn&&Dn.sendClick&&Dn.sendClick('dismiss'); Dn.closePopup && Dn.closePopup();" aria-label="Close">&times;</button>
 </div>
+</body>
+</html>

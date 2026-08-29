@@ -1,36 +1,111 @@
-<!-- nissan_demo_arrival-alert | Content type: Popup (custom HTML).
-     A capture form. The engine's native mechanism does the work: inputs are
-     read through data-dn-form-id, Dn.postSubscription validates and creates
-     the contact with its consent flags. No script tags, no form post. -->
-<style>
-  #nkx-arr { font-family: 'Nissan Brand', Arial, sans-serif; background: #fff; color: #111; border-radius: 4px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.22); max-width: 420px; }
-  #nkx-arr .m img { display: block; width: 100%; height: auto; }
-  #nkx-arr .b { padding: 20px 22px; }
-  #nkx-arr .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #c3002f; font-weight: 700; }
-  #nkx-arr h2 { margin: 6px 0 8px; font-size: 19px; color: #111; }
-  #nkx-arr p { margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: #3a3f43; }
-  #nkx-arr input { width: 100%; box-sizing: border-box; border: 1px solid #d9dde1; border-radius: 3px; padding: 11px 12px; font: inherit; font-size: 13.5px; margin-bottom: 10px; }
-  #nkx-arr input[data-dn-invalid="true"] { border-color: #c3002f; }
-  #nkx-arr .cta { width: 100%; border: 0; background: #111; color: #fff; font: inherit; font-size: 13px; letter-spacing: .06em; font-weight: 600; padding: 12px 16px; border-radius: 999px; cursor: pointer; }
-  #nkx-arr .fine { font-size: 11px; color: #6e7275; margin-top: 8px; }
-  #nkx-arr .done { display: none; padding: 8px 0 2px; color: #10633f; font-size: 13.5px; }
-  #nkx-arr .container[data-dn-is-submitted="true"] .done { display: block; }
-  #nkx-arr .container[data-dn-is-submitted="true"] .hide-after { display: none; }
-</style>
-<div id="nkx-arr">
-  <div class="m">
-    <img src="https://dengage-presales.github.io/nissanksa/assets/img/side-tekton.jpg" alt="Nissan TEKTON">
-  </div>
-  <div class="b container">
-    <span class="k">Arrival alert</span>
-    <h2>Be first when the TEKTON lands</h2>
-    <div class="hide-after">
-      <p>Leave your details and we will message you the moment it reaches your branch.</p>
-      <input type="email" data-dn-form-id="email" placeholder="Email address" data-dn-validation="email" data-dn-required="true">
-      <input type="tel" data-dn-form-id="phone" placeholder="Mobile (+9665...)" dir="ltr">
-      <button type="button" class="cta" onclick="Dn.postSubscription(); Dn.sendClick('subscribe');">NOTIFY ME</button>
-      <p class="fine">By subscribing you agree to receive updates from this demo. Unsubscribe any time.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nissan KSA demo | Arrival alert capture (Dengage panel content)</title>
+<!-- =========================================================================
+     Campaign: nissan_demo_arrival-alert. Paste this WHOLE FILE into
+     Content > On-Site > Custom HTML.
+
+     PANEL SETTINGS
+       Trigger              Data Layer Event
+       Event name           nissan_demo_arrival-alert
+       Where to display     /nissanksa/
+       Status               Active
+       Show every X minutes 1
+       Max show count       100
+       Layout               Popup, width 460
+       Design               padding 0, transparent background
+       Close button         Layout > Close Button > Add close button to outside
+
+     Padding 0 and the transparent background are not style choices: without
+     them the engine draws its own white box around the card.
+
+     THE NATIVE FORM CONTRACT. The engine injects its form handler only when
+     the stored content contains the exact text data-dn-form-id="subscription_form",
+     so the form below is the root element and carries it. Fields use
+     data-dn-id (master_contact column names) plus data-dn-type; the engine
+     validates, creates or updates the contact with its consent flags, and
+     stamps data-dn-is-submitted="true" on .container. Message spans pair
+     with fields BY INDEX, so their order below matches the field order.
+     No script tags: the panel strips them on save. -->
+</head>
+<body>
+<form class="form" data-dn-form-id="subscription_form" data-dn-validation-language="en"
+      id="nkx-arr" onsubmit="return false">
+  <style>
+    #nkx-arr * { margin: 0; padding: 0; box-sizing: border-box; }
+    #nkx-arr { font-family: 'Nissan Brand', Arial, sans-serif; width: 100%; display: block; color: #111; }
+    body > #nkx-arr { max-width: 460px; margin: 40px auto; }
+    #nkx-arr .container { width: 100%; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.22); }
+    #nkx-arr .m img { display: block; width: 100%; height: auto; }
+    #nkx-arr .b { padding: 20px 22px 24px; }
+    #nkx-arr .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #c3002f; font-weight: 700; }
+    #nkx-arr h2 { margin: 6px 0 8px; font-size: 19px; line-height: 1.3; color: #111; }
+    #nkx-arr p { margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: #3a3f43; }
+    #nkx-arr .block { margin-bottom: 10px; }
+    #nkx-arr input[data-dn-id] { width: 100%; border: 1px solid #d9dde1; border-radius: 3px; padding: 11px 12px; font: inherit; font-size: 13.5px; color: #111; background: #fff; }
+    #nkx-arr input[data-dn-id]:focus { outline: none; border-color: #111; }
+    #nkx-arr [data-dn-invalid="true"] { border-color: #c3002f; }
+    #nkx-arr [data-dn-invalid-message-type] { display: none; font-size: 11.5px; color: #c3002f; margin-top: 5px; }
+    #nkx-arr [data-dn-invalid="true"] ~ [data-dn-invalid-message-type] { display: block; }
+    #nkx-arr .perm { display: flex; gap: 9px; align-items: flex-start; margin: 12px 0 0; }
+    #nkx-arr .perm input { margin-top: 2px; width: 16px; height: 16px; accent-color: #c3002f; flex-shrink: 0; }
+    #nkx-arr .perm label { font-size: 12.5px; color: #111; line-height: 1.5; }
+    #nkx-arr .engine-missing { display: none; font-size: 12px; line-height: 1.5; color: #c3002f; border: 1px solid #c3002f; border-radius: 4px; padding: 10px 12px; margin-top: 12px; }
+    #nkx-arr[data-dn-engine="absent"] .engine-missing { display: block; }
+    #nkx-arr .send { display: block; width: 100%; border: 0; cursor: pointer; margin-top: 14px; background: #111; color: #fff; border-radius: 999px; padding: 12px 16px; font-family: inherit; font-size: 13px; letter-spacing: .06em; font-weight: 600; }
+    #nkx-arr .send:hover { background: #c3002f; }
+    #nkx-arr .fine { font-size: 11px; color: #6e7275; margin-top: 10px; margin-bottom: 0; }
+    #nkx-arr .submitted-content { display: none; padding: 30px 24px 34px; text-align: center; }
+    #nkx-arr .submitted-content .tick { width: 42px; height: 42px; margin: 0 auto 12px; border-radius: 50%; background: #e7f6ee; color: #10633f; font-size: 22px; line-height: 42px; }
+    #nkx-arr .container[data-dn-is-submitted="true"] .m,
+    #nkx-arr .container[data-dn-is-submitted="true"] .b { display: none; }
+    #nkx-arr .container[data-dn-is-submitted="true"] .submitted-content { display: block; }
+  </style>
+
+  <div class="container">
+    <div class="m">
+      <img src="https://dengage-presales.github.io/nissanksa/assets/img/side-tekton.jpg" alt="Nissan TEKTON">
     </div>
-    <p class="done">Done. You will know the moment it arrives.</p>
+    <div class="b">
+      <span class="k">Arrival alert</span>
+      <h2>Be first when the TEKTON lands</h2>
+      <p>Leave your details and we will message you the moment it reaches your branch.</p>
+
+      <div class="block">
+        <input type="email" id="nkx-arr-email" placeholder="Email address" aria-label="Email"
+               data-dn-id="email" data-dn-type="EMAIL" data-dn-required="true">
+        <span data-dn-invalid-message-type="EMAIL"></span>
+      </div>
+      <div class="block">
+        <input type="tel" id="nkx-arr-gsm" placeholder="Mobile (+9665...)" aria-label="Mobile" dir="ltr"
+               data-dn-id="gsm" data-dn-type="GSM" data-dn-required="true">
+        <span data-dn-invalid-message-type="GSM"></span>
+      </div>
+      <div class="perm">
+        <input type="checkbox" id="nkx-arr-perm" checked
+               data-dn-id="mergedPermission" data-dn-type="PERMISSION_CHECKBOX" data-dn-required="true">
+        <label for="nkx-arr-perm">Email and message me about the TEKTON. Unsubscribe any time.</label>
+      </div>
+      <span data-dn-invalid-message-type="PERMISSION_CHECKBOX"></span>
+
+      <p class="engine-missing">This form cannot submit right now: the engine's form
+        handler did not load into this creative, so there is nothing to send to.</p>
+
+      <button type="button" class="send"
+              onclick="var f=document.getElementById('nkx-arr');var native=(typeof Dn!=='undefined'&&typeof Dn.postSubscription==='function');if(native){Dn.postSubscription();}else{if(typeof Dn==='undefined'||typeof Dn.postMessageToParent!=='function'){f.setAttribute('data-dn-engine','absent');return;}var g=function(i){return document.getElementById(i);};var t=function(el){return el.value.replace(/^\s+|\s+$/g,'');};var bad=0;var mark=function(el,ok){if(ok){el.removeAttribute('data-dn-invalid');}else{el.setAttribute('data-dn-invalid','true');bad=1;}};var em=g('nkx-arr-email'),gs=g('nkx-arr-gsm'),pm=g('nkx-arr-perm');mark(em,/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(t(em)));mark(gs,t(gs).replace(/[^0-9]/g,'').length>6);if(bad||!pm.checked){return;}Dn.postMessageToParent('postSubscription',{form:{email:t(em),gsm:t(gs),emailPermission:pm.checked,gsmPermission:pm.checked}});}if(f.querySelector('[data-dn-invalid=&quot;true&quot;]')){return;}this.disabled=true;if(typeof Dn!=='undefined'&&Dn.sendClick){Dn.sendClick('arrival-alert__notify');}if(!native){f.querySelector('.container').setAttribute('data-dn-is-submitted','true');}">
+        NOTIFY ME
+      </button>
+      <p class="fine">A demonstration storefront. Your details are used only to show how Dengage records a contact.</p>
+    </div>
+
+    <div class="submitted-content" data-dn-is-enabled="true"
+         data-dn-is-modal-auto-close-enabled="true" data-dn-modal-close-seconds="6">
+      <div class="tick">&#10003;</div>
+      <h2>Done. You will know the moment it arrives.</h2>
+    </div>
   </div>
-</div>
+</form>
+</body>
+</html>
