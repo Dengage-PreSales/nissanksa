@@ -54,11 +54,20 @@ instead, both on the panel side:
    account API key, and the proof is a stored contact, not an accepted
    request.
 
+3. **The panel's own contact import, for the eight personas.** The
+   contacts list looks human when DPS-1 to DPS-8 carry name, surname,
+   email and mobile in `master_contact` itself. `panel/personas.csv`
+   holds exactly those eight rows, the same names and 555 block mobiles
+   the seeded tables use, with emails on the reserved .example domain so
+   no send can ever reach a real inbox. Import it in Audience, or type
+   the eight through New Contact; it creates or updates those keys only.
+
 The decision for this session: keep live typed contacts key only (the
-personas already carry the human details the profile story needs), or
-wire the contact upsert and verify it in the Sunday rehearsal. Nothing on
-the website changes either way; the pages already capture everything the
-chosen mechanism would need.
+personas carry the human details the profile story needs, via the import
+above and the related remote tables), or wire the contact upsert and
+verify it in the Sunday rehearsal. Nothing on the website changes either
+way; the pages already capture everything the chosen mechanism would
+need.
 
 ## 2. Ten campaigns, one paste each. Content > On-Site
 
