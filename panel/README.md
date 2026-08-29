@@ -57,10 +57,11 @@ instead, both on the panel side:
 3. **The panel's own contact import, for the eight personas.** The
    contacts list looks human when DPS-1 to DPS-8 carry name, surname,
    email and mobile in `master_contact` itself. `panel/personas.csv`
-   holds exactly those eight rows, the same names and 555 block mobiles
-   the seeded tables use, with emails on the reserved .example domain so
-   no send can ever reach a real inbox. Import it in Audience, or type
-   the eight through New Contact; it creates or updates those keys only.
+   holds exactly those eight rows in the account's own import template
+   columns, the same names and 555 block mobiles the seeded tables use,
+   with emails on the reserved .example domain so no send can ever reach
+   a real inbox. Import it in Audience, or type the eight through New
+   Contact; it creates or updates those keys only.
 
 The decision for this session: keep live typed contacts key only (the
 personas carry the human details the profile story needs, via the import

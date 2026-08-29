@@ -1,9 +1,9 @@
-contact_key,name,surname,email,gsm
-DPS-1,Ahmed,Al-Rashid,ahmed.alrashid@nissanksa-demo.example,+966555100001
-DPS-2,Sara,Al-Qahtani,sara.alqahtani@nissanksa-demo.example,+966555100002
-DPS-3,Mohammed,Al-Harbi,mohammed.alharbi@nissanksa-demo.example,+966555100003
-DPS-4,Noura,Al-Otaibi,noura.alotaibi@nissanksa-demo.example,+966555100004
-DPS-5,Khalid,Al-Ghamdi,khalid.alghamdi@nissanksa-demo.example,+966555100005
-DPS-6,Fatima,Al-Zahrani,fatima.alzahrani@nissanksa-demo.example,+966555100006
-DPS-7,Omar,Al-Shehri,omar.alshehri@nissanksa-demo.example,+966555100007
-DPS-8,Layla,Al-Mutairi,layla.almutairi@nissanksa-demo.example,+966555100008
+contact_key,contact_status,email,email_permission,email_status,gsm,gsm_permission,gsm_status,name,surname,gender,birth_date,segment,source,subscription_date,rfm_score,rfm_segment,rfm_mobile_score,rfm_mobile_segment,gsm_source,email_source,gsm_consent_date,email_consent_date,contact_type
+DPS-1,A,ahmed.alrashid@nissanksa-demo.example,true,A,966555100001,true,A,Ahmed,Al-Rashid,,,"","",2026-08-29,,,,,"","",2026-08-29 12:00:00.000,2026-08-29 12:00:00.000,
+DPS-2,A,sara.alqahtani@nissanksa-demo.example,true,A,966555100002,true,A,Sara,Al-Qahtani,,,"","",2026-08-29,,,,,"","",2026-08-29 12:00:00.000,2026-08-29 12:00:00.000,
+DPS-3,A,mohammed.alharbi@nissanksa-demo.example,true,A,966555100003,true,A,Mohammed,Al-Harbi,,,"","",2026-08-29,,,,,"","",2026-08-29 12:00:00.000,2026-08-29 12:00:00.000,
+DPS-4,A,noura.alotaibi@nissanksa-demo.example,true,A,966555100004,true,A,Noura,Al-Otaibi,,,"","",2026-08-29,,,,,"","",2026-08-29 12:00:00.000,2026-08-29 12:00:00.000,
+DPS-5,A,khalid.alghamdi@nissanksa-demo.example,true,A,966555100005,true,A,Khalid,Al-Ghamdi,,,"","",2026-08-29,,,,,"","",2026-08-29 12:00:00.000,2026-08-29 12:00:00.000,
+DPS-6,A,fatima.alzahrani@nissanksa-demo.example,true,A,966555100006,true,A,Fatima,Al-Zahrani,,,"","",2026-08-29,,,,,"","",2026-08-29 12:00:00.000,2026-08-29 12:00:00.000,
+DPS-7,A,omar.alshehri@nissanksa-demo.example,true,A,966555100007,true,A,Omar,Al-Shehri,,,"","",2026-08-29,,,,,"","",2026-08-29 12:00:00.000,2026-08-29 12:00:00.000,
+DPS-8,A,layla.almutairi@nissanksa-demo.example,true,A,966555100008,true,A,Layla,Al-Mutairi,,,"","",2026-08-29,,,,,"","",2026-08-29 12:00:00.000,2026-08-29 12:00:00.000,
