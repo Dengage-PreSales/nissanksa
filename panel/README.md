@@ -208,7 +208,7 @@ page shows each request and its outcome, which works on a phone too.
 
 Parked on 29 August, demo owner's call, revisit after Monday. The popups
 can follow the visitor's model two ways: display rule variants per vehicle
-path (cheap, page based), or Dynamic Content `{% %}` creatives reading the
+path (cheap, page based), or Dynamic Content template tag creatives reading the
 visitor's history and a product table per contact, the way the shared
 ecommerce abandoned cart card already does on this account. The plan when
 picked up: an `ni_product` remote table seeded from the committed imagery,
