@@ -120,7 +120,26 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   await page.fill('input[name="LastName"]', 'Visitor');
   await page.fill('input[name="Phone"]', '0555555555');
   await page.selectOption('select[name="purchaseOutlook"]', { index: 1 });
-  await page.waitForTimeout(200);
+  // The form enforces its own mandatory fields now, so the test books the
+  // way a person does: every visible required field filled.
+  await page.evaluate(() => {
+    const form = document.querySelector('select[name="Model"]').closest('form');
+    form.querySelectorAll('select').forEach((s) => {
+      if (!s.value && s.options.length > 1) {
+        s.selectedIndex = 1;
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+    form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach((i) => {
+      if (i.value) return;
+      if (/mail/i.test(i.name + i.id + i.type)) i.value = 'demo@example.com';
+      else if (/phone|mobile|number/i.test(i.name + i.id)) i.value = '0555555555';
+      else i.value = 'Demo';
+      i.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    form.querySelectorAll('input[type="checkbox"][required], input[type="checkbox"][aria-required="true"]').forEach((c) => { c.checked = true; });
+  });
+  await page.waitForTimeout(300);
   await page.click('form.hasValidation button[type="submit"], form.hasValidation input[type="submit"]').catch(async () => {
     await page.evaluate(() => {
       const sel = document.querySelector('select[name="Model"]');
@@ -136,6 +155,50 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   const done = await page.locator('.dps-form-done').count();
   if (!done) fail('booking: no confirmation state after submit');
   else ok('booking confirmation shown');
+  await page.close();
+}
+
+// 3a. The quote form: mandatory fields hold the door, and a completed
+// submit writes the quote lead, never the booking order.
+{
+  const page = await open('request-a-quote/index.html?c020_model=30211');
+  await page.waitForTimeout(500);
+  const submitSel = () => page.evaluate(() => {
+    const form = document.querySelector('select[name="Model"]').closest('form');
+    (form.querySelector('.submit-form-button') || form.querySelector('button[type="submit"]')).click();
+  });
+  await submitSel();
+  await page.waitForTimeout(400);
+  let evs = await events(page);
+  if (evs.includes('lead:quote_issued') || evs.includes('ec:order')) fail('quote: an empty submit went through');
+  else ok('quote: empty submit held for mandatory fields');
+  await page.evaluate(() => {
+    const form = document.querySelector('select[name="Model"]').closest('form');
+    form.querySelectorAll('select').forEach((s) => {
+      if (!s.value && s.options.length > 1) {
+        s.selectedIndex = 1;
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+    form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach((i) => {
+      if (i.value) return;
+      if (/mail/i.test(i.name + i.id + i.type)) i.value = 'demo@example.com';
+      else if (/phone|mobile|number/i.test(i.name + i.id)) i.value = '0555555555';
+      else i.value = 'Demo';
+      i.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    form.querySelectorAll('input[type="checkbox"][required], input[type="checkbox"][aria-required="true"]').forEach((c) => { c.checked = true; });
+  });
+  await page.waitForTimeout(300);
+  await submitSel();
+  await page.waitForTimeout(500);
+  evs = await events(page);
+  if (!evs.includes('lead:quote_issued')) fail(`quote: no quote_issued after full submit (got ${evs.join(', ')})`);
+  else if (evs.includes('ec:order') || evs.includes('lead:test_drive_booked')) fail('quote: booking events leaked into the quote form');
+  else ok('quote submit writes addToCart and quote_issued, no order');
+  const doneQ = await page.locator('.dps-form-done').count();
+  if (!doneQ) fail('quote: no confirmation state after submit');
+  else ok('quote confirmation shown');
   await page.close();
 }
 

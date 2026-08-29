@@ -319,13 +319,40 @@
         return hit;
     }
 
+    /* The demo owns validation, because the source forms carry required
+       flags on stripped and invisible fields that would block the submit
+       silently. This walks only the fields a person can actually see and
+       returns the first empty mandatory one. */
+    function firstMissingRequired(form) {
+        var fields = form.querySelectorAll('input[required], select[required], textarea[required], [aria-required="true"]');
+        for (var i = 0; i < fields.length; i++) {
+            var el = fields[i];
+            if (el.disabled || el.type === 'hidden') continue;
+            var box = el.getBoundingClientRect();
+            if (box.width === 0 && box.height === 0) continue;
+            var empty = el.type === 'checkbox' ? !el.checked : !(el.value || '').trim();
+            if (empty || (el.checkValidity && !el.checkValidity())) return el;
+        }
+        return null;
+    }
+    function demandRequired(form) {
+        var missing = firstMissingRequired(form);
+        if (!missing) return false;
+        if (missing.reportValidity) missing.reportValidity();
+        else missing.focus();
+        return true;
+    }
+
     function wireBookingForm() {
         var modelSelect = $('select[name="Model"]');
         var form = modelSelect ? modelSelect.closest('form') : null;
         if (!form) return;
-        form.__dpsBooking = true;
-        /* The demo owns validation: the source form's required flags would
-           block the submit event on fields this flow does not need. */
+        /* The quote form carries a Model select too; the model machinery
+           below serves both pages, but the order and booking lead belong
+           to the booking page alone. The quote submit stays with
+           wireOtherLeadForms. */
+        var isBooking = window.location.pathname.indexOf('book-a-test-drive') !== -1;
+        if (isBooking) form.__dpsBooking = true;
         form.setAttribute('novalidate', '');
 
         var begun = false;
@@ -376,6 +403,8 @@
             window.setTimeout(function () { pick(chosen()); }, 150);
         });
 
+        if (!isBooking) return;
+
         form.addEventListener('input', function (e) {
             var name = e.target && e.target.name;
             if (begun) return;
@@ -394,6 +423,7 @@
                 modelSelect.focus();
                 return;
             }
+            if (demandRequired(form)) return;
             var city = ($('select[name="City"]') || {}).value || undefined;
             var horizon = ($('select[name="purchaseOutlook"]') || {}).value || undefined;
             if (city && /select/i.test(city)) city = undefined;
@@ -425,10 +455,15 @@
             if (form.closest('#dengage-panel, #inbox, #site-menu')) return;
             var page = document.body.getAttribute('data-page-type');
             var product = currentModelId();
+            if (form.querySelector('[required], [aria-required="true"]')) form.setAttribute('novalidate', '');
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
+                if (demandRequired(form)) return;
                 var modelSel = form.querySelector('select[name="Model"]');
-                var car = modelSel ? modelFromName(modelSel.value) : (product ? window.Catalog.get(product) : null);
+                var opt = modelSel && modelSel.selectedOptions && modelSel.selectedOptions[0];
+                var car = opt && opt.value
+                    ? modelFromName((opt.getAttribute('data-name') || opt.textContent || '').trim())
+                    : (product ? window.Catalog.get(product) : null);
                 var horizonSel = form.querySelector('select[name="purchaseOutlook"]');
                 var horizon = horizonSel ? horizonSel.value : undefined;
                 if (horizon && /select/i.test(horizon)) horizon = undefined;
