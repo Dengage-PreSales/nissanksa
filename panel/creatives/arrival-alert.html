@@ -56,7 +56,7 @@
     #nkx-arr .perm input { margin-top: 2px; width: 16px; height: 16px; accent-color: #c3002f; flex-shrink: 0; }
     #nkx-arr .perm label { font-size: 12.5px; color: #111; line-height: 1.5; }
     #nkx-arr .engine-missing { display: none; font-size: 12px; line-height: 1.5; color: #c3002f; border: 1px solid #c3002f; border-radius: 4px; padding: 10px 12px; margin-top: 12px; }
-    #nkx-arr[data-dn-engine="absent"] .engine-missing { display: block; }
+    #nkx-arr[data-dn-engine="absent"] .engine-missing { display: block !important; }
     #nkx-arr .send { display: block; width: 100%; border: 0; cursor: pointer; margin-top: 14px; background: #111; color: #fff; border-radius: 999px; padding: 12px 16px; font-family: inherit; font-size: 13px; letter-spacing: .06em; font-weight: 600; }
     #nkx-arr .send:hover { background: #c3002f; }
     #nkx-arr .fine { font-size: 11px; color: #6e7275; margin-top: 10px; margin-bottom: 0; }
@@ -64,25 +64,25 @@
     #nkx-arr .submitted-content .tick { width: 42px; height: 42px; margin: 0 auto 12px; border-radius: 50%; background: #e7f6ee; color: #10633f; font-size: 22px; line-height: 42px; }
     #nkx-arr .container[data-dn-is-submitted="true"] .m,
     #nkx-arr .container[data-dn-is-submitted="true"] .b { display: none; }
-    #nkx-arr .container[data-dn-is-submitted="true"] .submitted-content { display: block; }
+    #nkx-arr .container[data-dn-is-submitted="true"] .submitted-content { display: block !important; }
   </style>
 
-  <div class="container">
-    <div class="m">
-      <img src="https://dengage-presales.github.io/nissanksa/assets/img/side-tekton.jpg" alt="Nissan TEKTON">
+  <div class="container" style="width:100%;background:#ffffff;border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;color:#111111">
+    <div class="m" style="height:190px;overflow:hidden">
+      <img src="https://dengage-presales.github.io/nissanksa/assets/img/side-tekton.jpg" alt="Nissan TEKTON" style="display:block;width:100%;height:100%;object-fit:cover;object-position:50% 74%">
     </div>
-    <div class="b">
+    <div class="b" style="padding:20px 22px 24px">
       <span class="k">Arrival alert</span>
       <h2>Be first when the TEKTON lands</h2>
       <p>Leave your details and we will message you the moment it reaches your branch.</p>
 
       <div class="block">
-        <input type="email" id="nkx-arr-email" placeholder="Email address" aria-label="Email"
+        <input style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #d9dde1;border-radius:3px;font-size:13.5px;margin-bottom:2px" type="email" id="nkx-arr-email" placeholder="Email address" aria-label="Email"
                data-dn-id="email" data-dn-type="EMAIL" data-dn-required="true">
         <span data-dn-invalid-message-type="EMAIL"></span>
       </div>
       <div class="block">
-        <input type="tel" id="nkx-arr-gsm" placeholder="Mobile (+9665...)" aria-label="Mobile" dir="ltr"
+        <input style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #d9dde1;border-radius:3px;font-size:13.5px;margin-bottom:2px" type="tel" id="nkx-arr-gsm" placeholder="Mobile (+9665...)" aria-label="Mobile" dir="ltr"
                data-dn-id="gsm" data-dn-type="GSM" data-dn-required="true">
         <span data-dn-invalid-message-type="GSM"></span>
       </div>
@@ -93,17 +93,17 @@
       </div>
       <span data-dn-invalid-message-type="PERMISSION_CHECKBOX"></span>
 
-      <p class="engine-missing">This form cannot submit right now: the engine's form
+      <p class="engine-missing" style="display:none">This form cannot submit right now: the engine's form
         handler did not load into this creative, so there is nothing to send to.</p>
 
-      <button type="button" class="send"
+      <button style="display:block;width:100%;border:0;cursor:pointer;margin-top:14px;background:#111111;color:#ffffff;border-radius:999px;padding:12px 16px;font-size:13px;font-weight:600;letter-spacing:.06em" type="button" class="send"
               onclick="var f=document.getElementById('nkx-arr');var native=(typeof Dn!=='undefined'&&typeof Dn.postSubscription==='function');if(native){Dn.postSubscription();}else{if(typeof Dn==='undefined'||typeof Dn.postMessageToParent!=='function'){f.setAttribute('data-dn-engine','absent');return;}var g=function(i){return document.getElementById(i);};var t=function(el){return el.value.replace(/^\s+|\s+$/g,'');};var bad=0;var mark=function(el,ok){if(ok){el.removeAttribute('data-dn-invalid');}else{el.setAttribute('data-dn-invalid','true');bad=1;}};var em=g('nkx-arr-email'),gs=g('nkx-arr-gsm'),pm=g('nkx-arr-perm');mark(em,/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(t(em)));mark(gs,t(gs).replace(/[^0-9]/g,'').length>6);if(bad||!pm.checked){return;}Dn.postMessageToParent('postSubscription',{form:{email:t(em),gsm:t(gs),emailPermission:pm.checked,gsmPermission:pm.checked}});}if(f.querySelector('[data-dn-invalid=&quot;true&quot;]')){return;}this.disabled=true;if(typeof Dn!=='undefined'&&Dn.sendClick){Dn.sendClick('arrival-alert__notify');}if(!native){f.querySelector('.container').setAttribute('data-dn-is-submitted','true');}">
         NOTIFY ME
       </button>
       <p class="fine">A demonstration storefront. Your details are used only to show how Dengage records a contact.</p>
     </div>
 
-    <div class="submitted-content" data-dn-is-enabled="true"
+    <div class="submitted-content" style="display:none" data-dn-is-enabled="true"
          data-dn-is-modal-auto-close-enabled="true" data-dn-modal-close-seconds="6">
       <div class="tick">&#10003;</div>
       <h2>Done. You will know the moment it arrives.</h2>

@@ -42,7 +42,7 @@
     #nkx-svy .opt input { accent-color: #c3002f; width: 15px; height: 15px; flex-shrink: 0; }
     #nkx-svy .form-message { display: none; font-size: 12px; color: #c3002f; margin: 2px 0 6px; }
     #nkx-svy [data-dn-invalid="true"] .form-message,
-    #nkx-svy [data-dn-invalid="true"] ~ .form-message { display: block; }
+    #nkx-svy [data-dn-invalid="true"] ~ .form-message { display: block !important; }
     #nkx-svy .send { display: block; width: 100%; border: 0; cursor: pointer; margin-top: 8px; background: #111; color: #fff; border-radius: 999px; padding: 12px 16px; font-family: inherit; font-size: 13px; letter-spacing: .06em; font-weight: 600; }
     #nkx-svy .send:hover { background: #c3002f; }
     #nkx-svy .fine { font-size: 11px; color: #6e7275; margin-top: 10px; margin-bottom: 0; }
@@ -50,11 +50,11 @@
     #nkx-svy .submitted-content .tick { width: 42px; height: 42px; margin: 0 auto 12px; border-radius: 50%; background: #e7f6ee; color: #10633f; font-size: 22px; line-height: 42px; }
     #nkx-svy .submitted-content p { font-size: 13px; color: #3a3f43; margin-top: 6px; }
     #nkx-svy .container[data-dn-is-submitted="true"] .b { display: none; }
-    #nkx-svy .container[data-dn-is-submitted="true"] .submitted-content { display: block; }
+    #nkx-svy .container[data-dn-is-submitted="true"] .submitted-content { display: block !important; }
   </style>
 
-  <div class="container">
-    <div class="b">
+  <div class="container" style="width:100%;background:#ffffff;border-radius:6px;overflow:hidden;font-family:Arial,sans-serif;color:#111111">
+    <div class="b" style="padding:24px 22px">
       <span class="k">30 seconds, one question</span>
       <h2>What would help you decide today?</h2>
 
@@ -64,17 +64,17 @@
         <label class="opt"><input type="radio" name="nkx-decide" value="test-drive"> A test drive</label>
         <label class="opt"><input type="radio" name="nkx-decide" value="finance"> Finance options</label>
         <label class="opt"><input type="radio" name="nkx-decide" value="compare"> Comparing models side by side</label>
-        <div class="form-message">Pick one to send.</div>
+        <div class="form-message" style="display:none">Pick one to send.</div>
       </div>
 
-      <button type="button" class="send"
+      <button style="display:block;width:100%;border:0;cursor:pointer;margin-top:8px;background:#111111;color:#ffffff;border-radius:999px;padding:12px 16px;font-size:13px;font-weight:600;letter-spacing:.06em" type="button" class="send"
               onclick="var f=document.getElementById('nkx-svy'),b=f.querySelector('.form-block'),n=(typeof Dn!=='undefined'&&typeof Dn.postQuestion==='function');if(n){Dn.postQuestion();}else{var s=b.querySelectorAll('input:checked'),t=b.getAttribute('data-dn-name'),v=[],i=0;for(i=0;i<s.length;i++){v.push({tag:t,value:s[i].value});}if(!v.length){b.setAttribute('data-dn-invalid','true');return;}b.setAttribute('data-dn-invalid','false');if(typeof Dn!=='undefined'&&Dn.setTags){Dn.setTags(v);}}if(b.getAttribute('data-dn-invalid')==='true'){return;}this.disabled=true;if(typeof Dn!=='undefined'&&Dn.sendClick){Dn.sendClick('shopping-survey__answer');}if(!n){f.querySelector('.container').setAttribute('data-dn-is-submitted','true');}">
         SEND
       </button>
       <p class="fine">A demonstration storefront. Your answer becomes a tag on your contact, which the panel can segment on.</p>
     </div>
 
-    <div class="submitted-content" data-dn-is-enabled="true"
+    <div class="submitted-content" style="display:none" data-dn-is-enabled="true"
          data-dn-is-modal-auto-close-enabled="true" data-dn-modal-close-seconds="6">
       <div class="tick">&#10003;</div>
       <h2>Thank you</h2>
