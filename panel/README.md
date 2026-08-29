@@ -71,7 +71,7 @@ the matching file from `panel/creatives/`.
 | Event name | File | Type | Native trigger instead? |
 |---|---|---|---|
 | `nissan_demo_test-drive-invite` | `test-drive-invite.html` | Popup | optional: page-view frequency rule if offered |
-| `nissan_demo_test-drive-rescue` | `test-drive-rescue.html` | Popup | optional: exit intent |
+| `nissan_demo_test-drive-rescue` | `test-drive-rescue.html` | Popup | CHOSEN: exit intent. The launcher card shows the gesture; move the pointer out of the top of the window to fire it |
 | `nissan_demo_finance-teaser` | `finance-teaser.html` | Sticky bar, bottom | no |
 | `nissan_demo_national-day` | `national-day.html` | Popup | no |
 | `nissan_demo_ramadan-offer` | `ramadan-offer.html` | Popup | no |
@@ -79,7 +79,7 @@ the matching file from `panel/creatives/`.
 | `nissan_demo_arrival-alert` | `arrival-alert.html` | Popup, capture | no |
 | `nissan_demo_newsletter-capture` | `newsletter-capture.html` | Popup, capture | no |
 | `nissan_demo_comeback-offer` | `comeback-offer.html` | Popup | no |
-| `nissan_demo_shopping-survey` | `shopping-survey.html` | Popup, survey | optional: scroll depth |
+| `nissan_demo_shopping-survey` | `shopping-survey.html` | Popup, survey | CHOSEN: scroll depth. The launcher card shows the gesture; scroll down the page to fire it |
 
 **Paste each file WHOLE**, doctype to closing tag: every file now carries
 its own panel settings in a comment at the top, including layout and width.

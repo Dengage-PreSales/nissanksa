@@ -32,7 +32,8 @@
         /* Nissan one-off campaigns, all pre-purchase. hy: true switches the
            fired prefix to the brand one. */
         { slug: 'test-drive-invite',  name: 'Test drive invite',  group: 'brand', hy: true },
-        { slug: 'test-drive-rescue',  name: 'Test drive rescue',  group: 'brand', hy: true },
+        { slug: 'test-drive-rescue',  name: 'Test drive rescue',  group: 'brand', hy: true,
+          gesture: 'gestureExitIntent' },
         { slug: 'finance-teaser',     name: 'Finance teaser',     group: 'brand', hy: true },
         { slug: 'national-day',       name: 'National Day offer', group: 'brand', hy: true },
         { slug: 'ramadan-offer',      name: 'Seasonal offer',     group: 'brand', hy: true },
@@ -40,7 +41,8 @@
         { slug: 'arrival-alert',      name: 'Arrival alert',      group: 'brand', hy: true },
         { slug: 'newsletter-capture', name: 'Newsletter capture', group: 'brand', hy: true },
         { slug: 'comeback-offer',     name: 'Welcome back offer', group: 'brand', hy: true },
-        { slug: 'shopping-survey',    name: 'Shopping survey',    group: 'brand', hy: true },
+        { slug: 'shopping-survey',    name: 'Shopping survey',    group: 'brand', hy: true,
+          gesture: 'gestureScrollDepth' },
 
         /* The shared platform library. Slugs must not change. */
         { slug: 'subscription-popup', name: 'Subscription',     group: 'onsite' },
