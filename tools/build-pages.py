@@ -16,6 +16,7 @@ import pathlib
 import re
 import shutil
 import sys
+import time
 
 from bs4 import BeautifulSoup, NavigableString
 
@@ -105,6 +106,11 @@ TRACKER = re.compile(
     r"googletagmanager|google-analytics|doubleclick|facebook|tiktok|snapchat|"
     r"licdn|linkedin|twitter|oracleinfinity|adobedtm|omtrdc|treasuredata|teads|"
     r"bing\.com|clarity|hotjar|krxd|bat\.js|analytics", re.I)
+
+# Pages caches assets for ten minutes; a fresh stamp per build makes every
+# page pull the demo layer that matches it, so a fix is live on one refresh.
+STAMP = str(int(time.time()))
+
 
 def _wa_glyph():
     svg = (ROOT / "assets" / "brand" / "whatsapp.svg").read_text()
@@ -728,7 +734,7 @@ def head_block(spec, rel, css_links):
      run before any stylesheet, because a pending stylesheet blocks every
      script after it and a blocked corporate network must never be able to
      stop the SDK from starting. -->
-<script src="{rel}js/identity.js"></script>
+<script src="{rel}js/identity.js?v={STAMP}"></script>
 <!-- DENGAGE SDK START -->
 <script>
   (function (window, document) {{
@@ -747,13 +753,13 @@ def head_block(spec, rel, css_links):
 <!-- DENGAGE SDK END -->
 
 {css_links}
-<link rel="stylesheet" href="{rel}assets/css/override.css">
-<link rel="stylesheet" href="{rel}assets/css/demo-controls.css">"""
+<link rel="stylesheet" href="{rel}assets/css/override.css?v={STAMP}">
+<link rel="stylesheet" href="{rel}assets/css/demo-controls.css?v={STAMP}">"""
 
 
 def mounts_block(rel):
     scripts = "\n".join(
-        f'<script src="{rel}js/{f}.js"></script>'
+        f'<script src="{rel}js/{f}.js?v={STAMP}"></script>'
         for f in ["config", "copy", "vehicles", "dengageEvents", "site",
                   "panels", "slots", "inbox", "debug"])
     return f"""
