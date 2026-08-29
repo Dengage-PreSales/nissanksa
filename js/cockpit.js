@@ -29,16 +29,27 @@
         { key: 'DPS-8', name: 'Layla', city: 'Jeddah',  note: 'On the TEKTON waiting list' }
     ];
 
-    /* Every signal names the real mechanics it uses, on the button itself. */
+    /* The persona's home showroom, matching the Find a Showroom directory
+       and the seeded ni_branch table. */
+    var HOME_BRANCH = {
+        Riyadh: 'Olaya Showroom, Riyadh',
+        Jeddah: 'Madinah Road Showroom, Jeddah',
+        Dammam: 'King Fahd Road Showroom, Dammam',
+        Khobar: 'Khobar Showroom, Khobar',
+        Makkah: 'Makkah Showroom, Makkah'
+    };
+
+    /* Every signal names the real mechanics it uses, on the button itself.
+       A branch of 'home' resolves to the chosen persona's own showroom. */
     var SIGNALS = [
-        { id: 'walk_in',           label: 'Walk-in captured',        detail: 'Reception logs a visitor at the showroom',            lead: { source: 'showroom', branch: 'Olaya Showroom, Riyadh' } },
-        { id: 'test_drive_booked', label: 'Test drive booked offline', detail: 'Booked at the desk or over the phone',              lead: { source: 'showroom', branch: 'Olaya Showroom, Riyadh' }, order: true },
+        { id: 'walk_in',           label: 'Walk-in captured',        detail: 'Reception logs a visitor at the showroom',            lead: { source: 'showroom', branch: 'home' } },
+        { id: 'test_drive_booked', label: 'Test drive booked offline', detail: 'Booked at the desk or over the phone',              lead: { source: 'showroom', branch: 'home' }, order: true },
         { id: 'test_drive_done',   label: 'Test drive completed',    detail: 'The keys came back, the follow-up can start',         lead: { source: 'showroom' } },
         { id: 'no_show',           label: 'Test drive no-show',      detail: 'Booked, never came; the re-invite journey reacts',    lead: { source: 'showroom' } },
         { id: 'call_outcome',      label: 'Call outcome: call later', detail: 'The call center logs the answer instead of closing', lead: { source: 'call-center', note: 'call later' } },
-        { id: 'quote_issued',      label: 'Quote issued',            detail: 'A dealer quote enters the follow-up journey',         lead: { source: 'showroom', branch: 'Olaya Showroom, Riyadh' } },
+        { id: 'quote_issued',      label: 'Quote issued',            detail: 'A dealer quote enters the follow-up journey',         lead: { source: 'showroom', branch: 'home' } },
         { id: 'whatsapp_intent',   label: 'WhatsApp intent signal',  detail: 'Simulates the Value First chatbot calling Dengage',   lead: { source: 'value-first-whatsapp', note: 'asked about financing' } },
-        { id: 'vehicle_sold',      label: 'Vehicle sold',            detail: 'Ends the funnel: sales journeys stop for this buyer', lead: { source: 'showroom', branch: 'Olaya Showroom, Riyadh' } }
+        { id: 'vehicle_sold',      label: 'Vehicle sold',            detail: 'Ends the funnel: sales journeys stop for this buyer', lead: { source: 'showroom', branch: 'home' } }
     ];
 
     var state = { persona: null, model: 'x-trail' };
@@ -98,6 +109,7 @@
             var car = window.Catalog.get(state.model);
             var fields = { model: car ? car.id : undefined, city: cityOf(state.persona) };
             Object.keys(spec.lead).forEach(function (k) { fields[k] = spec.lead[k]; });
+            if (fields.branch === 'home') fields.branch = HOME_BRANCH[fields.city];
             var row = window.DengageEvents.leadEvent(spec.id, fields);
             /* An offline booking is still a booking: the same funnel event the
                website sends, so the shared journeys see it identically. */
