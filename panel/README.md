@@ -80,12 +80,19 @@ Two account side steps switch it on:
    GET) reports the address the next call would leave from and whether
    the API user secrets are visible to it, never the secret values. Three honest ways out,
    in order of preference:
-   - **A static IP forwarding proxy** in front of the API (QuotaGuard,
-     Fixie or similar). The proxy's one or two fixed IPs are what gets
-     whitelisted, and the relay takes the proxy as configuration, the
-     `DENGAGE_API_BASE` secret, with no code change.
-   - **Run the same relay on any small server with a fixed IP**, a five
-     dollar VPS is enough; whitelist that server.
+   - **The chosen path: a small server with a fixed IP.** Any cheap
+     Ubuntu VPS with a dedicated public IPv4 works. Run
+     `tools/vps-egress-setup.sh` on it once, as root; it installs an
+     authenticated CONNECT proxy, then prints the address to allowlist
+     (one Add > Choose IP entry) and the `DENGAGE_EGRESS_PROXY` secret
+     to set on the Supabase project. The relay picks the proxy up from
+     that secret with no code change, every Dengage call then leaves
+     from the server's one fixed address, and the health GET shows that
+     address as `egress_ip`. TLS stays end to end: the proxy relays
+     encrypted bytes it cannot read, and only to port 443.
+   - **A hosted static IP proxy** (QuotaGuard class) does the same job
+     as a paid service; the same `DENGAGE_EGRESS_PROXY` secret carries
+     its URL.
    - **Whitelist a provider range** only if account security accepts how
      wide that is. The relay's pool is AWS us-east-1, which spans 295
      separate blocks, over 21 million addresses, so full cover is not

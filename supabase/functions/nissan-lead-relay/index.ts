@@ -13,11 +13,15 @@
 // Secrets read at runtime, all optional until the account side is ready:
 //   DENGAGE_API_USERKEY   the API user's key (Settings > Users, API user)
 //   DENGAGE_API_PASSWORD  its password
-//   DENGAGE_API_BASE      defaults to https://api.dengage.com/rest. Point it
-//                         at a static IP forwarding proxy when Dengage's IP
-//                         restriction requires an address this platform
-//                         cannot promise (edge functions have no fixed
-//                         egress IP; see the runbook, section 1a).
+//   DENGAGE_API_BASE      defaults to https://api.dengage.com/rest
+//   DENGAGE_EGRESS_PROXY  optional, http://user:pass@host:port. When set,
+//                         every Dengage call tunnels through this proxy, so
+//                         the address Dengage sees is the proxy machine's
+//                         fixed IP instead of this platform's rotating pool.
+//                         tools/vps-egress-setup.sh builds such a proxy on
+//                         any small Ubuntu server; runbook section 1a has
+//                         the whole story. TLS stays end to end: a CONNECT
+//                         proxy relays encrypted bytes it cannot read.
 //
 // This endpoint is public by design, like any lead form handler. It defends
 // itself with input validation, size caps and a per address rate cap rather
@@ -30,8 +34,32 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 const FORMS = new Set(['booking', 'quote', 'register_interest']);
 const API_BASE = Deno.env.get('DENGAGE_API_BASE') ?? 'https://api.dengage.com/rest';
+const EGRESS_PROXY = Deno.env.get('DENGAGE_EGRESS_PROXY') ?? '';
 const SB_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SB_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+/* Deno.createHttpClient is how a fetch is routed through a CONNECT proxy in
+   this runtime. It sits outside the stable type surface, so it is reached
+   through a loose binding; the runtime provides it. */
+// deno-lint-ignore no-explicit-any
+const D = Deno as any;
+// deno-lint-ignore no-explicit-any
+let egressClient: any = null;
+function egress(): unknown {
+  if (!EGRESS_PROXY) return undefined;
+  if (!egressClient) {
+    const u = new URL(EGRESS_PROXY);
+    egressClient = D.createHttpClient({
+      proxy: {
+        url: `${u.protocol}//${u.host}`,
+        ...(u.username
+          ? { basicAuth: { username: decodeURIComponent(u.username), password: decodeURIComponent(u.password) } }
+          : {}),
+      },
+    });
+  }
+  return egressClient;
+}
 
 function corsHeaders(origin: string): Record<string, string> {
   return {
@@ -61,7 +89,9 @@ async function dengagePost(path: string, body: unknown, token?: string) {
     headers,
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(8000),
-  });
+    // deno-lint-ignore no-explicit-any
+    client: egress() as any,
+  } as RequestInit);
   const text = await res.text();
   let data: unknown = null;
   try { data = JSON.parse(text); } catch { /* non JSON error body */ }
@@ -115,12 +145,20 @@ Deno.serve(async (req: Request) => {
   // sees) and whether the API user secrets are visible to it. No secret
   // values are ever returned.
   if (req.method === 'GET') {
-    let egress = 'unknown';
+    let egressIp = 'unknown';
     try {
-      egress = (await (await fetch('https://api.ipify.org', { signal: AbortSignal.timeout(5000) })).text()).trim().slice(0, 60);
-    } catch { /* the echo service being down does not matter */ }
+      const opts = {
+        signal: AbortSignal.timeout(5000),
+        // deno-lint-ignore no-explicit-any
+        client: egress() as any,
+      } as RequestInit;
+      egressIp = (await (await fetch('https://api.ipify.org', opts)).text()).trim().slice(0, 60);
+    } catch (err) {
+      egressIp = 'unreachable: ' + String(err).slice(0, 120);
+    }
     return reply({
-      egress_ip: egress,
+      egress_ip: egressIp,
+      egress_proxy_configured: !!EGRESS_PROXY,
       api_user_configured: !!(Deno.env.get('DENGAGE_API_USERKEY') && Deno.env.get('DENGAGE_API_PASSWORD')),
       api_base: API_BASE,
     }, 200, origin);
