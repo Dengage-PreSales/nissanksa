@@ -1,0 +1,121 @@
+/* The demo's own additions on top of the captured Lincoln styles: the Dengage
+   mark that replaces the dealer's logo, the lead form confirmation, and the
+   demonstration notice. Everything else on these pages is the capture's own
+   stylesheet, untouched. */
+
+.dps-brand-link { text-decoration: none; display: inline-flex; align-items: center; }
+.dps-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #324047;
+  line-height: 1.05;
+}
+.dps-brand svg { width: 32px; height: 32px; flex: none; }
+.dps-brand-text b {
+  display: block;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .14em;
+}
+.dps-brand-text i {
+  display: block;
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  opacity: .72;
+}
+footer .dps-brand { color: #ffffff; }
+
+.dps-dealer-name {
+  display: inline-block;
+  max-width: 220px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  letter-spacing: .02em;
+  color: inherit;
+  text-align: end;
+}
+
+/* A submitted lead form is replaced by its confirmation. */
+.dps-form-done {
+  margin: 24px auto;
+  max-width: 560px;
+  padding: 28px 26px;
+  background: #ffffff;
+  border: 1px solid #dcdcd8;
+  border-top: 3px solid #b45f1a;
+  font-size: 17px;
+  line-height: 1.55;
+  color: #1c1f21;
+}
+
+.dps-demo-notice {
+  padding: 18px 22px 26px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #9aa3a8;
+  text-align: center;
+}
+
+/* On phones the source site pins its complaints tab near the corner the
+   demo controls use; the controls step up so neither covers the other. */
+@media (max-width: 760px) {
+  .dps-controls { bottom: 96px; }
+}
+
+/* The branch cards carry the dealer network data the source page loads into
+   its map at runtime; the demo bakes the same data in as a self contained
+   grid. */
+.dps-branch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+  max-width: 1180px;
+  margin: 12px auto 56px;
+  padding: 0 22px;
+}
+.dps-branch-card {
+  border: 1px solid #dcdcd8;
+  border-top: 3px solid #b45f1a;
+  background: #ffffff;
+  padding: 20px 20px 16px;
+}
+.dps-branch-title {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #324047;
+}
+.dps-branch-addr {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #5b6770;
+}
+.dps-branch-links { margin: 0; font-size: 13.5px; }
+.dps-branch-links a {
+  color: #b45f1a;
+  text-decoration: none;
+  margin-right: 18px;
+}
+.dps-branch-links a:hover { text-decoration: underline; }
+
+/* Empty inline slot targets take no space until a campaign injects. */
+#dn_inline_target_below_header, #dn_inline_target_below_hero,
+#dn_inline_target_in_grid, #dn_inline_target_pdp_below_price,
+#dn_inline_target_above_footer, #dn_inline_target_reco { min-height: 0; }
+
+/* The source stylesheet shows the dealer mark inside .dealerLogo__sm only on
+   small screens, with rules scoped to the img this build replaces by text.
+   The text stand-in follows the same breakpoints as that img. */
+.dealerLogo__sm .dps-dealer-name { display: none; }
+@media (max-width: 991px) {
+  .dealerLogo__sm .dps-dealer-name {
+    display: block;
+    margin: 0 auto;
+    padding: 5px 0;
+    text-align: center;
+  }
+}

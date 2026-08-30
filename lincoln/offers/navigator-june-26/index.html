@@ -1,0 +1,4515 @@
+<!DOCTYPE html>
+<html lang="en"  data-demo-slug="lincoln" data-rel-root="../../" data-site-path="offers/navigator-june-26/index.html">
+
+<head>
+<!-- ORDER IN THE HEAD IS LOAD BEARING. identity.js resolves the contact key
+     synchronously and must run before the SDK snippet initializes; both must
+     run before any stylesheet, because a pending stylesheet blocks every
+     script after it. -->
+<script src="../../js/identity.js?v=1788114439"></script>
+<!-- DENGAGE SDK START -->
+<script>
+  (function (window, document) {
+    window.dengage = window.dengage || function () {
+      (window.dengage.q = window.dengage.q || []).push(arguments);
+    };
+    var accountId = '28';
+    var appGuid = '99d9b8fb-0c62-5a85-3e43-2402554d93a5';
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://pcdn.dengage.com/p/push/' + accountId + '/' + appGuid + '/dengage_sdk_loader.js';
+    document.getElementsByTagName('head')[0].appendChild(script);
+    window.__dnInit ? window.dengage('initialize', window.__dnInit) : window.dengage('initialize');
+  })(window, document);
+</script>
+<!-- DENGAGE SDK END -->
+<link rel="icon" type="image/svg+xml" href="../../assets/brand/favicon.svg">
+<meta name="robots" content="noindex">
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigator Offer | Lincoln KSA x Dengage demo</title>
+    
+    
+
+<!-- Android -->
+            
+                
+                
+                
+                
+                
+                
+                
+    
+<!-- Apple -->
+            
+                
+                
+                
+    
+<!-- Windows Phone -->
+            <meta name="msapplication-square70x70logo" content="/fav/lincoln/Fov-icon-lincoln-72X72.jpg" />
+                <meta name="msapplication-square72x72logo" content="/fav/lincoln/Fov-icon-lincoln-72X72.jpg" />
+                <meta name="msapplication-square152x152logo" content="/fav/lincoln/Fov-icon-lincoln-152X152.jpg" />
+    
+    <link defer href="../../css/bootstrap.min.css" rel="stylesheet" />
+    <link defer href="../../css/bootstrap-icons.css" rel="stylesheet" />
+    
+
+        
+    <!-- Custom CSS -->
+            <link defer rel="stylesheet" href="../../assets/lincoln-build.css?v=1">
+    
+    <meta name="description" content="Experience sophistication with Lincoln Nautilus Summer offers at M.Y. Naghi in Saudi Arabia. Elevate your drive with luxury, innovation, and exceptional performance.">
+    <meta name=”robots” content="index, follow">
+
+    <!-- Google Tag Manager -->
+    
+    <!-- End Google Tag Manager -->
+
+    <!-- code  -->
+    <style>
+    .header-container .logo img {
+        width: 114px !important;
+    }
+
+    @media screen and (max-width: 768px) {
+        .cookies-container {
+            bottom: 50px !important;
+        }
+    }
+</style>
+    <!-- /code  -->
+
+    <script>
+(() => {
+ //import form from '@/components/form.html?raw';
+class Hero {
+    constructor(ENV) {
+        this.ENV = ENV;
+        this.render();
+    }
+
+    capitalize(str) {
+        if (typeof str === 'string' && str.length > 0) {
+          return str?.charAt(0)?.toUpperCase() + str.slice(1);
+        }
+        return '';
+      }
+
+    render() {
+        // if (this.ENV === "DEBUG") {
+        //   let Form = form;
+        //   const app = document.getElementById("app");
+        //   app.innerHTML += Form;
+        // }
+
+        // Ensure the script runs after the DOM is fully loaded
+    
+        
+        document.addEventListener('DOMContentLoaded', () => {
+
+
+             // Get all the hidden input fields
+             let hiddenFields = document.querySelectorAll(
+                ".hidden-form .heroInputArea"
+            );
+
+
+            
+               // Check if any hidden fields exist
+               if (hiddenFields) {
+                // Loop through each input in the NodeList
+                hiddenFields.forEach((input) => {
+                    let variableType = input.getAttribute("data-variable");
+
+                    if (variableType == "Request varaible") {
+                        let paramName = input.getAttribute("data-params");
+                        let paramValue = this.getUrlParameters(); // Assuming getUrlParameter function is defined elsewhere
+                        if (paramValue) {
+                            setTimeout(() => {
+                                input.setAttribute("value", paramValue);
+                            }, 1000);
+                        }
+                    }
+                    if (variableType == "From cookie") {
+                        let cookieName = input.getAttribute("data-params");
+                        let cookieValue = this.getCookie(); // Assuming getCookie function is defined elsewhere
+                        if (cookieValue) {
+                            //input.value = cookieValue;
+                            setTimeout(() => {
+                                input.setAttribute("value", cookieValue);
+                            }, 1000);
+                        }
+                    }
+                    if (variableType == "From localstorage") {
+                        // Loop through all keys in localStorage
+                        for (let i = 0; i < localStorage.length; i++) {
+                            // Get the key and value
+                            let key = localStorage.key(i);
+                            let value = localStorage.getItem(key);
+
+                            // If an input field exists, set its value
+                            try {
+                                let parsedValue = JSON.parse(value);
+                                if (
+                                    typeof parsedValue === "object" &&
+                                    parsedValue !== null
+                                ) {
+                                    if (parsedValue) {
+                                        setTimeout(() => {
+                                            input.setAttribute(
+                                                "value",
+                                                JSON.stringify(parsedValue)
+                                            );
+                                        }, 1000);
+                                    }
+                                }
+                            } catch (e) {
+                                // If it fails, it's probably just a string, so no need to parse
+                            }
+                        }
+                    }
+
+                    if (
+                        variableType == "From request variable or localstorage"
+                    ) {
+                        let paramValue = this.getUrlParameters();
+
+                        for (let i = 0; i < localStorage.length; i++) {
+                            let key = localStorage.key(i);
+                            let value = localStorage.getItem(key);
+
+                            try {
+                                let parsedValue = JSON.parse(value);
+                                if (
+                                    typeof parsedValue === "object" &&
+                                    parsedValue !== null
+                                ) {
+                                    if (paramValue || parsedValue) {
+                                        setTimeout(() => {
+                                            let combinedValue =
+                                                paramValue +
+                                                " " +
+                                                JSON.stringify(parsedValue);
+                                            input.setAttribute(
+                                                "value",
+                                                combinedValue
+                                            );
+                                        }, 1000);
+                                    }
+                                }
+                            } catch (e) {}
+                        }
+                    }
+
+                    if (variableType == "Fixed Value") {
+                        setTimeout(() => {
+                            let fixVal = input.getAttribute("data-params");
+                            input.val = "";
+                            input.setAttribute("value", fixVal);
+                        }, 1000);
+                    } else {
+                        return true;
+                    }
+                });
+            }
+
+
+
+
+
+
+
+            let x = document.querySelectorAll('.custom-select-container__wrapper');
+            if (x) {
+                this.initializeSelect();
+            }
+
+            // Attach event listener to form
+            const form = document.getElementById("davfrom");
+            // Find the submit button using class name
+            const submitButton = document.querySelector('.formSubmitBtn');
+            if (form) {
+                submitButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const isValid = this.validateForm(form);
+
+                    if (isValid) {
+                        // Optionally, you can manually submit the form if validation passes
+                        form.submit();
+                    }
+                });
+            }
+
+            // Attach event listener to select boxes to clear errors on change
+            document.querySelectorAll('select').forEach(select => {
+                select.addEventListener('change', () => {
+                    this.clearSelectError(select);
+                });
+            })
+
+            // Function to initialize a custom select box
+            function initCustomSelect(container) {
+                let searchInput = container.querySelector('.search-input');
+                let customSelect = container.querySelector('.custom-select');
+                let optionsContainer = container.querySelector('.options-container');
+
+                // Function to populate the custom options container with options from the select element
+                function populateOptions() {
+                    optionsContainer.innerHTML = ''; // Clear previous options
+
+                    Array.from(customSelect.options).forEach(option => {
+                        let optionElement = document.createElement('div');
+                        optionElement.className = 'option';
+                        optionElement.setAttribute('data-value', option.value);
+                        optionElement.textContent = option.textContent;
+
+                        optionElement.addEventListener('click', () => {
+                            searchInput.value = option.textContent; // Set the input value to the selected option's text
+                            customSelect.value = option.value; // Update the hidden select element's value
+                            optionsContainer.style.display = 'none'; // Hide options
+                        });
+
+                        optionsContainer.appendChild(optionElement);
+                    });
+                }
+
+                // Filter options based on search input
+                searchInput.addEventListener('input', function () {
+                    let searchTerm = this.value.toLowerCase();
+                    let options = optionsContainer.querySelectorAll('.option');
+
+                    options.forEach(option => {
+                        let optionText = option.textContent.toLowerCase();
+                        option.style.display = optionText.includes(searchTerm) ? '' : 'none';
+                    });
+
+                    optionsContainer.style.display = searchTerm ? 'block' : 'none';
+                });
+
+                // Toggle options container display
+                searchInput.addEventListener('focus', function () {
+                    optionsContainer.style.display = 'block';
+                });
+
+                // Close options when clicking outside of the custom select box
+                document.addEventListener('click', function (event) {
+                    if (!container.contains(event.target)) {
+                        optionsContainer.style.display = 'none';
+                    }
+                });
+
+                // Initial population of options
+                populateOptions();
+            }
+
+            // Initialize all custom select boxes on the page
+            document.querySelectorAll('.custom-select-container__wrapper').forEach(initCustomSelect);
+
+
+
+               // Belong select box
+                  document.querySelectorAll('.selectBelong').forEach(function(selectBelong) {
+                    const belongName = selectBelong.getAttribute('data-belong');
+                    const relatedSelect = document.querySelector(`[name="${belongName}"]`);
+
+                    if (relatedSelect) {
+                        relatedSelect.addEventListener('change', function() {
+                            const selectedCity = this.value;
+
+                            // Hide all options in the .selectBelong select
+                            document.querySelectorAll('.selectBelong option').forEach(function(option) {
+                                option.style.display = 'none'; // Hide all options initially
+                            });
+
+                            // Show only the options that match the selected city
+                            document.querySelectorAll(`.selectBelong option[data-parent="${selectedCity}"]`).forEach(function(option) {
+                                option.style.display = ''; // Show matching options
+                            });
+
+                            // Automatically select the first visible option
+                            setTimeout(() => {
+                            selectBelong.querySelectorAll('option').forEach(function(option) {
+                                if (option.style.display !== 'none') {
+                                    selectBelong.value = option.value; // Set the first visible option as selected
+                                    selectBelong.dispatchEvent(new Event('change')); // Trigger change event
+                                    return false; // Exit loop once the first visible option is selected
+                                }
+                            });
+                          }, 1000);
+                        });
+                    }
+                  });
+              // Belong select box end
+
+
+
+        });
+    }
+
+
+    initializeSelect() {
+        let formSelect = document.querySelectorAll('.custom-select-container__wrapper');
+        return formSelect;
+    }
+
+        // Function to get all URL parameters and parse them
+        getUrlParameters() {
+            // Get the query string from the URL, excluding the "?"
+            let urlParams = window.location.search.slice(1);
+    
+            // Replace all '?' after the first one with '&'
+            let normalizedParams = urlParams.replace(/\?(?=.*\?)/g, "&");
+    
+            // Use URLSearchParams to parse the parameters
+            let params = new URLSearchParams(normalizedParams);
+    
+            let paramObject = {};
+    
+            // Loop through and build the paramObject
+            params.forEach((value, key) => {
+                if (paramObject[key]) {
+                    // Append multiple values to the same key
+                    paramObject[key] += `, ${value}`;
+                } else {
+                    paramObject[key] = value;
+                }
+            });
+    
+            let commaSeparatedParams = ""; // Variable to store the result
+            // Loop through the object and build the comma-separated string
+            for (let key in paramObject) {
+                if (paramObject.hasOwnProperty(key)) {
+                    // Append key-value pairs to the string, separated by a comma
+                    commaSeparatedParams += `${key}=${paramObject[key]}, `;
+                }
+            }
+    
+            return commaSeparatedParams;
+        }
+    
+        // Function to get a cookie value by name
+        getCookie(name) {
+            const value = `${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+    
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return parts.toString();
+        }
+
+
+    validateForm = (form) => {
+        // Create an object to store form values and constraints
+        let formValues = {};
+        let constraints = {};
+
+
+
+        // Loop through each input field to get the data-regex attribute
+        form.querySelectorAll('.heroInputArea').forEach(input => {
+            let fieldName = input.name;
+            let fieldValue = input.value;
+            let fieldRegex = input.getAttribute('data-regex');
+            let requiredMessage = input.getAttribute('data-required-message') || 'This field is required';
+            let invalidMessage = input.getAttribute('data-invalid-message') || 'Invalid input';
+            let validateField = input.getAttribute('data-validate') !== 'false'; // Check if field should be validated
+
+            // Check if the input is hidden
+              if (input.closest('.hidden-form') || input.style.display === 'none') {
+                return; // Skip validation for this hidden field
+            }
+
+            if (!validateField) {
+                // Skip validation for this field
+                return;
+            }
+
+            if (input.tagName.toLowerCase() === 'select') {
+                // Custom validation for select boxes
+                formValues[fieldName] = fieldValue;
+                constraints[fieldName] = {
+                    presence: { allowEmpty: false, message: requiredMessage }
+                };
+
+                // Clear previous errors for select
+                this.clearSelectError(input);
+
+
+                // Clear previous errors and handle current validation
+                const existingError = input.parentElement.querySelector('.error');
+                if (existingError) {
+                    existingError.remove();
+                }
+                input.classList.remove('has-error');
+
+                // Show error if no valid option is selected
+                if (!input.value || input.value === "") {
+                    input.classList.add('has-error');
+                    const errorElement = document.createElement('div');
+                    errorElement.classList.add('error');
+                    errorElement.textContent = requiredMessage;
+                    input.parentElement.appendChild(errorElement);
+                }
+
+
+
+
+            } else if (fieldRegex) {
+                // For fields with regex
+                try {
+                    new RegExp(fieldRegex); // Validate regex pattern
+                } catch (e) {
+                    console.error(`Invalid regex pattern for field: ${fieldName}`, e);
+                    return; // Skip this field if regex is invalid
+                }
+
+                formValues[fieldName] = fieldValue;
+                constraints[fieldName] = {
+                    presence: { allowEmpty: false, message: `:${requiredMessage}` },
+                    format: {
+                        pattern: fieldRegex,
+                        message: invalidMessage
+                    }
+                };
+            } else {
+
+                if (input.type === "checkbox") {
+                    if (input.hasAttribute('data-validate')) {
+                        if(!input.checked){
+                            const errorElement = document.createElement("div");
+                            errorElement.classList.add("error");
+                            errorElement.textContent = requiredMessage;
+                            input.parentElement.appendChild(errorElement);
+                        }
+
+                    }else{
+                        input.removeAttribute('data-validate');
+                        // Remove error class and error message if the checkbox is checked
+                        input.classList.remove("has-error");
+                        const existingError = input.parentElement.querySelector(".error");
+                        if (existingError) {
+                            existingError.remove();
+                        }
+
+                    }
+
+                    // Add form values and constraints for validation
+                    formValues[fieldName] = input.checked ? "checked" : "";
+                    constraints[fieldName] = {
+                        presence: {
+                            allowEmpty: false,
+                            message: requiredMessage
+                        },
+                    };
+
+                    return false; // Skip validation for this
+                }
+
+
+
+
+                // For fields without regex
+                formValues[fieldName] = fieldValue;
+                constraints[fieldName] = {
+                    presence: { allowEmpty: false, message: requiredMessage }
+                };
+            }
+
+        });
+
+        const options = {
+            fullMessages: false // Disable default "Field name is invalid" format
+        };
+
+        // Validate the form values against the constraints
+        const errors = validate(formValues, constraints, options);
+
+        // Clear previous errors and remove the has-error class
+        form.querySelectorAll('.error').forEach(el => el.remove());
+        form.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
+
+        if (errors) {
+            // Display errors
+            Object.keys(errors).forEach(field => {
+                const errorMessages = errors[field];
+                const fieldElement = form.querySelector(`[name=${field}]`);
+
+                if (fieldElement) {
+                    // Add the has-error class
+                    fieldElement.classList.add('has-error');
+
+                    errorMessages.forEach(message => {
+                        const errorElement = document.createElement('div');
+                        errorElement.classList.add('error');
+                        //errorElement.textContent = message;
+                        errorElement.textContent = this.capitalize(message); // Use capitalize here
+                        fieldElement.parentElement.appendChild(errorElement);
+                    });
+                }
+            });
+            return false; // Prevent form submission
+        }
+        return true; // Allow form submission
+    };
+
+
+    clearSelectError = (select) => {
+        // Clear error messages and classes for a specific select box
+        if (select.value) {
+            select.classList.remove('has-error');
+            const existingError = select.parentElement.querySelector('.error');
+            if (existingError) {
+                existingError.remove();
+            }
+        }
+    };
+
+}
+new Hero();
+})();
+</script>
+    <style>
+        .installation__backdrop{
+    display:none;
+}
+.installation__steps__backdrop{
+    display:none;
+}
+</style>
+</head>
+
+<body
+     class="slidetext-dark "  data-page-type="other">
+
+    <!-- Google Tag Manager (noscript) -->
+    
+    <!-- End Google Tag Manager (noscript) -->
+
+
+    <div class="heroWrapper">
+        <!-- Start header component -->
+        <div class="headerWrap with-logo-small headerSecondary">
+                        <div class="inner-header vehicle-header ">
+    <div class="containerHeader">
+                <div class="header-container hide-b-border">
+            <div class="mobile-menu-btn">
+                <img src="../../img/icon/dots.svg" alt="EN Lincoln Live">
+                <span>Menu</span>
+            </div>
+            <div class="burger-bar transform lincoln-mobile-menu-btn">
+                <div class="lines-wrapper">
+                    <span class="lines line1"></span>
+                    <span class="lines line2"></span>
+                    <span class="lines line3"></span>
+                </div>
+            </div>
+
+            <div class="logo">
+                <a aria-label="Dengage Auto Demo home" class="d-sm-block d-none dps-brand-link" href="../../index.html"><span aria-label="Dengage Auto Demo" class="dps-brand"><svg aria-hidden="true" role="img" viewBox="0 0 38 38"><path d="M11.3821 34.8307H6.61521V28.0187H11.3821C16.4408 27.824 20.4293 23.6395 20.2348 18.5791C20.1375 13.7133 16.1489 9.82066 11.3821 9.72334H6.61521V15.5623H12.3549V22.3744H0V2.91125H11.3821C20.2348 3.2032 27.1418 10.5019 26.85 19.3576C26.6554 27.824 19.8456 34.6361 11.3821 34.8307Z" fill="currentColor"></path><path d="M36.9964 15.9687C38.288 17.303 38.3802 19.5905 36.9964 20.9248C35.6126 22.2591 33.3986 22.2591 32.0148 20.9248C31.369 20.2576 31 19.3045 31 18.4468C31 16.5406 32.476 14.9203 34.4134 14.9203C34.4134 14.9203 34.4134 14.9203 34.5056 14.9203C35.4281 14.9203 36.3507 15.3015 36.9964 15.9687Z" fill="currentColor"></path></svg><span class="dps-brand-text"><b>DENGAGE</b><i>Auto Demo</i></span></span></a>
+                    <a aria-label="Dengage Auto Demo home" class="d-sm-none d-block dps-brand-link" href="../../index.html"><span aria-label="Dengage Auto Demo" class="dps-brand"><svg aria-hidden="true" role="img" viewBox="0 0 38 38"><path d="M11.3821 34.8307H6.61521V28.0187H11.3821C16.4408 27.824 20.4293 23.6395 20.2348 18.5791C20.1375 13.7133 16.1489 9.82066 11.3821 9.72334H6.61521V15.5623H12.3549V22.3744H0V2.91125H11.3821C20.2348 3.2032 27.1418 10.5019 26.85 19.3576C26.6554 27.824 19.8456 34.6361 11.3821 34.8307Z" fill="currentColor"></path><path d="M36.9964 15.9687C38.288 17.303 38.3802 19.5905 36.9964 20.9248C35.6126 22.2591 33.3986 22.2591 32.0148 20.9248C31.369 20.2576 31 19.3045 31 18.4468C31 16.5406 32.476 14.9203 34.4134 14.9203C34.4134 14.9203 34.4134 14.9203 34.5056 14.9203C35.4281 14.9203 36.3507 15.3015 36.9964 15.9687Z" fill="currentColor"></path></svg><span class="dps-brand-text"><b>DENGAGE</b><i>Auto Demo</i></span></span></a>
+                <!-- in mobile view when click on vehicale add acitve class on mobile-subtile -->
+                <div class="mobile-subtile">
+                    <div>
+                        <div class="backcta">
+                            <a href="javascript:void(0)"><svg viewBox="-5 0 24 24" version="1.1"
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    xmlns:sketch="http://www.bohemiancoding.com/sketch/ns" fill="#000000">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                                    </g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <title>chevron-left</title>
+                                        <desc>Created with Sketch Beta.</desc>
+                                        <defs> </defs>
+                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none"
+                                            fill-rule="evenodd" sketch:type="MSPage">
+                                            <g id="Icon-Set" sketch:type="MSLayerGroup"
+                                                transform="translate(-421.000000, -1195.000000)" fill="#00095b">
+                                                <path
+                                                    d="M423.429,1206.98 L434.686,1196.7 C435.079,1196.31 435.079,1195.67 434.686,1195.28 C434.293,1194.89 433.655,1194.89 433.263,1195.28 L421.282,1206.22 C421.073,1206.43 420.983,1206.71 420.998,1206.98 C420.983,1207.26 421.073,1207.54 421.282,1207.75 L433.263,1218.69 C433.655,1219.08 434.293,1219.08 434.686,1218.69 C435.079,1218.29 435.079,1217.66 434.686,1217.27 L423.429,1206.98"
+                                                    id="chevron-left" sketch:type="MSShapeGroup"> </path>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </svg>back</a>
+                        </div>
+                        <div class="vehicle-title">Explore Vehicles</div>
+                    </div>
+
+                </div>
+            </div>
+            <nav class="site-header innernavbar vehicle-header-wrapper">
+                                <div class="dealerLogo__sm"><span class="dps-dealer-name">Mohamed Yousuf Naghi Motors Co.</span></div>
+                                <ul>
+                                        <!-- when you click on menu need to add class => active -->
+                                        <li class="main-item Explore">
+                        <a href="javascript:void(0)"
+                            class="vehicle-menu-link car-list">Vehicles</a>
+                        <div class="dropdown-menu-wrapper">
+                            <div class="containerHeader">
+                                                                <div class="inner-nav-header">
+                                    <div class="inner-back">
+                                        <img src="../../img/icon/back-btn.svg" alt="">
+                                        <span>Back</span>
+                                    </div>
+                                    <h6 class="title-heading">Explore Vehicles</h6>
+                                    <div class="mobile-menu-close">
+                                        <img src="../../img/icon/menu-close.svg" alt="">
+                                    </div>
+                                </div>
+                                <div class="menu-product">
+                                    <div class="labelHolder">Vehicles</div>
+                                    <ul
+                                        class="sub-menu sub-tab-menu active">
+                                                                                
+                                        <!-- when you click on menu need to add class => active -->
+                                        <li
+                                            class="sub-menu-item active">
+                                            <a href="javascript:void(0)"
+                                                class="sub-tab-menu-item Vehicles">Vehicles</a>
+                                            <div class="product-grid">
+                                                <div>
+                                                    <ul>
+                                                                                                                                                                                                                                                                                                                <li>
+                                                                    <div class="product-info Vehicles ">
+                                                                                                                                                    <label class="years">2025</label>
+                                                                                                                                                <div>
+                                                                            <a href="../../vehicles/corsair/index.html">
+                                                                                <img src="../../assets/cms/storage/lincoln_common/car-data/side-images/corsair.jpeg" alt="Corsair" />
+                                                                            </a>
+                                                                        </div>
+                                                                                                                                                <div>
+                                                                            <span class="product-title">Corsair</span>
+                                                                          <a href="../../vehicles/corsair/index.html"
+                                                                                    class="explore-cta">Explore</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                                                                                                                                                                                                                                                                                                                            <li>
+                                                                    <div class="product-info Vehicles ">
+                                                                                                                                                    <label class="years">2025</label>
+                                                                                                                                                <div>
+                                                                            <a href="../../vehicles/aviator/index.html">
+                                                                                <img src="../../assets/cms/storage/lincoln_common/car-data/side-images/aviator-new.avif" alt="Aviator" />
+                                                                            </a>
+                                                                        </div>
+                                                                                                                                                <div>
+                                                                            <span class="product-title">Aviator</span>
+                                                                          <a href="../../vehicles/aviator/index.html"
+                                                                                    class="explore-cta">Explore</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                                                                                                                                                                                                                                                                                                                            <li>
+                                                                    <div class="product-info Vehicles ">
+                                                                                                                                                    <label class="years">2025</label>
+                                                                                                                                                <div>
+                                                                            <a href="../../vehicles/navigator/index.html">
+                                                                                <img src="../../assets/cms/storage/lincoln_common/car-data/side-images/new-navigator.jpg" alt="Navigator" />
+                                                                            </a>
+                                                                        </div>
+                                                                                                                                                <div>
+                                                                            <span class="product-title">Navigator</span>
+                                                                          <a href="../../vehicles/navigator/index.html"
+                                                                                    class="explore-cta">Explore</a>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                                                                                                                        </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                                                            </ul>
+                                </div>
+                                                                                            </div>
+                        </div>
+                    </li>
+                                                            <!-- when you click on menu need to add class => active -->
+                                        <li class="main-item shopping-menu">
+                        <a href="#"
+                            class="vehicle-menu-link ">Shopping Tools</a>
+                        <div class="dropdown-menu-wrapper">
+                            <div class="containerHeader">
+                                                                                                <div class="info-menu">
+                                                                        <div class="info-column">
+                                        <h6 class="title-heading">Explore how to get perfect lincoln for you</h6>
+                                        <ul>
+                                                                                        <li class="lds-icon-request-quote box-list">
+                                                <a
+                                                    href="../../forms/quote/index.html">REQUEST A QUOTE</a>
+                                            </li>
+                                                                                        <li class="lds-icon-test-drive box-list">
+                                                <a
+                                                    href="../../forms/testdrive/index.html">REQUEST A TEST DRIVE</a>
+                                            </li>
+                                                                                        <li class="lds-icon-download-brochure box-list">
+                                                <a
+                                                    href="../../download-specifications/index.html">DOWNLOAD SPECIFICATIONS</a>
+                                            </li>
+                                                                                        <li class="lds-icon-locate-dealer box-list">
+                                                <a
+                                                    href="../../branches/index.html">OUR BRANCHES</a>
+                                            </li>
+                                                                                    </ul>
+                                    </div>
+                                                                    </div>
+                                                            </div>
+                        </div>
+                    </li>
+                                                            <!-- when you click on menu need to add class => active -->
+                                        <li class="main-item ">
+                        <a href="#"
+                            class="vehicle-menu-link ">Owners</a>
+                        <div class="dropdown-menu-wrapper">
+                            <div class="containerHeader">
+                                                                                                <div class="info-menu">
+                                                                        <div class="info-column">
+                                        <h6 class="title-heading">Experience effortless ownership with exclusive benefits</h6>
+                                        <ul>
+                                                                                        <li class="">
+                                                <a
+                                                    href="../../100-years-of-lincoln/index.html">100 Years of Lincoln</a>
+                                            </li>
+                                                                                        <li class="">
+                                                <a
+                                                    href="../../contact-us/index.html">Contact Us</a>
+                                            </li>
+                                                                                        <li class="">
+                                                <a
+                                                    href="../../news/index.html">Newsroom</a>
+                                            </li>
+                                                                                        <li class="">
+                                                <a
+                                                    href="../../about-us/index.html">About Us</a>
+                                            </li>
+                                                                                        </ul>
+                                    </div>
+                                                                    </div>
+                                                            </div>
+                        </div>
+                    </li>
+                                                            <!-- when you click on menu need to add class => active -->
+                                        <li class="main-item no-arrow-right no-sub-menu text-start">
+                        <a href="../../offers/index.html" class="vehicle-menu-link ">LATEST OFFERS</a>
+                    </li>
+                                                            
+                </ul>
+                                <div class="info-icone info-icone-mobile-menu">
+                    <div class="info-icone-dropdown">
+                        <ul>
+                                                    </ul>
+                    </div>
+                </div>
+                                <div class="header-right desktop-none">
+                    
+                </div>
+            </nav>
+<div id="dn_inline_target_below_header"></div>
+
+            <div class="header-right  header-right-warpper">
+                
+                                <div class="info-icone">
+                                    </div>
+                                                <span class="dealerLogo dps-dealer-name">Mohamed Yousuf Naghi Motors Co.</span>
+                                <div class="mobile-menu-close">
+                    <img src="../../img/icon/menu-close.svg" alt="">
+                </div>
+            </div>
+        </div>
+            </div>
+</div>
+                    </div>
+        
+        <div class="toggle_btn"></div>
+        <div id="overlay_mbl_menu"></div>
+        <!-- End header component -->
+
+        <!-- End Floating panel -->
+        <main id="container" role="main" class="mainWrap">
+            <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body><p>
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+                        <section class="section alt-element" component-id="5025ec94-a878-1649-78eb-11c082c9bd9e" data-pos="1">
+    <div class="container-fluid column1-component">
+        <div class="row">
+            <div class="col-12">
+
+                <section component-id="af23480d-9bb7-0b24-e1b1-f5f06d31aa2b" class="alt-component alt-component-vehicleLandingPanelLincoln">
+    <div class="hero-banner-section">
+        <div class="hero-banner-container">
+            <picture class="image-banner">
+                <source media="(max-width:567px)" srcset="../../assets/cms/storage/lincoln_common/offers/june-26/m/navigator_jun_offer_M.webp">
+                <source media="(max-width:960px)" srcset="../../assets/cms/storage/lincoln_common/offers/june-26/m/navigator_jun_offer_M.webp">
+                <img loading="lazy" src="../../assets/cms/storage/lincoln_common/offers/june-26/d/navigator_jun_offer_D.webp" width="100%" alt="Lincoln Navigator">
+            </source></source></picture>
+
+            <video class="video-banner" autoplay="" loop="" muted="" playsinline="true" style="display: none;" webkit-playsinline="true">
+                <source src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </source></video>
+
+            <div class="disc-area mobile-content-center content-center box-left whiteTone">
+                <div class="richWrapper">
+                    <h1 class="heading">Lincoln's Luxury Awaits You</h1><h1 style="text-align: center;"></h1>
+                </div>
+
+                <div class="richWrapper">
+                    <h3 class="bannerDec"><br></h3><p style="text-align: center;"></p>
+                </div>
+
+                <div class="cta-btn None">
+                    <a href="#" class="whiteText-bgDark-btn primaryBtn" style="display: none;">Explore Nautilus </a>
+                    <a href="#" class="whiteText-bgDark-btn secondaryBtn" style="display: none;">Explore Nautilus </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+</section>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</section><section class="section alt-element" component-id="3204782e-bce2-59af-d26d-3bb034e6c2aa" data-pos="1">
+  
+        <div class="col-md-6 mx-auto column6-component">
+            <div component-id="ce920803-f7d4-36b2-299e-819deed53f06" class="alt-component alt-component-richtext">
+    <div class="richWrapper p-4"><h2><span style="font-size: 24pt;">Navigator</span></h2>
+<h2><span style="font-size: 24pt;">50% payment now, and 50% after 4 years</span></h2>
+<ul>
+<li>0% Admin Fees, 0% Profit Rate</li>
+<li>5 Years / 100,000 KM Service Contract</li>
+<li>5 Years / 100,000 KM Manufacturing Warranty</li>
+</ul></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+        </div>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</section><section class="section alt-element hideForPWA" component-id="dd49cc7b-2201-c8e5-9409-b8af01d062c6" data-pos="1">
+    <form action="/leads/submit" method="post" data-endpoint="Leads" class="ns-hero-form ns-hero-form-with-parsley" id="davfrom">
+        <input type="hidden" name="endPoint" value="Leads" class="hidden_field" wfd-id="id0">
+        <input type="hidden" name="endpointPath" value="/leads/submit" class="hidden_field" wfd-id="id1">
+        <input type="hidden" name="systemRoutingId" value="" class="hidden_field" wfd-id="id2">
+        <input type="hidden" name="formCategory" value="" class="hidden_field" wfd-id="id3">
+        <input type="hidden" name="formTypo" value="Offer Callback" class="hidden_field" wfd-id="id4">
+        <input type="hidden" name="retURL" value="/offers/navigator-june-26/thank-you" class="hidden_field" wfd-id="id5">
+
+            <div class="col-md-7 mx-auto formHeroSize">
+
+                <div component-id="28cb1a0d-bf1d-5b51-72d4-044c33cd151d" class="alt-component alt-component-richtext">
+    <div class="richWrapper p-4"><h2 style="text-align: center;">Request a Quote</h2></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="5b29980c-829c-cf45-8c3b-c25200745189" class="alt-component alt-component-input-text">
+    <div class="form-group heroForm">
+        <label for="text">Full Name</label>
+        <input type="text" class="heroInputArea text" id="" name="firstname" placeholder="" data-required-message="Only alphabetic characters are allowed in the Full Name field" data-invalid-message="not should be emptyshould not be empty" data-validate="true" required="required" data-regex="^[-_a-zA-Z\u0621-\u064A0]+(\s+[-_a-zA-Z\u0621-\u064A0]+){0,2}$" wfd-id="id6">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="70874e8f-af44-5c03-b723-699fa5dccdb6" class="alt-component alt-component-input-text">
+    <div class="form-group heroForm">
+        <label for="text">Phone Number</label>
+        <input type="text" class="heroInputArea text" id="" name="mobile" placeholder="e.x. 05XXXXXXXX" data-required-message="Please provide a valid phone number, ex: 0501234567" data-invalid-message="should not be empty" data-validate="true" required="required" data-regex="^(05)[0-9]{8}$" wfd-id="id7">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="c49dbe8c-18e3-f5bc-b916-9fcb977b1c12" class="alt-component alt-component-input-text">
+    <div class="form-group heroForm">
+        <label for="text" class="no-mandatory">Email Address</label>
+        <input type="text" class="heroInputArea text" id="" name="email" placeholder="" data-validate="false" data-regex="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" wfd-id="id8">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="99ba50ef-8da2-6ac9-3960-493f3a498531" class="alt-component alt-component-form-select">
+    <div class="form-group heroForm selectboxWrapper">
+                    <label for="list-in">City</label>
+                        <div class="customSelector">
+                            <select class="formControl genericSelectBox heroInputArea" name="city" id="list-in" data-invalid-message="should not be empty" data-validate="true" data-required-message="should not be empty">
+                            <option selected disabled value="">Select from the list</option><option value="Taif">Taif</option><option value="Mecca">Mecca</option><option value="Jeddah">Jeddah</option><option value="Baljurashi">Baljurashi</option><option value="Jizan">Jizan</option><option value="Abha">Abha</option><option value="Madinah">Madinah</option><option value="Najran">Najran</option><option value="Tabuk">Tabuk</option><option value="Yanbu">Yanbu</option>
+                            </select>
+                            <span class="selectedValue">Select from a list</span>
+                        </div>
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="984553f1-0e3a-94a5-87fb-21b680570fa6" class="alt-component alt-component-text-area">
+    <div class="form-group heroForm">
+        <label for="textArea" class="no-mandatory">Additional Comments</label>
+        <textarea id="" class="textAreaHero" name="comments" placeholder="" rows="3"></textarea>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="8eef460f-25a3-c1b8-e32c-5f0f50773306" class="alt-component alt-component-checkbox">
+    <div class="form-group checkboxHero checkbox-firstline">
+        <input type="checkbox" id="privacyconsent" name="privacyconsent" class="heroInputArea" data-validate="true" wfd-id="id9" required="required" data-required-message="Please accept the privacy conditions.">
+        <label for="privacyconsent" class="">By accepting, I authorize Mohamed Yousuf Naghi Motors and its affiliates to contact me by mail or email for marketing purposes. In addition, by providing my telephone number and submitting, I consent to receive calls and automated telephone and/or text messages from Mohamed Yousuf Naghi Motors and its affiliates for marketing purposes. I understand that my consent is not a condition to purchase any product or service and that I may revoke my consent at any time. Please visit the <u><strong><a href="../../privacy-policy/index.html">Privacy Policy</a></strong></u> for information about how we collect, use and protect your data.</label>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="5b2d9689-61ca-4d97-1f0a-a87665c1f512" class="alt-component alt-component-input-hidden">
+    <div class="form-group heroForm hidden-form">
+        <input type="text" class="heroInputArea text" id="language" data-variable="Fixed Value" data-params="English" name="language" value="English" wfd-id="id10">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="8a7faf81-4af5-143c-33e1-8ea7ea1b0b80" class="alt-component alt-component-input-hidden">
+    <div class="form-group heroForm hidden-form">
+        <input type="text" class="heroInputArea text" id="brand" data-variable="Fixed Value" data-params="Lincoln" name="brand" value="Lincoln" wfd-id="id11">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="12b6c734-daa9-c5bd-052d-4780ff56d260" class="alt-component alt-component-input-hidden">
+    <div class="form-group heroForm hidden-form">
+        <input type="text" class="heroInputArea text" id="leadsource" data-variable="Fixed Value" data-params="Website" name="leadsource" value="Website" wfd-id="id12">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="be7ca53c-af77-b9fd-0fe4-6d04451a2f7c" class="alt-component alt-component-input-hidden">
+    <div class="form-group heroForm hidden-form">
+        <input type="text" class="heroInputArea text" id="datatype" data-variable="Fixed Value" data-params="Sales" name="datatype" value="Sales" wfd-id="id13">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="f6992e05-325d-645d-e2dc-064d389e7ef2" class="alt-component alt-component-input-hidden">
+    <div class="form-group heroForm hidden-form">
+        <input type="text" class="heroInputArea text" id="formtype" data-variable="Fixed Value" data-params="June 2026 Offers - Navigator" name="formtype" value="June 2026 Offers - Navigator" wfd-id="id14">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="f7afa600-d44e-22a6-3a0a-41d9059cfdd7" class="alt-component alt-component-input-hidden">
+    <div class="form-group heroForm hidden-form">
+        <input type="text" class="heroInputArea text" id="model" data-variable="Fixed Value" data-params="Navigator" name="model" value="Navigator" wfd-id="id15">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div component-id="4937b318-98d3-861b-ba54-93c5e6929216" class="alt-component alt-component-input-hidden">
+    <div class="form-group heroForm hidden-form">
+        <input type="text" class="heroInputArea text" id="" data-variable="From request variable and
+                                browser" data-params="campaign" name="campaign" wfd-id="id16" value="campaign">
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+            </div>
+
+        <div class="col-md-7 mx-auto formHeroSize ctaSubmitWrappper">
+            <p class="mandatoryLegend">The fields marked as "*" are mandatory.</p>
+            <div>
+                <button type="submit" class="primaryCta font-icon formSubmitBtn">SUBMIT</button>
+                <button type="reset" class="primaryCta font-icon formResetBtn">Cancel</button>
+            </div>
+            
+        </div>
+    </form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</section><section class="section alt-element" component-id="9a1aa5e1-3b63-8e23-3cc1-f630031e982a" data-pos="1">
+  
+        <div class="col-md-6 mx-auto column6-component">
+            <div component-id="dffd7278-02e4-3cd9-a510-967f2bd7eabd" class="alt-component alt-component-richtext hideForPWA">
+    <div class="richWrapper p-4"><p style="text-align: center;"><strong><span style="font-size: 10pt;">Terms & Conditions</span></strong></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">Offer valid until June 30th 2026 or while stock lasts.</span></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">Images and specifications stated in the advertisement are for illustration purposes only and may vary by time, branch, and stock availability. All vehicles are designated for the Saudi market and comply with approved regulations.</span></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">Advertised prices and fees (if any) include VAT, and do not include registration fees, insurance, or any other governmental charges, unless explicitly stated otherwise.</span></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">The monthly installment is calculated as per the price of the base model.</span></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">All financing offers (if any) are provided by financing entities licensed in the Kingdom of Saudi Arabia and are subject to the financing entity’s approval, terms, and conditions.</span></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">Insurance and extended warranty services (if any) are optional services provided by licensed insurance companies and are subject to their approvals, contractual terms, conditions, and coverage scope as stated in the relevant agreements or documents.</span></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">Maintenance packages and additional services (if any) are optional and offered at additional cost, and are subject to separate terms and conditions, unless explicitly stated otherwise.</span></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">Offers are subject to availability and may be amended or discontinued without prior notice. The company shall not be liable for any unintended typographical or technical errors.</span></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">This advertisement does not constitute a binding offer. All sales transactions are subject to - final contract execution and approved sales agreements.</span></p>
+<p style="text-align: center;"><span style="font-size: 10pt;">T&C applies.</span></p></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+        </div>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</section></p>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+<div class="scrim" id="scrim"></div>
+
+<aside class="dps-drawer" id="inbox" aria-label="Lincoln updates">
+  <div class="dps-drawer-head dps-modal-head">
+    <h2>Lincoln updates</h2>
+    <span id="inbox-count" hidden></span>
+    <button type="button" id="inbox-refresh">Refresh</button>
+    <button type="button" class="dps-x" data-close="1" aria-label="Close">&times;</button>
+  </div>
+  <div class="dps-drawer-body" id="inbox-body"></div>
+</aside>
+
+<div class="dps-modal" id="dengage-panel" role="dialog" aria-label="Dengage">
+  <div class="dps-modal-head">
+    <h2>Dengage</h2>
+    <button type="button" class="dps-x" data-close="1" aria-label="Close">&times;</button>
+  </div>
+  <div class="dps-modal-body">
+    <p class="dps-note">Fire any experience on this page, live. Everything lands in the Dengage panel as it happens.</p>
+    <details class="ref-details">
+      <summary>Quick reference</summary>
+      <div id="ref-grid"></div>
+    </details>
+    <div class="launcher-grid" id="launcher-grid"></div>
+    <h2 class="dps-h">Storefront events</h2>
+    <p class="dps-note">Send a real ecommerce event to Dengage, exactly as the site itself does.</p>
+    <div class="dps-field">
+      <select id="event-select"></select>
+    </div>
+    <p id="event-note"></p>
+    <button type="button" class="btn-dps" id="event-send">Send event</button>
+    <button type="button" class="btn btn-quiet btn-block" id="reset-display">Reset widget display state</button>
+    <div class="log" id="panel-log"></div>
+  </div>
+</div>
+
+<div class="dps-controls">
+  <button type="button" class="dps-bell" data-open="#inbox" aria-label="Lincoln updates">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4a5 5 0 0 1 5 5v4l1.7 2.6H5.3L7 13V9a5 5 0 0 1 5-5z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+    <span class="dps-badge" id="inbox-badge" hidden>0</span>
+  </button>
+  <button type="button" class="dps-launch" data-open="#dengage-panel" aria-label="Dengage demo">
+    <svg viewBox="0 0 38 38"><path d="M11.3821 34.8307H6.61521V28.0187H11.3821C16.4408 27.824 20.4293 23.6395 20.2348 18.5791C20.1375 13.7133 16.1489 9.82066 11.3821 9.72334H6.61521V15.5623H12.3549V22.3744H0V2.91125H11.3821C20.2348 3.2032 27.1418 10.5019 26.85 19.3576C26.6554 27.824 19.8456 34.6361 11.3821 34.8307Z"/><path d="M36.9964 15.9687C38.288 17.303 38.3802 19.5905 36.9964 20.9248C35.6126 22.2591 33.3986 22.2591 32.0148 20.9248C31.369 20.2576 31 19.3045 31 18.4468C31 16.5406 32.476 14.9203 34.4134 14.9203C34.4134 14.9203 34.4134 14.9203 34.5056 14.9203C35.4281 14.9203 36.3507 15.3015 36.9964 15.9687Z"/></svg>
+  </button>
+</div>
+
+<link rel="stylesheet" href="../../assets/css/demo-controls.css?v=1788114439">
+<link rel="stylesheet" href="../../assets/css/lincoln-overrides.css?v=1788114439">
+<script src="../../js/config.js?v=1788114439"></script>
+<script src="../../js/copy.js?v=1788114439"></script>
+<script src="../../js/vehicles.js?v=1788114439"></script>
+<script src="../../js/dengageEvents.js?v=1788114439"></script>
+<script src="../../js/site.js?v=1788114439"></script>
+<script src="../../js/panels.js?v=1788114439"></script>
+<script src="../../js/slots.js?v=1788114439"></script>
+<script src="../../js/inbox.js?v=1788114439"></script>
+<script src="../../js/debug.js?v=1788114439"></script>
+</body></html>
+
+        </main>
+
+        <!-- Start footer component -->
+        <div id="dn_inline_target_above_footer"></div>
+<footer id="footer">
+            <div class="footerIndexWrapper">
+    
+                                                                                                                                                                        
+    <footer>
+        <div class="indexFooter">
+                            <div class="itemFoo ">
+                    <div class="fooTitle">ALL VEHICLES
+                                            </div>
+                    <ul class="fooList">
+                                                    <li><a href="../../vehicles/navigator/index.html" target="_self">Navigator</a></li>
+                                                    <li><a href="../../vehicles/aviator/index.html" target="_self">Aviator</a></li>
+                                                    <li><a href="../../vehicles/corsair/index.html" target="_self">Corsair</a></li>
+                                            </ul>
+                </div>
+                            <div class="itemFoo accordinFooHandler">
+                    <div class="fooTitle">SHOPPING TOOLS
+                                                    <span class="icon">
+                                <svg class="plus" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"></path>
+                                </svg>
+                                <svg class="minus" width="24" height="24" viewBox="0 0 24 24"
+                                    style="display: none;">
+                                    <path d="M19 13H5v-2h14v2z"></path>
+                                </svg>
+                            </span>
+                                            </div>
+                    <ul class="fooList">
+                                                    <li><a href="../../forms/quote/index.html" target="_self">Request a Quote</a></li>
+                                                    <li><a href="../../forms/testdrive/index.html" target="_self">Request a Test Drive</a></li>
+                                                    <li><a href="../../download-specifications/index.html" target="_self">Download Specifications</a></li>
+                                                    <li><a href="../../branches/index.html" target="_self">Our Branches</a></li>
+                                            </ul>
+                </div>
+                            <div class="itemFoo accordinFooHandler">
+                    <div class="fooTitle">OWNERS
+                                                    <span class="icon">
+                                <svg class="plus" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"></path>
+                                </svg>
+                                <svg class="minus" width="24" height="24" viewBox="0 0 24 24"
+                                    style="display: none;">
+                                    <path d="M19 13H5v-2h14v2z"></path>
+                                </svg>
+                            </span>
+                                            </div>
+                    <ul class="fooList">
+                                                    <li><a href="../../contact-us/index.html" target="_self">Contact Us</a></li>
+                                            </ul>
+                </div>
+                            <div class="itemFoo accordinFooHandler">
+                    <div class="fooTitle">NEWS
+                                                    <span class="icon">
+                                <svg class="plus" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"></path>
+                                </svg>
+                                <svg class="minus" width="24" height="24" viewBox="0 0 24 24"
+                                    style="display: none;">
+                                    <path d="M19 13H5v-2h14v2z"></path>
+                                </svg>
+                            </span>
+                                            </div>
+                    <ul class="fooList">
+                                                    <li><a href="../../news/index.html" target="_self">Newsroom</a></li>
+                                            </ul>
+                </div>
+                    </div>
+        <div class="lincoln-footer-bottom">
+            <!-- Footer Social start -->
+                                                                                                                                                                                        <div class="socialMain">
+                                <div class="socialInner">
+                                    <div class="titleIn">Follow Us</div>
+                                    <div class="socialHolder">
+                                                                                    <a href="https://www.facebook.com/mynaghi.lincoln" target="_blank"><i
+                                                    class="fa  fa-facebook-official"></i></a>
+                                                                                    <a href="https://www.instagram.com/lincoln.mynaghi/" target="_blank"><i
+                                                    class="fa  fa-instagram"></i></a>
+                                                                                    <a href="https://www.youtube.com/channel/UCxc0NAL8CBAzwFz6sxfV21Q" target="_blank"><i
+                                                    class="fa fa-youtube-play"></i></a>
+                                                                                    <a href="https://twitter.com/lincolnmynaghi" target="_blank"><i
+                                                    class="icon-twitter-fds"></i></a>
+                                                                            </div>
+                                </div>
+                            </div>
+                                                                                                                                                                                                                                                                                                                    <!-- Footer Social end -->
+
+            <div class="bottomLinks">
+                <div class="footer-menu">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                    <ul class="siteLinks">
+                                                                    <li class="copyright-text">
+                                        © Mohamed Yousuf Naghi Motors Co.
+                                    </li>
+                                                                    <li class="">
+                                        <a href="https://www.lincoln.com/" target="_self">Global Site
+                                                                                    </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="../../privacy-policy/index.html" target="_self">Privacy Policy
+                                                                                    </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="../../cookie-policy/index.html" target="_self">Cookie Policy
+                                                                                    </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="../../terms-and-conditions/index.html" target="_self">Terms and Conditions
+                                                                                    </a>
+                                    </li>
+                                                                    <li class="">
+                                        <a href="../../terms-of-use/index.html" target="_self">Terms of Use
+                                                                                    </a>
+                                    </li>
+                                                                    <li class="">
+                                        
+                                    </li>
+                                                            </ul>
+                                                                                                                                                                                                                                                                                                                                    </div>
+                <div class="footerLogoMain">
+                                                                                                                                                                                                                                                                                                                                                                                <a aria-label="Dengage Auto Demo home" class="dps-brand-link" href="../../index.html"><span aria-label="Dengage Auto Demo" class="dps-brand"><svg aria-hidden="true" role="img" viewBox="0 0 38 38"><path d="M11.3821 34.8307H6.61521V28.0187H11.3821C16.4408 27.824 20.4293 23.6395 20.2348 18.5791C20.1375 13.7133 16.1489 9.82066 11.3821 9.72334H6.61521V15.5623H12.3549V22.3744H0V2.91125H11.3821C20.2348 3.2032 27.1418 10.5019 26.85 19.3576C26.6554 27.824 19.8456 34.6361 11.3821 34.8307Z" fill="currentColor"></path><path d="M36.9964 15.9687C38.288 17.303 38.3802 19.5905 36.9964 20.9248C35.6126 22.2591 33.3986 22.2591 32.0148 20.9248C31.369 20.2576 31 19.3045 31 18.4468C31 16.5406 32.476 14.9203 34.4134 14.9203C34.4134 14.9203 34.4134 14.9203 34.5056 14.9203C35.4281 14.9203 36.3507 15.3015 36.9964 15.9687Z" fill="currentColor"></path></svg><span class="dps-brand-text"><b>DENGAGE</b><i>Auto Demo</i></span></span></a>
+                                                                                                                                                                                                                                                                                                                        <span class="copyright-place"></span>
+                </div>
+            </div>
+        </div>
+    <div class="dps-demo-notice">A demonstration storefront built by Dengage for a sales conversation. Vehicle names and imagery come from the public Lincoln Saudi Arabia website of Mohamed Yousuf Naghi Motors; this is not their site, and no data entered here reaches Lincoln or the dealer.</div></footer>
+    <div class="overlayLang" id="langSelectorFoo">
+        <div class="modalLang">
+            <div class="closeLang">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                        <rect width="24" height="24" fill="transparent"></rect>
+                        <path d="M7 17L16.8995 7.10051" stroke="#00095b" stroke-linecap="round" stroke-linejoin="round">
+                        </path>
+                        <path d="M7 7.00001L16.8995 16.8995" stroke="#00095b" stroke-linecap="round"
+                            stroke-linejoin="round"></path>
+                    </g>
+                </svg>
+            </div>
+            <div class="contentIn">
+                                            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="cookies-container cookies-container_inverse" style="display: none">
+        <div class="cookies-container-text">
+            <p>
+This website uses cookies to enhance your online experience, customize content, and display targeted advertisements. For more information, please review our <a href="../../privacy-policy/index.html">Privacy Statement </a> and <a href="../../cookie-policy/index.html">Cookie Policy </a>
+</p>
+<div class="cookies-buttons-container">
+    <button class="accept-cookie-btn">Accept</button>
+    <button class="decline-cookie-btn">Decline</button>
+</div>
+        </div>
+        <div class="cookies-container-button hide">
+            <button type="button" class="disclaimer-close-icon" aria-label="close"></button>
+        </div>
+    </div>
+
+
+
+
+
+    <section class="sticky-sidebar">
+        <ul class="sticky-sidebar-list ">
+                                                <li class="sticky-sidebar-item ">
+                        <a class="sticky-sidebar-link" href="../../forms/quote/index.html">
+                            <span class="sticky-sidebar-icon">
+                                <i class="sticky-icon-request-a-quote"></i>
+                            </span>
+                            <span class="sticky-sidebar-text">
+                                REQUEST A QUOTE
+                            </span>
+                        </a>
+                    </li>
+                                                                <li class="sticky-sidebar-item ">
+                        <a class="sticky-sidebar-link" href="../../forms/testdrive/index.html">
+                            <span class="sticky-sidebar-icon">
+                                <i class="sticky-icon-drive"></i>
+                            </span>
+                            <span class="sticky-sidebar-text">
+                                BOOK A TEST DRIVE
+                            </span>
+                        </a>
+                    </li>
+                                                                <li class="sticky-sidebar-item ">
+                        <a class="sticky-sidebar-link" href="../../download-specifications/index.html">
+                            <span class="sticky-sidebar-icon">
+                                <i class="sticky-icon-download"></i>
+                            </span>
+                            <span class="sticky-sidebar-text">
+                                DOWNLOAD SPECIFICATIONS
+                            </span>
+                        </a>
+                    </li>
+                                                                <li class="sticky-sidebar-item ">
+                        <a class="sticky-sidebar-link" href="../../branches/index.html">
+                            <span class="sticky-sidebar-icon">
+                                <i class="sticky-icon-get-location"></i>
+                            </span>
+                            <span class="sticky-sidebar-text">
+                                OUR BRANCHES
+                            </span>
+                        </a>
+                    </li>
+                                                                <li class="sticky-sidebar-item ">
+                        <a class="sticky-sidebar-link" href="../../submit-a-complaint/index.html">
+                            <span class="sticky-sidebar-icon">
+                                <i class="sticky-complaint-icon"></i>
+                            </span>
+                            <span class="sticky-sidebar-text">
+                                COMPLAINTS &amp; INQUIRIES
+                            </span>
+                        </a>
+                    </li>
+                            
+            
+                    </ul>
+    </section>
+
+
+        </footer>
+        <!-- End footer component -->
+    </div>
+    
+    <script>
+        
+                var website_data = {"currency":"SAR","currency_separator":",","currency_after_separator":"SAR","show_prices":true,"show_currency":true,"logo":"../../assets/brand/favicon.svg","gtm":""}
+        var page = {"page_title":"Own Navigator Offers | Lincoln Naghi KSA","slug":"navigator-june-26","navigation_title":"Own Navigator 2026 with June Offers","page_type":"Form","lang":"EN","car":""}
+    </script>
+
+    
+
+    
+    <!-- Custom JS -->
+            <script defer src="../../assets/lincoln-build.js?v=1"></script>
+    
+    <style>
+.header-container .logo img {
+        width: 114px !important;
+  }
+.cookies-container .cookies-container-button button{
+    visibility: hidden;
+}
+.cookies-container .cookies-container-button button:before{
+    visibility: visible;
+}
+.cookies-container{
+background-color: #b45f1a !important;
+}
+.Tiktok{    background-image: url("data:image/svg+xml,%3Csvg fill='%23000000' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' xml:space='preserve'%3E%3Cg id='SVGRepo_bgCarrier' stroke-width='0'%3E%3C/g%3E%3Cg id='SVGRepo_tracerCarrier' stroke-linecap='round' stroke-linejoin='round'%3E%3C/g%3E%3Cg id='SVGRepo_iconCarrier'%3E%3Cpath d='M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743l-.002-.001.002.001a2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.831 4.831 0 0 1-1.003-.104z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
+    display: block;
+    width: 23px;
+    height: 22px;
+    content: '';
+    filter: invert(1);
+}
+</style>
+
+
+<style>
+    /* info: added jun 23 for cookie component */
+    .cookies-container {
+        display: block;
+        margin: 0;
+        padding: 20px;
+        background-color: #b45f1a !important;
+    }
+
+    .cookies-container .cookies-container-text {
+        margin: 0;
+        padding: 0;
+        top: 0;
+        display: flex;
+        gap: 1em;
+        align-items: center;
+        margin: 0 auto;
+        justify-content: start;
+    }
+
+    .cookies-container .cookies-container-text p {
+        margin: 0;
+        text-align: start;
+    }
+
+    .cookies-container .cookies-container-text .cookies-buttons-container {
+        display: flex;
+        gap: 1em;
+        align-items: center;
+    }
+
+
+    .cookies-container .cookies-container-text .accept-cookie-btn {
+        font-size: .875rem;
+        line-height: 2em;
+        display: inline-block;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 0;
+        padding: 6px 20px;
+        transition: all .2s ease-in-out 0s;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        justify-content: center;
+        background-color: #324047;
+        color: #fff;
+        border-color: #066fef;
+        width: -moz-fit-content;
+        width: fit-content;
+    }
+
+    .cookies-container .cookies-container-text .decline-cookie-btn {
+        font-size: .875rem;
+        line-height: 2em;
+        display: inline-block;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 0;
+        transition: all .2s ease-in-out 0s;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        justify-content: center;
+        background-color: #fff;
+        color: #324047;
+        width: -moz-fit-content;
+        width: fit-content;
+        border: 1px solid #fff;
+        padding: 5px 20px;
+    }
+
+    .cookies-container .cookies-container-button button.disclaimer-close-icon {
+        display: none;
+    }
+
+
+    @media screen and (max-width: 991px) {
+        .cookies-container .cookies-container-text {
+            flex-direction: column;
+            align-items: start;
+        }
+
+        .cookies-container .cookies-container-text .accept-cookie-btn,
+        .cookies-container .cookies-container-text .decline-cookie-btn {
+            font-size: .625rem !important;
+            line-height: 1.125rem !important;
+            min-height: 30px !important;
+        }
+    }
+</style>
+<script>
+    // info: added jun 23 for cookie component
+    class HandleCookieAction {
+        constructor(ENV) {
+            this.ENV = ENV;
+            this.cookieDisclaimerElement = "";
+            this.BANNER_ID = "cookie-consent-banner";
+            this.CONSENT_KEY = "lincolnNaghiCookieConsent";
+            this.CONSENT_ACCEPT = 'accepted';
+            this.CONSENT_DECLINE = 'declined';
+            this.CONSENT_DURATION_DAYS = 7; // changed from 180 to 7
+
+            this.initialize();
+        }
+
+        initialize() {
+            document.addEventListener("DOMContentLoaded", () => {
+                this.cookieDisclaimerElement =
+                    document.querySelector(".cookies-container");
+                if (!this.cookieDisclaimerElement) {
+                    console.log(
+                        ".cookies-container not found!",
+                        this.cookieDisclaimerElement
+                    );
+                    return;
+                }
+
+                const showDisclaimer = this.shouldShowDisclaimer();
+                if (!showDisclaimer) {
+                    this.cookieDisclaimerElement.classList.add("hide");
+                    // execute scripts if user already agreed
+                    const consentStatus = JSON.parse(localStorage.getItem(this.CONSENT_KEY));
+                    if (consentStatus.status === this.CONSENT_ACCEPT) {
+                        this.loadScripts()
+                    }
+                    return;
+                } else {
+                    this.cookieDisclaimerElement.classList.remove("hide");
+                }
+
+                const acceptBtn = this.cookieDisclaimerElement.querySelector(
+                    "button.accept-cookie-btn"
+                );
+                if (!acceptBtn) {
+                    console.log("accept button not found!", acceptBtn);
+                    return;
+                }
+
+                const declineBtn = this.cookieDisclaimerElement.querySelector(
+                    "button.decline-cookie-btn"
+                );
+                if (!declineBtn) {
+                    console.log("decline button not found!", declineBtn);
+                    return;
+                }
+
+                acceptBtn.addEventListener("click", () => {
+                    this.setConsent(this.CONSENT_ACCEPT);
+                });
+                declineBtn.addEventListener("click", () => {
+                    this.setConsent(this.CONSENT_DECLINE);
+                });
+            });
+        }
+
+        setConsent(status) {
+            const data = {
+                status,
+                timestamp: Date.now(),
+            };
+            localStorage.setItem(this.CONSENT_KEY, JSON.stringify(data));
+
+            if (status === this.CONSENT_ACCEPT) {
+                this.cookieDisclaimerElement.classList.add("hide");
+                this.loadScripts();
+            } else {
+                this.cookieDisclaimerElement.classList.add("hide");
+            }
+        }
+
+        loadScripts() {
+            console.log("load cookie scripts....");
+        }
+
+        shouldShowDisclaimer() {
+            const stored = localStorage.getItem(this.CONSENT_KEY);
+            if (!stored) return true;
+
+            try {
+                const {status, timestamp} = JSON.parse(stored);
+                const now = Date.now();
+                const maxAge = this.CONSENT_DURATION_DAYS * 864e5; // 7 days in ms
+
+                if (now - timestamp < maxAge) {
+                    return false;
+                } else {
+                    localStorage.removeItem(this.CONSENT_KEY);
+                    return true;
+                }
+            } catch (e) {
+                localStorage.removeItem(this.CONSENT_KEY); // cleanup on bad format
+                return true;
+            }
+        }
+    }
+    new HandleCookieAction();
+</script>
+
+</body>
+
+</html>

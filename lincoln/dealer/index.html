@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-demo-slug="lincoln" data-rel-root="../" data-site-path="dealer/index.html">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dealer cockpit | Lincoln KSA x Dengage demo</title>
+<meta name="description" content="A simulator feeding offline pre-purchase signals into Dengage. The source is simulated; the events, storage and reactions are real.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="../assets/brand/favicon.svg">
+<meta name="theme-color" content="#111111">
+
+<!-- ORDER IN THE HEAD IS LOAD BEARING. identity.js resolves the contact key
+     synchronously and must run before the SDK snippet initializes; both must
+     run before any stylesheet. -->
+<script src="../js/identity.js?v=1787993094"></script>
+<!-- DENGAGE SDK START -->
+<script>
+  (function (window, document) {
+    window.dengage = window.dengage || function () {
+      (window.dengage.q = window.dengage.q || []).push(arguments);
+    };
+    var accountId = '28';
+    var appGuid = '99d9b8fb-0c62-5a85-3e43-2402554d93a5';
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://pcdn.dengage.com/p/push/' + accountId + '/' + appGuid + '/dengage_sdk_loader.js';
+    document.getElementsByTagName('head')[0].appendChild(script);
+    window.__dnInit ? window.dengage('initialize', window.__dnInit) : window.dengage('initialize');
+  })(window, document);
+</script>
+<!-- DENGAGE SDK END -->
+
+<link rel="stylesheet" href="../assets/css/demo-controls.css?v=1787993094">
+<style>
+  body {
+    margin: 0;
+    background: #14161a;
+    color: #ecedee;
+    font-family: 'ProximaNova', 'Segoe UI', Arial, sans-serif;
+  }
+  .ck-wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 80px; }
+  .ck-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .ck-top svg { width: 34px; height: 34px; fill: #fff; }
+  .ck-top h1 { font-size: 22px; letter-spacing: .04em; margin: 0; }
+  .ck-top .tag {
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    background: #b45f1a; color: #fff; padding: 4px 10px; border-radius: 3px;
+  }
+  .ck-sim {
+    margin: 14px 0 26px; padding: 12px 16px; font-size: 13.5px; line-height: 1.55;
+    color: #b9bdc2; background: #1c1f24; border-left: 3px solid #b45f1a;
+  }
+  .ck-sim b { color: #ecedee; }
+  h2 { font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: #8d939b; margin: 26px 0 12px; }
+  #ck-personas { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .ck-persona {
+    text-align: start; background: #1c1f24; color: #ecedee; border: 1px solid #2a2e34;
+    padding: 12px 14px; border-radius: 6px; cursor: pointer; display: grid; gap: 3px;
+    font-family: inherit;
+  }
+  .ck-persona b { font-size: 14px; letter-spacing: .06em; }
+  .ck-persona span { font-size: 12.5px; color: #b9bdc2; }
+  .ck-persona i { font-style: normal; font-size: 11.5px; color: #8d939b; line-height: 1.45; }
+  .ck-persona.active { border-color: #b45f1a; box-shadow: 0 0 0 1px #b45f1a inset; }
+  .ck-model { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+  .ck-model label { font-size: 12.5px; color: #8d939b; letter-spacing: .08em; text-transform: uppercase; }
+  #ck-model {
+    background: #1c1f24; color: #ecedee; border: 1px solid #2a2e34;
+    font-size: 15px; padding: 9px 12px; border-radius: 5px; font-family: inherit;
+  }
+  #ck-signals { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .ck-signal {
+    text-align: start; background: #22262c; color: #ecedee; border: 1px solid #2f343b;
+    padding: 13px 15px; border-radius: 6px; cursor: pointer; display: grid; gap: 4px;
+    font-family: inherit;
+  }
+  .ck-signal:hover { border-color: #b45f1a; }
+  .ck-signal b { font-size: 14px; }
+  .ck-signal span { font-size: 12px; color: #b9bdc2; line-height: 1.45; }
+  .ck-signal i { font-style: normal; font-size: 10.5px; color: #6e747c; letter-spacing: .06em; }
+  #ck-log {
+    background: #0e1013; color: #9fe3b1; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    border: 1px solid #23272d; border-radius: 6px; padding: 14px; min-height: 130px;
+    max-height: 320px; overflow: auto; white-space: pre-wrap;
+  }
+  .ck-links { margin-top: 26px; font-size: 13px; color: #8d939b; line-height: 1.7; }
+  .ck-links a { color: #d8dadd; }
+</style>
+</head>
+<body data-page-type="other">
+<div class="ck-wrap">
+  <div class="ck-top">
+    <svg viewBox="0 0 38 38" aria-hidden="true"><path d="M11.3821 34.8307H6.61521V28.0187H11.3821C16.4408 27.824 20.4293 23.6395 20.2348 18.5791C20.1375 13.7133 16.1489 9.82066 11.3821 9.72334H6.61521V15.5623H12.3549V22.3744H0V2.91125H11.3821C20.2348 3.2032 27.1418 10.5019 26.85 19.3576C26.6554 27.824 19.8456 34.6361 11.3821 34.8307Z"/><path d="M36.9964 15.9687C38.288 17.303 38.3802 19.5905 36.9964 20.9248C35.6126 22.2591 33.3986 22.2591 32.0148 20.9248C31.369 20.2576 31 19.3045 31 18.4468C31 16.5406 32.476 14.9203 34.4134 14.9203C34.4134 14.9203 34.4134 14.9203 34.5056 14.9203C35.4281 14.9203 36.3507 15.3015 36.9964 15.9687Z"/></svg>
+    <h1>Dealer cockpit</h1>
+    <span class="tag">Simulated feed, real platform</span>
+  </div>
+  <p class="ck-sim">This screen stands in for the systems that send offline signals in
+  production: the <b>showroom tablet</b>, the <b>call-center screen</b> and the
+  <b>Value First WhatsApp integration</b>. Every button below writes a real event into
+  Dengage through the same module the website uses; only the sender is simulated.
+  Nothing here is drawn for show.</p>
+
+  <h2>1. Who is in front of you</h2>
+  <div id="ck-personas"></div>
+
+  <h2>2. Which car</h2>
+  <div class="ck-model">
+    <label for="ck-model">Model</label>
+    <select id="ck-model"></select>
+  </div>
+
+  <h2>3. What just happened</h2>
+  <div id="ck-signals"></div>
+
+  <h2>Sent from this cockpit</h2>
+  <div id="ck-log"></div>
+
+  <div class="ck-links">
+    Open the storefront as the same person to see both worlds on one profile:
+    <a href="../index.html">the demo site</a> keeps whichever persona is chosen here.
+    Add <a href="../index.html?debug=1">?debug=1</a> anywhere for the full event trail.
+  </div>
+</div>
+
+<script src="../js/config.js?v=1788070089"></script>
+<script src="../js/copy.js?v=1787993094"></script>
+<script src="../js/vehicles.js?v=1787993094"></script>
+<script src="../js/dengageEvents.js?v=1787993094"></script>
+<script src="../js/cockpit.js?v=1787993094"></script>
+<script src="../js/debug.js?v=1787993094"></script>
+</body>
+</html>
