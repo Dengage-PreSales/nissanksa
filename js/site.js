@@ -147,10 +147,13 @@
             return el && el.value ? el.value : undefined;
         }
         var consent = form.querySelector('input[name="allOptIn"]');
+        var titleValue = val('Title');
+        if (titleValue && /select/i.test(titleValue)) titleValue = undefined;
         var params = null;
         try { params = new URLSearchParams(window.location.search); } catch (err) { /* old browser */ }
         var body = {
             contact_key: (window.DemoIdentity || {}).contactKey,
+            title: titleValue,
             name: val('FirstName'),
             surname: val('LastName'),
             email: val('Email'),

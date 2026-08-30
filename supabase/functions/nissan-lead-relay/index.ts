@@ -174,6 +174,7 @@ Deno.serve(async (req: Request) => {
 
   const lead = {
     contact_key: clean(raw.contact_key, 48),
+    title: clean(raw.title, 30),
     name: clean(raw.name, 100),
     surname: clean(raw.surname, 100),
     email: clean(raw.email)?.toLowerCase(),
@@ -221,22 +222,29 @@ Deno.serve(async (req: Request) => {
   if (userkey && password) {
     try {
       const token = await dengageToken(userkey, password);
-      const columns: string[] = ['contact_key'];
-      const record: Record<string, unknown> = { contact_key: lead.contact_key };
-      if (lead.name) { columns.push('name'); record.name = lead.name; }
-      if (lead.surname) { columns.push('surname'); record.surname = lead.surname; }
+      const core: Record<string, unknown> = { contact_key: lead.contact_key };
+      if (lead.name) core.name = lead.name;
+      if (lead.surname) core.surname = lead.surname;
       if (lead.email) {
-        columns.push('email', 'email_permission');
-        record.email = lead.email;
-        record.email_permission = lead.marketing_consent;
+        core.email = lead.email;
+        core.email_permission = lead.marketing_consent;
       }
       if (lead.gsm) {
-        columns.push('gsm', 'gsm_permission');
-        record.gsm = lead.gsm;
-        record.gsm_permission = lead.marketing_consent;
+        core.gsm = lead.gsm;
+        core.gsm_permission = lead.marketing_consent;
       }
-      const res = await dengagePost('/bulk/contacts', {
-        columns,
+      /* The profile fields for segmentation. They need the matching custom
+         columns on master_contact (runbook, section 1a); until those exist
+         the retry below drops them so the core contact still lands, and the
+         status says so. */
+      const extras: Record<string, unknown> = {};
+      if (lead.title) extras.title = lead.title;
+      if (lead.model) extras.preferred_model = lead.model;
+      if (lead.city) extras.city = lead.city;
+      if (lead.purchase_horizon) extras.purchase_horizon = lead.purchase_horizon;
+
+      const push = (record: Record<string, unknown>) => dengagePost('/bulk/contacts', {
+        columns: Object.keys(record),
         contactDatas: [record],
         insertIfNotExists: true,
         throwExceptionIfInvalidRecord: false,
@@ -245,8 +253,19 @@ Deno.serve(async (req: Request) => {
          { code, message, data: { inserted, updated, errors, warnings } }.
          The envelope-free shape is read too, in case it ever appears. */
       type Arrays = { inserted?: unknown[]; updated?: unknown[]; errors?: unknown[] };
-      const body = res.data as (Arrays & { data?: Arrays }) | null;
-      const arrays = body?.data ?? body;
+      const readArrays = (d: unknown) => {
+        const b = d as (Arrays & { data?: Arrays }) | null;
+        return b?.data ?? b;
+      };
+
+      let res = await push({ ...core, ...extras });
+      let arrays = readArrays(res.data);
+      let droppedWhy = '';
+      if ((!res.ok || arrays?.errors?.length) && Object.keys(extras).length) {
+        droppedWhy = (res.text || 'no answer').slice(0, 240);
+        res = await push(core);
+        arrays = readArrays(res.data);
+      }
       if (!res.ok) {
         status = `error HTTP ${res.status}`;
         detail = res.text.slice(0, 500);
@@ -254,8 +273,11 @@ Deno.serve(async (req: Request) => {
         status = 'rejected';
         detail = JSON.stringify(arrays.errors).slice(0, 500);
       } else {
-        status = arrays?.inserted?.length ? 'contact inserted' : 'contact updated';
-        detail = res.text.slice(0, 500);
+        status = (arrays?.inserted?.length ? 'contact inserted' : 'contact updated') +
+          (droppedWhy ? ', profile fields dropped' : '');
+        detail = droppedWhy
+          ? 'profile fields need the master_contact columns from runbook 1a. The full push answered: ' + droppedWhy
+          : res.text.slice(0, 500);
       }
     } catch (err) {
       status = 'error';
