@@ -241,16 +241,21 @@ Deno.serve(async (req: Request) => {
         insertIfNotExists: true,
         throwExceptionIfInvalidRecord: false,
       }, token);
-      const body = res.data as { inserted?: unknown[]; updated?: unknown[]; errors?: unknown[] } | null;
+      /* The result arrays sit under a data envelope:
+         { code, message, data: { inserted, updated, errors, warnings } }.
+         The envelope-free shape is read too, in case it ever appears. */
+      type Arrays = { inserted?: unknown[]; updated?: unknown[]; errors?: unknown[] };
+      const body = res.data as (Arrays & { data?: Arrays }) | null;
+      const arrays = body?.data ?? body;
       if (!res.ok) {
         status = `error HTTP ${res.status}`;
         detail = res.text.slice(0, 500);
-      } else if (body?.errors?.length) {
+      } else if (arrays?.errors?.length) {
         status = 'rejected';
-        detail = JSON.stringify(body.errors).slice(0, 500);
+        detail = JSON.stringify(arrays.errors).slice(0, 500);
       } else {
-        status = body?.inserted?.length ? 'contact inserted' : 'contact updated';
-        detail = JSON.stringify(body).slice(0, 500);
+        status = arrays?.inserted?.length ? 'contact inserted' : 'contact updated';
+        detail = res.text.slice(0, 500);
       }
     } catch (err) {
       status = 'error';

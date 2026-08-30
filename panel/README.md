@@ -89,7 +89,9 @@ Two account side steps switch it on:
      that secret with no code change, every Dengage call then leaves
      from the server's one fixed address, and the health GET shows that
      address as `egress_ip`. TLS stays end to end: the proxy relays
-     encrypted bytes it cannot read, and only to port 443.
+     encrypted bytes it cannot read, and only to port 443. The server is
+     a monthly rental; if it ever lapses the relay degrades to store
+     only, and every lead still lands in `ni_web_lead`.
    - **A hosted static IP proxy** (QuotaGuard class) does the same job
      as a paid service; the same `DENGAGE_EGRESS_PROXY` secret carries
      its URL.
