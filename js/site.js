@@ -133,6 +133,45 @@
         }
     }
 
+    /* The typed details' path onto the contact card. The Web SDK deliberately
+       cannot write contact fields from a page, so each lead form also posts
+       what was typed to the lead relay, the demo's stand-in for a website
+       backend, which upserts the contact server side through the Dengage REST
+       API. Fire and forget: the SDK events never depend on it, and a missing
+       relay costs only the server side copy. panel/README.md section 1a. */
+    function relayLead(form, fields) {
+        var url = (window.DEMO_CONFIG || {}).leadRelay;
+        if (!url || typeof window.fetch !== 'function') return;
+        function val(name) {
+            var el = form.querySelector('[name="' + name + '"]');
+            return el && el.value ? el.value : undefined;
+        }
+        var consent = form.querySelector('input[name="allOptIn"]');
+        var params = null;
+        try { params = new URLSearchParams(window.location.search); } catch (err) { /* old browser */ }
+        var body = {
+            contact_key: (window.DemoIdentity || {}).contactKey,
+            name: val('FirstName'),
+            surname: val('LastName'),
+            email: val('Email'),
+            gsm: val('Phone'),
+            page_url: window.location.href,
+            utm_source: params ? params.get('utm_source') || undefined : undefined,
+            utm_medium: params ? params.get('utm_medium') || undefined : undefined,
+            utm_campaign: params ? params.get('utm_campaign') || undefined : undefined,
+            marketing_consent: consent ? !!consent.checked : false
+        };
+        for (var k in fields) { if (fields[k] !== undefined) body[k] = fields[k]; }
+        try {
+            window.fetch(url, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+                keepalive: true
+            })['catch'](function () { /* the lead's SDK trail is unaffected */ });
+        } catch (err) { /* no fetch, no relay */ }
+    }
+
     /* ------------------------------------------------------------------ */
     /* The hero and every other frozen slick carousel                       */
 
@@ -429,6 +468,7 @@
             if (city && /select/i.test(city)) city = undefined;
             if (horizon && /select/i.test(horizon)) horizon = undefined;
             mintIdentity();
+            relayLead(form, { form: 'booking', model: car.id, city: city, purchase_horizon: horizon });
             var line = pending() || { id: car.id, quantity: 1, price: car.price };
             window.DengageEvents.order({
                 orderId: 'DPS-' + slug + '-td-' + Date.now(),
@@ -472,6 +512,7 @@
                 if (city && /select/i.test(city)) city = undefined;
                 mintIdentity();
                 if (window.location.pathname.indexOf('request-a-quote') !== -1) {
+                    relayLead(form, { form: 'quote', model: car ? car.id : undefined, city: city, purchase_horizon: horizon });
                     if (car) window.DengageEvents.addToCart({ id: car.id, quantity: 1, price: car.price }, cartLines());
                     window.DengageEvents.leadEvent('quote_issued', {
                         model: car ? car.id : undefined, city: city, purchase_horizon: horizon,
@@ -481,6 +522,7 @@
                     return;
                 }
                 if (product === 'tekton' || window.location.pathname.indexOf('tekton') !== -1) {
+                    relayLead(form, { form: 'register_interest', model: 'tekton', city: city });
                     window.DengageEvents.leadEvent('register_interest', {
                         model: 'tekton', city: city, source: 'website'
                     });
@@ -495,6 +537,7 @@
                             if (!car && promo.indexOf(c.id) === 0) car = c;
                         });
                     }
+                    relayLead(form, { form: 'register_interest', model: car ? car.id : undefined, city: city, purchase_horizon: horizon });
                     window.DengageEvents.leadEvent('register_interest', {
                         model: car ? car.id : undefined, city: city, purchase_horizon: horizon,
                         source: 'website', note: 'offer ' + promo
@@ -786,11 +829,11 @@
         var models = window.Catalog.all().filter(function (c) { return c.price; });
         host.innerHTML =
             '<label>Model<select id="fin-model">' + models.map(function (c) {
-                return '<option value="' + c.id + '">' + c.nameEn + ' — SAR ' + c.price.toLocaleString('en-US') + '</option>';
+                return '<option value="' + c.id + '">' + c.nameEn + ', SAR ' + c.price.toLocaleString('en-US') + '</option>';
             }).join('') + '</select></label>' +
             '<label>Down payment (SAR)<input id="fin-down" type="number" min="0" step="1000" value="0"></label>' +
             '<label>Months<select id="fin-months"><option>24</option><option>36</option><option selected>48</option><option>60</option></select></label>' +
-            '<div class="fin-out"><span>Indicative monthly amount</span><strong id="fin-monthly">—</strong>' +
+            '<div class="fin-out"><span>Indicative monthly amount</span><strong id="fin-monthly">...</strong>' +
             '<small>Vehicle price divided over the term, excluding any finance rate, insurance or fees. Your dealer quotes the real figure.</small></div>';
         var signalled = false;
         function calc(interaction) {

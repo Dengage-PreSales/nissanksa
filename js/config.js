@@ -25,5 +25,13 @@ window.DEMO_CONFIG = {
         appGuid: '99d9b8fb-0c62-5a85-3e43-2402554d93a5',
         scenarioPrefix: 'dengage_demo_',
         brandPrefix: 'nissan_demo_'
-    }
+    },
+    /* The lead relay is the demo's stand-in for a website backend: the lead
+       forms post the typed details to it, it stores them in the ni_web_lead
+       table and upserts the contact through the Dengage REST API once the
+       API user exists. The URL is public the way any form action is public;
+       the function validates and rate limits on its own side. An empty
+       string turns the relay off and the forms lose nothing but the copy
+       of the lead. See panel/README.md section 1a. */
+    leadRelay: 'https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-lead-relay'
 };

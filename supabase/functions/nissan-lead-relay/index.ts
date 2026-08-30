@@ -1,0 +1,213 @@
+// The lead relay: the demo's stand-in for a website backend.
+//
+// The storefront is a static site, so it has no server of its own. In a real
+// deployment the brand's web backend receives the form post and calls the
+// Dengage REST API from its fixed egress IP. This function plays that backend
+// for the demo: it receives the typed lead, stores it in the ni_web_lead
+// table, and upserts the contact into Dengage over the documented REST calls
+// (POST /rest/login, then POST /rest/bulk/contacts) as soon as API user
+// credentials are configured as secrets. Until then every lead is stored with
+// dengage_status 'pending api user', so nothing is lost while the account
+// side is prepared.
+//
+// Secrets read at runtime, all optional until the account side is ready:
+//   DENGAGE_API_USERKEY   the API user's key (Settings > Users, API user)
+//   DENGAGE_API_PASSWORD  its password
+//   DENGAGE_API_BASE      defaults to https://api.dengage.com/rest. Point it
+//                         at a static IP forwarding proxy when Dengage's IP
+//                         restriction requires an address this platform
+//                         cannot promise (edge functions have no fixed
+//                         egress IP; see the runbook, section 1a).
+//
+// This endpoint is public by design, like any lead form handler. It defends
+// itself with input validation, size caps and a per address rate cap rather
+// than a shared browser token, because a token shipped inside a public page
+// is not a secret.
+
+const ALLOWED_ORIGINS = new Set([
+  'https://dengage-presales.github.io',
+  'http://localhost:8101',
+]);
+const FORMS = new Set(['booking', 'quote', 'register_interest']);
+const API_BASE = Deno.env.get('DENGAGE_API_BASE') ?? 'https://api.dengage.com/rest';
+const SB_URL = Deno.env.get('SUPABASE_URL') ?? '';
+const SB_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+function corsHeaders(origin: string): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin) ? origin : 'https://dengage-presales.github.io',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'content-type',
+    'Vary': 'Origin',
+  };
+}
+
+function reply(body: unknown, status: number, origin: string): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json', ...corsHeaders(origin) },
+  });
+}
+
+// A short lived token cache so the function honors Dengage's guidance that
+// logging in before every call is wrong.
+let tokenCache: { value: string; expiresAt: number } | null = null;
+
+async function dengagePost(path: string, body: unknown, token?: string) {
+  const headers: Record<string, string> = { 'content-type': 'application/json' };
+  if (token) headers['authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(8000),
+  });
+  const text = await res.text();
+  let data: unknown = null;
+  try { data = JSON.parse(text); } catch { /* non JSON error body */ }
+  return { ok: res.ok, status: res.status, data, text };
+}
+
+async function dengageToken(userkey: string, password: string): Promise<string> {
+  if (tokenCache && tokenCache.expiresAt > Date.now() + 60000) return tokenCache.value;
+  const res = await dengagePost('/login', { userkey, password });
+  if (!res.ok) throw new Error(`login failed with HTTP ${res.status}`);
+  const body = res.data as { access_token?: string; expires_in?: number };
+  if (!body?.access_token) throw new Error('login returned no token');
+  tokenCache = {
+    value: body.access_token,
+    expiresAt: Date.now() + (body.expires_in ?? 3600) * 1000,
+  };
+  return tokenCache.value;
+}
+
+// Saudi mobile normalization, light touch: digits only, the local leading
+// zero swapped for the country code. Anything else passes through as typed,
+// because inventing digits would be worse than storing what was given.
+function normalizeGsm(raw: string): string {
+  const digits = raw.replace(/\D+/g, '').slice(0, 20);
+  if (/^05\d{8}$/.test(digits)) return '966' + digits.slice(1);
+  if (/^5\d{8}$/.test(digits)) return '966' + digits;
+  return digits;
+}
+
+const seen = new Map<string, number[]>();
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const stamps = (seen.get(ip) ?? []).filter((t) => now - t < 600000);
+  stamps.push(now);
+  seen.set(ip, stamps);
+  return stamps.length > 30;
+}
+
+function clean(value: unknown, max = 200): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const v = value.trim().slice(0, max);
+  return v || undefined;
+}
+
+Deno.serve(async (req: Request) => {
+  const origin = req.headers.get('origin') ?? '';
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(origin) });
+  if (req.method !== 'POST') return reply({ error: 'POST only' }, 405, origin);
+
+  const ip = (req.headers.get('x-forwarded-for') ?? 'unknown').split(',')[0].trim();
+  if (rateLimited(ip)) return reply({ error: 'too many requests' }, 429, origin);
+
+  let raw: Record<string, unknown>;
+  try { raw = await req.json(); } catch { return reply({ error: 'body must be JSON' }, 400, origin); }
+
+  const lead = {
+    contact_key: clean(raw.contact_key, 48),
+    name: clean(raw.name, 100),
+    surname: clean(raw.surname, 100),
+    email: clean(raw.email)?.toLowerCase(),
+    gsm: clean(raw.gsm) ? normalizeGsm(clean(raw.gsm)!) : undefined,
+    model: clean(raw.model, 60),
+    city: clean(raw.city, 60),
+    purchase_horizon: clean(raw.purchase_horizon, 60),
+    form: clean(raw.form, 30),
+    page_url: clean(raw.page_url, 500),
+    utm_source: clean(raw.utm_source, 100),
+    utm_medium: clean(raw.utm_medium, 100),
+    utm_campaign: clean(raw.utm_campaign, 100),
+    marketing_consent: raw.marketing_consent === true,
+  };
+
+  if (!lead.contact_key || !/^DPS-[A-Za-z0-9_-]{1,44}$/.test(lead.contact_key)) {
+    return reply({ error: 'contact_key must be a DPS- demo key' }, 400, origin);
+  }
+  if (!lead.form || !FORMS.has(lead.form)) return reply({ error: 'unknown form' }, 400, origin);
+  if (!lead.email && !lead.gsm) return reply({ error: 'a lead needs an email or a phone' }, 400, origin);
+  if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) {
+    return reply({ error: 'email does not look like an address' }, 400, origin);
+  }
+
+  // 1. Store the lead first, so a Dengage side failure never loses it.
+  const insert = await fetch(`${SB_URL}/rest/v1/ni_web_lead`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'apikey': SB_KEY,
+      'authorization': `Bearer ${SB_KEY}`,
+      'prefer': 'return=representation',
+    },
+    body: JSON.stringify({ ...lead, dengage_status: 'received' }),
+  });
+  if (!insert.ok) return reply({ error: 'could not store the lead' }, 502, origin);
+  const [row] = await insert.json();
+
+  // 2. Push the contact into Dengage when the API user exists.
+  const userkey = Deno.env.get('DENGAGE_API_USERKEY');
+  const password = Deno.env.get('DENGAGE_API_PASSWORD');
+  let status = 'pending api user';
+  let detail = 'store only: DENGAGE_API_USERKEY and DENGAGE_API_PASSWORD are not set';
+
+  if (userkey && password) {
+    try {
+      const token = await dengageToken(userkey, password);
+      const columns: string[] = ['contact_key'];
+      const record: Record<string, unknown> = { contact_key: lead.contact_key };
+      if (lead.name) { columns.push('name'); record.name = lead.name; }
+      if (lead.surname) { columns.push('surname'); record.surname = lead.surname; }
+      if (lead.email) {
+        columns.push('email', 'email_permission');
+        record.email = lead.email;
+        record.email_permission = lead.marketing_consent;
+      }
+      if (lead.gsm) {
+        columns.push('gsm', 'gsm_permission');
+        record.gsm = lead.gsm;
+        record.gsm_permission = lead.marketing_consent;
+      }
+      const res = await dengagePost('/bulk/contacts', {
+        columns,
+        contactDatas: [record],
+        insertIfNotExists: true,
+        throwExceptionIfInvalidRecord: false,
+      }, token);
+      const body = res.data as { inserted?: unknown[]; updated?: unknown[]; errors?: unknown[] } | null;
+      if (!res.ok) {
+        status = `error HTTP ${res.status}`;
+        detail = res.text.slice(0, 500);
+      } else if (body?.errors?.length) {
+        status = 'rejected';
+        detail = JSON.stringify(body.errors).slice(0, 500);
+      } else {
+        status = body?.inserted?.length ? 'contact inserted' : 'contact updated';
+        detail = JSON.stringify(body).slice(0, 500);
+      }
+    } catch (err) {
+      status = 'error';
+      detail = String(err).slice(0, 500);
+    }
+  }
+
+  await fetch(`${SB_URL}/rest/v1/ni_web_lead?id=eq.${row.id}`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json', 'apikey': SB_KEY, 'authorization': `Bearer ${SB_KEY}` },
+    body: JSON.stringify({ dengage_status: status, dengage_detail: detail }),
+  });
+
+  return reply({ stored: true, dengage: status }, 200, origin);
+});
