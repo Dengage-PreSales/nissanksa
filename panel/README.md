@@ -315,3 +315,34 @@ Monday scope.
 | SMS, Email | Composer field sheets in `CONTENT.md`; sender id needed for live sends |
 | WhatsApp | Value First's channel; journey step and copy shown, live send via their WABA in production |
 | RCS | Not offered. Say so if asked |
+
+## 9. The Lincoln demo rides on all of the above unchanged
+
+Added 30 August. A second storefront lives in this repository at
+`https://dengage-presales.github.io/nissanksa/lincoln/`, a replica of the
+Lincoln Saudi Arabia distributor site (Mohamed Yousuf Naghi Motors), built for
+its own meeting. It needs nothing from the panel, because everything in
+sections 1 to 8 already covers it:
+
+- **Same application, same display rules.** Lincoln pages sit under
+  `/nissanksa/`, so every campaign whose display rule matches that path serves
+  there too. Verified live on 30 August: firing `nissan_demo_test-drive-invite`
+  on a Lincoln page fetched and drew the campaign with zero panel edits.
+- **Same tables, same journeys.** The Lincoln booking funnel writes the same
+  rows: `page_view_events`, `shopping_cart_events`, `order_events` (order ids
+  `DPS-lincoln-td-<n>`), `ni_lead_events`, and typed leads reach
+  `master_contact` through the same relay. A journey on any of those reacts to
+  Lincoln traffic exactly as it does to Nissan traffic.
+- **Same personas.** The `DPS-1` to `DPS-8` contacts serve both demos; the
+  Lincoln dealer cockpit reuses them with Lincoln model context.
+- **Two launcher cards are Nissan only** and are deliberately absent from the
+  Lincoln launcher: `tekton-launch-bar` and `arrival-alert` carry Nissan model
+  copy. Everything else in the launcher is shared.
+- **Known trade-offs, stated on the call if asked:** the web push and campaign
+  click targets configured in the panel point at Nissan demo URLs, and the
+  campaign creatives carry the shared automotive styling rather than Lincoln's
+  palette. Both are panel content choices, not platform limits; a production
+  account per brand would carry its own.
+- **Branch data on the Lincoln branches page** is baked in from the
+  distributor's public dealer feed at build time, so the page is self
+  contained like everything else in the demo.
