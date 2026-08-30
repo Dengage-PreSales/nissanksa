@@ -30,6 +30,10 @@ PROXY_PASS="${2:-$(openssl rand -hex 24)}"
 PROXY_PORT=8642
 
 export DEBIAN_FRONTEND=noninteractive
+# Budget VPS images sometimes ship with a half finished package state, which
+# makes every apt command refuse to run. Settle it before installing.
+dpkg --configure -a >/dev/null 2>&1 || true
+apt-get install -y -f -qq >/dev/null 2>&1 || true
 apt-get update -qq
 apt-get install -y -qq tinyproxy ufw curl >/dev/null
 
