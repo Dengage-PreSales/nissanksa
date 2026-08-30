@@ -87,7 +87,15 @@ Two account side steps switch it on:
    - **Run the same relay on any small server with a fixed IP**, a five
      dollar VPS is enough; whitelist that server.
    - **Whitelist a provider range** only if account security accepts how
-     wide that is.
+     wide that is. The relay's pool is AWS us-east-1, which spans 295
+     separate blocks, over 21 million addresses, so full cover is not
+     realistic. The five blocks that covered every observed call on 30
+     August, each one an Add > Choose Range entry, are: 3.224.0.0 to
+     3.239.255.255, 44.192.0.0 to 44.223.255.255, 100.48.0.0 to
+     100.63.255.255, 18.232.0.0 to 18.235.255.255, and 13.216.0.0 to
+     13.223.255.255. The pool can drift outside them; when it does, the
+     lead is still stored and its `dengage_detail` names the refused
+     address, which says exactly which block to add next.
    In production none of this exists: the brand's backend already has a
    fixed IP, and that is the whole integration story told to a prospect.
 
