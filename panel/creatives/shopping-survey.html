@@ -60,7 +60,10 @@
       <span class="k">30 seconds, one question</span>
       <h2>What would help you decide today?</h2>
 
-      <div class="form-block" data-dn-name="pre_purchase_blocker"
+      <!-- data-dn-is-radio is load bearing: without it the engine validates in
+           checkbox mode, counts zero checked checkboxes among these radios,
+           and refuses every answer. Read from the engine's own form handler. -->
+      <div class="form-block" data-dn-name="pre_purchase_blocker" data-dn-is-radio="true"
            data-dn-min-selection="1" data-dn-max-selection="1">
         <label class="opt"><input type="radio" name="nkx-decide" value="price"> Clear pricing and offers</label>
         <label class="opt"><input type="radio" name="nkx-decide" value="test-drive"> A test drive</label>
