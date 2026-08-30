@@ -137,11 +137,13 @@ The two supporting mechanisms are unchanged:
 - **The engine's own capture.** The `newsletter-capture` and
   `arrival-alert` campaigns store the typed email through
   `Dn.postSubscription`; pasting section 2 turns this on.
-- **The persona import.** `panel/personas.csv` holds DPS-1 to DPS-8 in
-  the account's own import template columns, the same names and 555
-  block mobiles the seeded tables use, with emails on the reserved
-  .example domain. Import it in Audience; it creates or updates those
-  keys only.
+- **The persona import: already done, over the API.** On 30 August the
+  `nissan-persona-seed` function (source committed beside the relay)
+  upserted DPS-1 to DPS-8 with name, surname, email, mobile, city and
+  consent, and read DPS-1 back stored. It is idempotent, so a POST to
+  it re-asserts the eight any time. `panel/personas.csv` remains the
+  same eight rows in the account's import template columns, kept as
+  the manual Audience alternative.
 
 ## 2. Ten campaigns, one paste each. Content > On-Site
 
