@@ -60,22 +60,17 @@ that browser, so the attributes land on the exact contact the events
 already belong to. Until the account side below is done, every lead is
 stored with status `pending api user` and nothing is lost.
 
-**The whole form onto the profile.** The relay pushes name, surname,
-email, mobile and the consent flag onto columns `master_contact` already
-has. The other four typed answers (title, preferred model, city,
-purchase horizon) go along in the same push, and they stick as soon as
-the matching custom columns exist on the contact table. Create them
-once, in the same Data Space screen where `ni_lead_events` was created:
-Tables > `master_contact` > Edit, add three text columns named exactly
-`title`, `preferred_model`, `purchase_horizon`. The contact table
-already carries `city`: when the API was asked on 30 August it named
-only those three as missing. Until they exist the relay retries
-without them so the core contact still lands, and the lead row's
-status reads `profile fields dropped` with Dengage's answer in the
-detail. Once they exist, rule based segments can target
-them directly: `purchase_horizon = Within 1 Month` over live web
-contacts is the hot leads audience of section 4, fed by the site
-itself.
+**What lands where, the relational split.** Demo owner's call, 30
+August: no custom columns on `master_contact`. The relay puts identity
+and reachability on the contact (name, surname, email, mobile, the
+consent flag, and city, a column the contact table already carries).
+The behavioral answers (preferred model, purchase horizon, title) are
+deliberately not copied onto the profile: they already live on the
+lead's related rows, `ni_lead_events` in Data Space and `ni_web_lead`
+in Supabase, keyed to the same contact, and segmentation reaches them
+through that relation. That is the relational story told on the call,
+and reversing it later is a one line change in the relay plus the
+matching columns on the contact table.
 
 Two account side steps switch it on:
 
@@ -206,11 +201,12 @@ automation.
 
 ## 4. The purchase-horizon field and the segments
 
-The booking form captures **Purchase Horizon** and it lands three ways: on
-the order's `ni_lead_events` row (`purchase_horizon`), on the lead's
-`ni_web_lead` row, and on the contact itself once the `purchase_horizon`
-column from section 1a exists on `master_contact`. Columns are never added
-to the six standard event tables; the contact table does take them.
+The booking form captures **Purchase Horizon** and it lands two ways: on
+the order's `ni_lead_events` row (`purchase_horizon`) and on the lead's
+`ni_web_lead` row, both keyed to the contact. It is deliberately not
+copied onto the contact itself: segmentation reaches it through the
+relation, the demo owner's call of 30 August. Columns are never added to
+the six standard event tables.
 
 Remote data: connect the `DPS - supabase` Postgres (the same source
 `dps_product` and the `hy_` tables already use) and add the four tables

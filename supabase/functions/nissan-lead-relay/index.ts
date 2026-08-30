@@ -233,15 +233,15 @@ Deno.serve(async (req: Request) => {
         core.gsm = lead.gsm;
         core.gsm_permission = lead.marketing_consent;
       }
-      /* The profile fields for segmentation. They need the matching custom
-         columns on master_contact (runbook, section 1a); until those exist
-         the retry below drops them so the core contact still lands, and the
-         status says so. */
+      /* The relational split, the demo owner's call of 30 August: identity
+         and reachability live on the contact, while the behavioral answers
+         (preferred model, purchase horizon, title) stay on the lead's
+         related rows in ni_lead_events and ni_web_lead, where segmentation
+         reaches them through the contact relation. city rides along only
+         because the contact table already carries that column. The retry
+         below keeps the core contact safe if that ever changes. */
       const extras: Record<string, unknown> = {};
-      if (lead.title) extras.title = lead.title;
-      if (lead.model) extras.preferred_model = lead.model;
       if (lead.city) extras.city = lead.city;
-      if (lead.purchase_horizon) extras.purchase_horizon = lead.purchase_horizon;
 
       const push = (record: Record<string, unknown>) => dengagePost('/bulk/contacts', {
         columns: Object.keys(record),
@@ -276,7 +276,7 @@ Deno.serve(async (req: Request) => {
         status = (arrays?.inserted?.length ? 'contact inserted' : 'contact updated') +
           (droppedWhy ? ', profile fields dropped' : '');
         detail = droppedWhy
-          ? 'profile fields need the master_contact columns from runbook 1a. The full push answered: ' + droppedWhy
+          ? 'a contact column was refused. The full push answered: ' + droppedWhy
           : res.text.slice(0, 500);
       }
     } catch (err) {
