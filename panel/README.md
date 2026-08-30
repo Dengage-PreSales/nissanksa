@@ -69,10 +69,16 @@ Two account side steps switch it on:
    per IP, and bulk upsert is meant to be called about once a minute;
    single lead calls during a demo sit far under both.
 2. **Whitelist an egress IP**: Settings > Identity & Access Management >
-   API IP Restriction; it accepts single addresses or ranges and applies
-   in about five minutes. The trap: Supabase Edge Functions have no
-   static egress IP, stated plainly in Supabase's own docs, so the
-   address to whitelist cannot be the function's. Three honest ways out,
+   API IP Restriction, then Add; choose single IP or range, name the
+   entry, Save, and it applies in about five minutes. The trap: Supabase
+   Edge Functions have no static egress IP, stated plainly in Supabase's
+   own docs and measured here on 30 August: five consecutive relay calls
+   left from five different addresses, and a live push was refused by
+   Dengage naming a sixth, before any credential was checked. Whitelisting
+   an observed address can never hold, so the address must come from one
+   of the options below. Opening the function URL in a browser (a plain
+   GET) reports the address the next call would leave from and whether
+   the API user secrets are visible to it, never the secret values. Three honest ways out,
    in order of preference:
    - **A static IP forwarding proxy** in front of the API (QuotaGuard,
      Fixie or similar). The proxy's one or two fixed IPs are what gets

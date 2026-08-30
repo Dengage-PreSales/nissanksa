@@ -109,6 +109,23 @@ function clean(value: unknown, max = 200): string | undefined {
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get('origin') ?? '';
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(origin) });
+
+  // The health line: open the function URL in a browser and it reports the
+  // IP its calls currently leave from (the address Dengage's IP restriction
+  // sees) and whether the API user secrets are visible to it. No secret
+  // values are ever returned.
+  if (req.method === 'GET') {
+    let egress = 'unknown';
+    try {
+      egress = (await (await fetch('https://api.ipify.org', { signal: AbortSignal.timeout(5000) })).text()).trim().slice(0, 60);
+    } catch { /* the echo service being down does not matter */ }
+    return reply({
+      egress_ip: egress,
+      api_user_configured: !!(Deno.env.get('DENGAGE_API_USERKEY') && Deno.env.get('DENGAGE_API_PASSWORD')),
+      api_base: API_BASE,
+    }, 200, origin);
+  }
+
   if (req.method !== 'POST') return reply({ error: 'POST only' }, 405, origin);
 
   const ip = (req.headers.get('x-forwarded-for') ?? 'unknown').split(',')[0].trim();
