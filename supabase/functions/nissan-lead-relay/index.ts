@@ -71,7 +71,7 @@ async function dengagePost(path: string, body: unknown, token?: string) {
 async function dengageToken(userkey: string, password: string): Promise<string> {
   if (tokenCache && tokenCache.expiresAt > Date.now() + 60000) return tokenCache.value;
   const res = await dengagePost('/login', { userkey, password });
-  if (!res.ok) throw new Error(`login failed with HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`login failed with HTTP ${res.status}: ${res.text.slice(0, 300)}`);
   const body = res.data as { access_token?: string; expires_in?: number };
   if (!body?.access_token) throw new Error('login returned no token');
   tokenCache = {
