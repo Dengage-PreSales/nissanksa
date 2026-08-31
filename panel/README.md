@@ -346,3 +346,21 @@ sections 1 to 8 already covers it:
 - **Branch data on the Lincoln branches page** is baked in from the
   distributor's public dealer feed at build time, so the page is self
   contained like everything else in the demo.
+
+## 10. Before a call: check the browser's notification permission
+
+Found 31 August while testing with a real click. When a browser has
+notifications **blocked** for `dengage-presales.github.io`, the Dengage SDK
+opens its blocked-push panel over the page on every load: a full window
+modal, "Catch price drops and new offers", with a close control. It is
+dismissible and then gone for that page, but it lands on top of whatever is
+being shown.
+
+This is SDK behaviour driven by the browser's permission state, not
+something in the demo, and it affects the Nissan and Lincoln demos alike. It
+appears only when the permission is blocked; a browser that has never been
+asked, or that allowed push, never sees it.
+
+Before presenting, open the padlock beside the address bar and set
+Notifications for this site to Allow or Ask. A browser that was used to test
+push and answered Block is exactly the case that shows the panel.
