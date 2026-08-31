@@ -1,4 +1,4 @@
-# The Lincoln demo's messages
+# The Nissan demo's messages
 
 Everything here is content to create in the Dengage panel. Nothing in this
 folder is served by the site, and nothing here is read at runtime: the panel
@@ -9,16 +9,13 @@ and the values the message prints.
 
 | Moment | Sent as | Email body | Content id variable |
 |---|---|---|---|
-| Test drive booked | `booking` | `booking-confirmation.html` | `DENGAGE_TX_EMAIL_CONTENT_ID`<br>`DENGAGE_TX_PUSH_CONTENT_ID` |
-| Booking started and left | `abandoned_booking` | `abandoned-booking.html` | `DENGAGE_TX_EMAIL_ABANDONED`<br>`DENGAGE_TX_PUSH_ABANDONED` |
-| Quote requested | `quote` | `quote-acknowledgement.html` | `DENGAGE_TX_EMAIL_QUOTE`<br>`DENGAGE_TX_PUSH_QUOTE` |
-| Specification downloaded | `brochure` | `brochure-delivery.html` | `DENGAGE_TX_EMAIL_BROCHURE`<br>`DENGAGE_TX_PUSH_BROCHURE` |
-| Newsletter signup | `newsletter` | `newsletter-welcome.html` | `DENGAGE_TX_EMAIL_NEWSLETTER`<br>`DENGAGE_TX_PUSH_NEWSLETTER` |
-| Survey answered | `survey` | `survey-thanks.html` | `DENGAGE_TX_EMAIL_SURVEY`<br>`DENGAGE_TX_PUSH_SURVEY` |
-| Walk in logged at the showroom | `showroom_visit` | `showroom-visit.html` | `DENGAGE_TX_EMAIL_WALKIN`<br>`DENGAGE_TX_PUSH_WALKIN` |
-| Test drive completed | `test_drive_done` | `test-drive-done.html` | `DENGAGE_TX_EMAIL_TD_DONE`<br>`DENGAGE_TX_PUSH_TD_DONE` |
-| Booked but did not arrive | `no_show` | `no-show-reinvite.html` | `DENGAGE_TX_EMAIL_NOSHOW`<br>`DENGAGE_TX_PUSH_NOSHOW` |
-| A message waiting in the app inbox | `inbox_message` | push only | `DENGAGE_TX_PUSH_INBOX` |
+| Test drive booked | `booking` | `booking-confirmation.html` | `DENGAGE_TX_EMAIL_NI_NI_BOOKING`<br>`DENGAGE_TX_PUSH_NI_CONTENT_ID` |
+| Quote requested | `quote` | `quote-acknowledgement.html` | `DENGAGE_TX_EMAIL_NI_QUOTE`<br>`DENGAGE_TX_PUSH_NI_QUOTE` |
+| Specification downloaded | `brochure` | `brochure-delivery.html` | `DENGAGE_TX_EMAIL_NI_BROCHURE`<br>`DENGAGE_TX_PUSH_NI_BROCHURE` |
+| Newsletter signup | `newsletter` | `newsletter-welcome.html` | `DENGAGE_TX_EMAIL_NI_NEWSLETTER`<br>`DENGAGE_TX_PUSH_NI_NEWSLETTER` |
+| Walk in logged at the showroom | `showroom_visit` | `showroom-visit.html` | `DENGAGE_TX_EMAIL_NI_WALKIN`<br>`DENGAGE_TX_PUSH_NI_WALKIN` |
+| Test drive completed | `test_drive_done` | `test-drive-done.html` | `DENGAGE_TX_EMAIL_NI_TD_DONE`<br>`DENGAGE_TX_PUSH_NI_TD_DONE` |
+| Booked but did not arrive | `no_show` | `no-show-reinvite.html` | `DENGAGE_TX_EMAIL_NI_NOSHOW`<br>`DENGAGE_TX_PUSH_NI_NOSHOW` |
 
 Push copy is in [PUSH.md](PUSH.md), one section each.
 
@@ -28,7 +25,7 @@ carries a dealer name and a footer. So a push variable is only needed where
 this demo wants copy of its own, and an email variable is needed for every
 moment.
 
-    supabase secrets set DENGAGE_TX_EMAIL_QUOTE=<public id> --project-ref <ref>
+    supabase secrets set DENGAGE_TX_EMAIL_NI_QUOTE=<public id> --project-ref <ref>
 
 The function's health check lists the state of every moment for both demos:
 
@@ -46,8 +43,8 @@ empty here and are not used.
 | `$Current.model` | the model, or the brand name when no car is in play | yes |
 | `$Current.model_url` | that model's page on the demo | yes |
 | `$Current.booking_url` | the test drive form, with the model already chosen where there is one | yes |
-| `$Current.model_image` | that model's banner, JPEG, near enough 2:1 for a rich push | yes |
-| `$Current.model_seats` | seats, the figure this brand's own site publishes | with a known model |
+| `$Current.model_image` | not sent by this demo. Its capture has no per model artwork a message can use, and the wrong car is worse than no car | never |
+| `$Current.model_price` | from, the figure this brand's own site publishes | with a known model |
 | `$Current.model_category` | SUV, Sedan or Sports | with a known model |
 | `$Current.first_name` | what the visitor typed | when given |
 | `$Current.full_name` | first and last together | when given |

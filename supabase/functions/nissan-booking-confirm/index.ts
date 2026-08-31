@@ -36,6 +36,14 @@
 // top of panel/lincoln/README.md alongside the content it expects. A moment
 // with no id configured sends nothing and says so, so a new one goes live by
 // setting two variables rather than by changing this file.
+//
+// TWO DEMOS SHARE THIS. Each page sends the brand it belongs to and the reply
+// names it back. They share every push content, because that copy names no
+// dealer and only the values differ; the newsletter is the one exception and
+// is held back for Nissan until it has its own. Email bodies are never shared:
+// they carry a dealer name and a footer, so Nissan reads its own ids from
+// DENGAGE_TX_EMAIL_NI_*, and a moment without one reports that it needs
+// content rather than sending a visitor to the wrong showroom.
 
 const ALLOWED_ORIGINS = new Set([
   'https://dengage-presales.github.io',
@@ -103,6 +111,28 @@ const MOMENTS: Record<string, Moment> = {
     push: Deno.env.get('DENGAGE_TX_PUSH_NOSHOW') ?? 'e974aaf2-4b7c-409c-8a57-91565a226bf3',
   },
 };
+/* The Nissan demo's own email bodies, one per moment. They cannot be shared
+   with Lincoln: an email carries a dealer name and a footer, and telling a
+   Nissan visitor about Mohamed Yousuf Naghi Motors would be worse than sending
+   nothing. A moment with no id here reports that it needs content. */
+const NISSAN_EMAIL: Record<string, string> = {
+  booking: Deno.env.get('DENGAGE_TX_EMAIL_NI_BOOKING') ?? '',
+  quote: Deno.env.get('DENGAGE_TX_EMAIL_NI_QUOTE') ?? '',
+  brochure: Deno.env.get('DENGAGE_TX_EMAIL_NI_BROCHURE') ?? '',
+  newsletter: Deno.env.get('DENGAGE_TX_EMAIL_NI_NEWSLETTER') ?? '',
+  survey: Deno.env.get('DENGAGE_TX_EMAIL_NI_SURVEY') ?? '',
+  showroom_visit: Deno.env.get('DENGAGE_TX_EMAIL_NI_WALKIN') ?? '',
+  test_drive_done: Deno.env.get('DENGAGE_TX_EMAIL_NI_TD_DONE') ?? '',
+  no_show: Deno.env.get('DENGAGE_TX_EMAIL_NI_NOSHOW') ?? '',
+  abandoned_booking: Deno.env.get('DENGAGE_TX_EMAIL_NI_ABANDONED') ?? '',
+};
+/* Push content Nissan needs of its own. Everything absent here falls back to
+   the shared content, because that copy names no dealer. */
+const NISSAN_PUSH: Record<string, string> = {
+  newsletter: Deno.env.get('DENGAGE_TX_PUSH_NI_NEWSLETTER') ?? '',
+};
+const PUSH_NAMES_A_DEALER = new Set(['newsletter']);
+
 const APP_ID = Deno.env.get('DENGAGE_APP_ID') ?? '99d9b8fb-0c62-5a85-3e43-2402554d93a5';
 const SB_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SB_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -171,51 +201,92 @@ async function dengageToken(): Promise<string> {
   return tokenCache.value;
 }
 
-/* What the messages can say about the car, derived here from the model id
-   rather than taken from the page, so a request cannot put arbitrary text or
-   links into a send. Every value comes from the source site: the three model
-   names, the seat counts it publishes, the image it uses on its own range
-   page, and the demo's page for that model. The site publishes no prices, so
-   there is no price here to quote. */
-const DEMO_ORIGIN = 'https://dengage-presales.github.io/nissanksa/lincoln/';
-/* The image a message carries is the source site's own banner for that model,
-   chosen for the shape a message needs rather than the shape a web page needs:
-   1440 by 720, which is the 2:1 a rich push asks for, under 200KB, and JPEG.
-   The range page images are portrait or AVIF, and both fail here: a portrait
-   crop fills a push badly, and no notification or mail client decodes AVIF. */
-const VEHICLES: Record<string, { name: string; seats: number; image: string }> = {
-  navigator: { name: 'Navigator', seats: 8, image: 'assets/cms/storage/lincoln_common/navigator-2025/overview/main-banner/desktop/overview-main-banner.jpg' },
-  aviator: { name: 'Aviator', seats: 7, image: 'assets/cms/storage/lincoln_common/Aviator-2025/parent-page/main-banner.jpg' },
-  corsair: { name: 'Corsair', seats: 5, image: 'assets/cms/storage/lincoln_common/Corsair/parent-page/overview-main-banner_D.jpg' },
+/* What the messages can say about the car, derived here from the brand and
+   the model id rather than taken from the page, so a request cannot put
+   arbitrary text or links into a send. Every value comes from the source site
+   each demo was built from: the model names, the figures those sites publish,
+   the imagery they use, and the demo's own page for that model.
+
+   Two demos share this function. They share the push content too, because that
+   copy names no dealer and only the values below change between them. The
+   email bodies do not share: they carry a dealer name and a footer, so each
+   brand has its own. */
+type Vehicle = { name: string; category: string; seats?: number; price?: number; image?: string; path?: string };
+type Brand = { origin: string; form: string; stands_in: string; image?: string; vehicles: Record<string, Vehicle> };
+
+const BRANDS: Record<string, Brand> = {
+  lincoln: {
+    origin: 'https://dengage-presales.github.io/nissanksa/lincoln/',
+    form: 'forms/testdrive/',
+    stands_in: 'Lincoln',
+    /* Used when no car is in play. The brand's own concept interior, which
+       belongs to no single model. */
+    image: 'assets/cms/storage/lincoln_common/100-years-of-lincoln/header-background-image.jpg',
+    /* The banner each message carries is the source site's own, chosen for the
+       shape a message needs rather than the shape a web page needs: 1440 by
+       720, which is the 2:1 a rich push asks for, under 200KB, and JPEG. The
+       range page images are portrait or AVIF, and both fail here: a portrait
+       crop fills a push badly, and no notification or mail client decodes AVIF.
+       The site publishes no prices, so there is no price here to quote. */
+    vehicles: {
+      navigator: { name: 'Navigator', category: 'SUV', seats: 8, image: 'assets/cms/storage/lincoln_common/navigator-2025/overview/main-banner/desktop/overview-main-banner.jpg' },
+      aviator: { name: 'Aviator', category: 'SUV', seats: 7, image: 'assets/cms/storage/lincoln_common/Aviator-2025/parent-page/main-banner.jpg' },
+      corsair: { name: 'Corsair', category: 'SUV', seats: 5, image: 'assets/cms/storage/lincoln_common/Corsair/parent-page/overview-main-banner_D.jpg' },
+    },
+  },
+  nissan: {
+    origin: 'https://dengage-presales.github.io/nissanksa/',
+    form: 'book-a-test-drive/',
+    stands_in: 'Nissan',
+    /* No image, deliberately. That capture carries a 300 pixel side shot per
+       model, far too small for a message, and wide banners that cannot be
+       attributed to one model. Sending the wrong car's photograph is worse
+       than sending none, so a Nissan message carries no picture until the
+       dealer supplies per model art. Every other value personalizes. */
+    vehicles: {
+      /* Starting prices as the source site published them on 28 August 2026.
+         The Tekton is announced without one, so it carries none rather than an
+         invented figure. The NISMO has no page of its own in this build and
+         routes to the Patrol, exactly as its card does. */
+      'magnite': { name: 'Magnite', category: 'SUV', price: 69999 },
+      'kicks': { name: 'Kicks', category: 'SUV', price: 89599 },
+      'x-trail': { name: 'X-Trail', category: 'SUV', price: 104999 },
+      'x-terra': { name: 'X-Terra', category: 'SUV', price: 118999 },
+      'pathfinder': { name: 'Pathfinder', category: 'SUV', price: 164999 },
+      'patrol': { name: 'Patrol', category: 'SUV', price: 270999 },
+      'patrol-pro4x': { name: 'Patrol PRO-4X', category: 'SUV', price: 380999 },
+      'patrol-nismo': { name: 'Patrol NISMO', category: 'SUV', price: 450999, path: 'patrol' },
+      'altima': { name: 'Altima', category: 'Sedan', price: 112700 },
+      'z': { name: 'Z', category: 'Sports', price: 261999 },
+      'tekton': { name: 'Tekton', category: 'SUV' },
+    },
+  },
 };
 
-/* When the moment carries no car, the message still needs every tag it uses to
-   resolve to something. A notification that renders a gap where the model
-   should be is the one failure a visitor sees before anything else, so these
-   four are always sent: the brand name stands in for the model, the links go
-   to the range and to the unfiltered form, and the image is the brand's own
-   concept interior, which belongs to no single model. Everything else stays
-   optional and is only ever printed inside a condition, because a city, a
-   showroom or a purchase horizon has no honest stand in. */
-const GENERIC = {
-  model: 'Lincoln',
-  model_url: DEMO_ORIGIN,
-  model_image: DEMO_ORIGIN + 'assets/cms/storage/lincoln_common/100-years-of-lincoln/header-background-image.jpg',
-  booking_url: DEMO_ORIGIN + 'forms/testdrive/',
-};
-
-function vehicleParams(modelId?: string, modelName?: string): Record<string, string> {
-  const v = modelId ? VEHICLES[modelId.toLowerCase()] : undefined;
-  if (!v) return { ...GENERIC, ...(modelName ? { model: modelName } : {}) };
-  return {
-    model: v.name,
-    model_id: modelId!.toLowerCase(),
-    model_seats: String(v.seats),
-    model_category: 'SUV',
-    model_url: DEMO_ORIGIN + 'vehicles/' + modelId!.toLowerCase() + '/',
-    model_image: DEMO_ORIGIN + v.image,
-    booking_url: DEMO_ORIGIN + 'forms/testdrive/?model=' + encodeURIComponent(v.name),
+function vehicleParams(brandKey: string, modelId?: string, modelName?: string): Record<string, string> {
+  const b = BRANDS[brandKey] ?? BRANDS.lincoln;
+  const id = modelId ? modelId.toLowerCase() : '';
+  const v = id ? b.vehicles[id] : undefined;
+  /* These four resolve whatever the moment carries. A notification that
+     renders a gap where the model should be is the one failure a visitor sees
+     before anything else, so the brand name stands in for an unknown model and
+     the links fall back to the range and the unfiltered form. Everything else
+     stays optional and is only ever printed inside a condition, because a
+     city, a showroom or a purchase horizon has no honest stand in. */
+  const out: Record<string, string> = {
+    model: v ? v.name : (modelName || b.stands_in),
+    model_url: b.origin + (v ? 'vehicles/' + (v.path ?? id) + '/' : ''),
+    booking_url: b.origin + b.form + (v ? '?model=' + encodeURIComponent(v.name) : ''),
   };
+  if (v) {
+    out.model_id = id;
+    out.model_category = v.category;
+    if (v.seats) out.model_seats = String(v.seats);
+    if (v.price) out.model_price = 'SAR ' + v.price.toLocaleString('en-US');
+    if (v.image) out.model_image = b.origin + v.image;
+  }
+  if (!out.model_image && b.image) out.model_image = b.origin + b.image;
+  return out;
 }
 
 const seen = new Map<string, number[]>();
@@ -240,9 +311,11 @@ Deno.serve(async (req: Request) => {
     return reply({
       moments: Object.fromEntries(Object.entries(MOMENTS).map(([k, m]) => [k, {
         label: m.label,
-        email: m.email ? 'configured' : 'needs content',
-        push: m.push ? 'configured' : 'needs content',
+        lincoln: (m.email ? 'email' : 'no email') + ', ' + (m.push ? 'push' : 'no push'),
+        nissan: (NISSAN_EMAIL[k] ? 'email' : 'no email') + ', ' +
+          ((NISSAN_PUSH[k] || (!PUSH_NAMES_A_DEALER.has(k) && m.push)) ? 'push' : 'no push'),
       }])),
+      brands: Object.keys(BRANDS),
       app_id: APP_ID,
       api_user_configured: !!(Deno.env.get('DENGAGE_API_USERKEY') && Deno.env.get('DENGAGE_API_PASSWORD')),
       egress_proxy_configured: !!EGRESS_PROXY,
@@ -259,6 +332,18 @@ Deno.serve(async (req: Request) => {
   const momentKey = clean(raw.moment, 40) ?? 'booking';
   const moment = MOMENTS[momentKey];
   if (!moment) return reply({ error: 'unknown moment' }, 400, origin);
+  /* Which demo is asking. Lincoln by default, because it asked first and its
+     pages were sending before this field existed. */
+  const brandKey = (clean(raw.brand, 20) ?? 'lincoln').toLowerCase();
+  if (!BRANDS[brandKey]) return reply({ error: 'unknown brand' }, 400, origin);
+  const emailId = brandKey === 'nissan' ? (NISSAN_EMAIL[momentKey] ?? '') : moment.email;
+  /* The push copy names no dealer, so one content serves both demos and only
+     the values change. The newsletter is the one exception: its copy names the
+     dealer it welcomes you to, so it does not carry over, and the moment
+     reports that it needs content until Nissan has its own. */
+  const pushId = brandKey === 'nissan'
+    ? (NISSAN_PUSH[momentKey] ?? (PUSH_NAMES_A_DEALER.has(momentKey) ? '' : moment.push))
+    : moment.push;
 
   const lead = {
     contact_key: clean(raw.contact_key, 48),
@@ -291,7 +376,7 @@ Deno.serve(async (req: Request) => {
       params[k] = v as string;
     }
   }
-  Object.assign(params, vehicleParams(lead.model_id, lead.model));
+  Object.assign(params, vehicleParams(brandKey, lead.model_id, lead.model));
   if (lead.name) params.first_name = lead.name;
   if (lead.name || lead.surname) {
     params.full_name = [lead.name, lead.surname].filter(Boolean).join(' ');
@@ -303,13 +388,13 @@ Deno.serve(async (req: Request) => {
   try {
     const token = await dengageToken();
 
-    if (lead.email && moment.email) {
+    if (lead.email && emailId) {
       const res = await dengagePost('/transactional/email', {
         send: { to: lead.email, toLanguage: 'EN' },
-        content: { templateId: moment.email },
+        content: { templateId: emailId },
         current: params,
         reporting: { trackOpen: true, trackClick: true },
-        tags: ['demo', momentKey],
+        tags: ['demo', brandKey, momentKey],
       }, token);
       out.email = res.ok ? 'sent' : `error HTTP ${res.status}`;
       notes.push('email: ' + res.text.slice(0, 300));
@@ -319,7 +404,7 @@ Deno.serve(async (req: Request) => {
       out.email = 'needs content for ' + momentKey;
     }
 
-    if (moment.push) {
+    if (pushId) {
       /* The push API takes no inline title or body: every word comes from the
          saved content, personalized through these two. They carry the same
          values so the content can use whichever tag form it was built with. */
@@ -333,7 +418,7 @@ Deno.serve(async (req: Request) => {
         expire: { type: 'PERIOD', period: 30, periodType: 'DAY' },
       };
       const res = await dengagePost('/transactional/push', {
-        contentId: moment.push,
+        contentId: pushId,
         contactKey: lead.contact_key,
         appId: APP_ID,
         sendToAll: true,
@@ -341,7 +426,7 @@ Deno.serve(async (req: Request) => {
         current: params,
         customParameters: Object.entries(params).map(([key, value]) => ({ key, value })),
         inboxParams,
-        tags: ['demo', momentKey],
+        tags: ['demo', brandKey, momentKey],
       }, token);
       out.push = res.ok ? 'sent' : `error HTTP ${res.status}`;
       notes.push('push: ' + res.text.slice(0, 300));
@@ -354,14 +439,14 @@ Deno.serve(async (req: Request) => {
         out.push = 'no device subscribed for this contact';
         if (lead.device_token) {
           const direct = await dengagePost('/transactional/push', {
-            contentId: moment.push,
+            contentId: pushId,
             token: lead.device_token,
             appId: APP_ID,
             language: 'EN',
             current: params,
             customParameters: Object.entries(params).map(([key, value]) => ({ key, value })),
             inboxParams,
-            tags: ['demo', momentKey],
+            tags: ['demo', brandKey, momentKey],
           }, token);
           out.push = direct.ok ? 'sent to this device by token' : `error HTTP ${direct.status}`;
           notes.push('push by token: ' + direct.text.slice(0, 300));
@@ -400,6 +485,6 @@ Deno.serve(async (req: Request) => {
     } catch { /* the sends already happened; the record is a convenience */ }
   }
 
-  return reply({ moment: momentKey, email: out.email, push: out.push,
+  return reply({ brand: brandKey, moment: momentKey, email: out.email, push: out.push,
                  personalized: Object.keys(params).sort() }, 200, origin);
 });

@@ -42,10 +42,10 @@
     /* Every signal names the real mechanics it uses, on the button itself.
        A branch of 'home' resolves to the chosen persona's own showroom. */
     var SIGNALS = [
-        { id: 'walk_in',           label: 'Walk-in captured',        detail: 'Reception logs a visitor at the showroom',            lead: { source: 'showroom', branch: 'home' } },
+        { id: 'walk_in',           label: 'Walk-in captured',        detail: 'Reception logs a visitor at the showroom',            lead: { source: 'showroom', branch: 'home' }, moment: 'showroom_visit' },
         { id: 'test_drive_booked', label: 'Test drive booked offline', detail: 'Booked at the desk or over the phone',              lead: { source: 'showroom', branch: 'home' }, order: true },
-        { id: 'test_drive_done',   label: 'Test drive completed',    detail: 'The keys came back, the follow-up can start',         lead: { source: 'showroom' } },
-        { id: 'no_show',           label: 'Test drive no-show',      detail: 'Booked, never came; the re-invite journey reacts',    lead: { source: 'showroom' } },
+        { id: 'test_drive_done',   label: 'Test drive completed',    detail: 'The keys came back, the follow-up can start',         lead: { source: 'showroom' }, moment: 'test_drive_done' },
+        { id: 'no_show',           label: 'Test drive no-show',      detail: 'Booked, never came; the re-invite journey reacts',    lead: { source: 'showroom' }, moment: 'no_show' },
         { id: 'call_outcome',      label: 'Call outcome: call later', detail: 'The call center logs the answer instead of closing', lead: { source: 'call-center', note: 'call later' } },
         { id: 'quote_issued',      label: 'Quote issued',            detail: 'A dealer quote enters the follow-up journey',         lead: { source: 'showroom', branch: 'home' } },
         { id: 'whatsapp_intent',   label: 'WhatsApp intent signal',  detail: 'Simulates the Value First chatbot calling Dengage',   lead: { source: 'value-first-whatsapp', note: 'asked about financing' } },
@@ -121,8 +121,69 @@
                     paymentMethod: 'other'
                 }, [{ id: car.id, quantity: 1, price: car.price }]);
             }
+            /* Three of these are moments the customer hears about. The rest
+               change who they are without saying anything, which is what stops
+               the wrong message going out later. */
+            if (spec.moment) messageFor(spec.moment, state.persona, car);
             log('Sent ' + spec.id + ' for ' + state.persona, row);
         });
+    }
+
+    /* What the visitor told the website, if this browser is that visitor. The
+       seeded personas carry a name and a city here in the page; someone who
+       arrived through the storefront carries what they typed into a form, and
+       an address is the difference between a follow-up they can read and a
+       notification they may never have allowed. */
+    function ownLead() {
+        try {
+            var raw = window.localStorage.getItem('dps:' + window.DEMO_SLUG + ':lead');
+            return raw ? JSON.parse(raw) : null;
+        } catch (err) { return null; }
+    }
+
+    function messageFor(moment, personaKey, car) {
+        var url = (window.DEMO_CONFIG || {}).bookingConfirm;
+        if (!url || typeof window.fetch !== 'function') return;
+        var persona = PERSONAS.filter(function (p) { return p.key === personaKey; })[0];
+        /* A key that is not one of the seeded eight is a real visitor who came
+           in through the website, and is the whole point of the offline half:
+           they book online, then walk into a showroom. Whoever it is gets the
+           message, with the details we have and without the ones we do not. */
+        var own = (window.DemoIdentity || {}).contactKey === personaKey ? ownLead() : null;
+        var body = {
+            brand: 'nissan',
+            moment: moment,
+            contact_key: personaKey,
+            name: persona ? (persona.name || '').split(' ')[0] : (own ? own.name : undefined),
+            surname: own ? own.surname : undefined,
+            email: own ? own.email : undefined,
+            gsm: own ? own.gsm : undefined,
+            city: persona ? persona.city : (own ? own.city : undefined),
+            branch: persona ? HOME_BRANCH[persona.city] : undefined,
+            model: car ? car.name : undefined,
+            model_id: car ? car.id : undefined
+        };
+        /* Only when this browser IS the persona: then its own token is a fair
+           fallback if Dengage has not bound the key to a subscription yet.
+           Firing a signal for someone else must never push to this machine. */
+        if ((window.DemoIdentity || {}).contactKey === personaKey) {
+            try {
+                window.dengage('getToken', function (value) {
+                    if (value) body.device_token = String(value);
+                });
+            } catch (err) { /* the SDK is not there */ }
+        }
+        try {
+            window.fetch(url, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+                keepalive: true
+            }).then(function (res) { return res.json(); })
+              .then(function (answer) {
+                  log('Asked Dengage for the ' + moment + ' message', answer);
+              })['catch'](function () { /* the signal itself is already sent */ });
+        } catch (err) { /* no fetch */ }
     }
 
     function cityOf(key) {

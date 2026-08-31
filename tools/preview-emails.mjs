@@ -19,15 +19,15 @@
    rather than a sandbox without egress.
 
        python3 -m http.server 8101
-       node tools/preview-lincoln-emails.mjs
-       # writes to .preview/lincoln-emails/ , which git ignores */
+       node tools/preview-emails.mjs
+       # writes to .preview/emails/ , which git ignores */
 import { createRequire } from 'node:module';
 const { chromium } = createRequire('/opt/node22/lib/node_modules/')('playwright');
 import { readFileSync, readdirSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const SRC = 'panel/lincoln';
-const OUT = '.preview/lincoln-emails';
+const SRC_DIRS = ['panel/lincoln', 'panel/nissan'];
+const OUT = '.preview/emails';
 const ORIGIN = 'http://localhost:8101/lincoln/';
 
 /* Everything a visitor can give, and the same message with none of it. */
@@ -45,6 +45,9 @@ const BARE = {
   model_image: ORIGIN + 'assets/cms/storage/lincoln_common/100-years-of-lincoln/header-background-image.jpg',
   booking_url: ORIGIN + 'forms/testdrive/',
 };
+/* Nissan publishes a starting price and no seat count, and its messages carry
+   no photograph, so its bodies are rendered with what they actually receive. */
+Object.assign(FULL, { model_price: 'SAR 270,999' });
 
 function render(html, values) {
   let out = html;
@@ -63,17 +66,19 @@ function render(html, values) {
 }
 
 mkdirSync(OUT, { recursive: true });
-const bodies = readdirSync(SRC).filter((f) => f.endsWith('.html') && !f.startsWith('_'));
+const bodies = SRC_DIRS.flatMap((dir) =>
+  readdirSync(dir).filter((f) => f.endsWith('.html') && !f.startsWith('_'))
+    .map((f) => ({ dir, file: f })));
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 const page = await browser.newPage({ viewport: { width: 700, height: 1000 } });
 let problems = 0;
 
-for (const file of bodies) {
-  const source = readFileSync(join(SRC, file), 'utf8');
+for (const { dir, file } of bodies) {
+  const source = readFileSync(join(dir, file), 'utf8');
   for (const [variant, values] of [['filled', FULL], ['bare', BARE]]) {
     const html = render(source, values);
     const leftover = html.match(/\{%[\s\S]{0,50}/g);
-    const name = `${file.replace(/\.html$/, '')}.${variant}`;
+    const name = `${dir.split('/').pop()}.${file.replace(/\.html$/, '')}.${variant}`;
     const path = join(OUT, name + '.html');
     writeFileSync(path, html);
     await page.goto('file://' + join(process.cwd(), path));

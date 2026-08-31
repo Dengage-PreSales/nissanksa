@@ -429,13 +429,32 @@ has not allowed notifications answers `Token not found with given ContactKey`.
 The confirmation card offers the permission for exactly that reason: allow it
 and the same confirmation arrives as a notification seconds later.
 
-## 12. The ten moments that can message
+## 12. The moments that can message, on both demos
 
-Added 31 August. The demo asks Dengage for a transactional email and a push at
-any of these moments, and all ten are authored and wired: nine send on both
-channels, and the inbox message is a notification with no email counterpart.
-Each was fired once and accepted on both channels on 31 August. Check the
-current state at any time by opening the function URL in a browser:
+Added 31 August. Either demo asks Dengage for a transactional email and a push
+at these moments. One function serves both and tells them apart by the brand
+each page sends, so the reply names it back.
+
+**The push contents are shared.** That copy names no dealer, so one content
+serves both demos and only the values change: the model, its figure, its page
+and its photograph. The newsletter is the single exception, because its copy
+names the dealer it welcomes you to, and the function holds it back for Nissan
+rather than sending the wrong dealer's words.
+
+**The email bodies are never shared.** An email carries a dealer name and a
+footer. Lincoln's ten are authored and live; Nissan's seven are written and
+waiting in [`nissan/`](nissan/README.md), and until their ids are set the
+Nissan side reports `needs content` and sends nothing.
+
+Two other differences follow from the source sites rather than from choice.
+Lincoln publishes seat counts and no prices, so its messages carry seats;
+Nissan publishes starting prices and no seat counts, so its messages carry the
+price. And a Nissan message carries no photograph: that capture has a 300 pixel
+side shot per model and wide banners that cannot be attributed to one model,
+and the wrong car is worse than no car.
+
+Check the current state of both at any time by opening the function URL in a
+browser:
 `.../functions/v1/nissan-booking-confirm` lists every moment and whether its
 content is configured.
 
@@ -460,7 +479,9 @@ composing from scratch.
 
 **To replace one**, author the new content and set the variable for that
 channel; the message function carries the current ids as its defaults, so a
-variable is only needed when one changes. The names are:
+variable is only needed when one changes. Nissan's own email ids read from the
+same names with `NI_` after `EMAIL_`, listed in [`nissan/README.md`](nissan/README.md).
+The Lincoln names are:
 `DENGAGE_TX_EMAIL_ABANDONED`, `DENGAGE_TX_PUSH_ABANDONED`,
 `DENGAGE_TX_EMAIL_QUOTE`, `DENGAGE_TX_PUSH_QUOTE`,
 `DENGAGE_TX_EMAIL_BROCHURE`, `DENGAGE_TX_PUSH_BROCHURE`,

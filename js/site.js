@@ -29,6 +29,7 @@
     var slug = window.DEMO_SLUG || 'nissanksa';
     var TD_KEY = 'dps:' + slug + ':tdcart';
     var CAMPAIGN_KEY = 'dps:' + slug + ':campaign';
+    var LEAD_KEY = 'dps:' + slug + ':lead';
     var WISH_KEY = 'dps:' + slug + ':wishlist';
 
     /* The campaign that brought them, kept for as long as the browser keeps
@@ -188,13 +189,93 @@
         };
         for (var k in fields) { if (fields[k] !== undefined) body[k] = fields[k]; }
         try {
-            window.fetch(url, {
+            return window.fetch(url, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(body),
                 keepalive: true
             })['catch'](function () { /* the lead's SDK trail is unaffected */ });
         } catch (err) { /* no fetch, no relay */ }
+        return null;
+    }
+
+    /* Run something when a promise settles or when the wait is up, whichever
+       comes first, and only ever once. */
+    function once(promise, ms, fn) {
+        var done = false;
+        function go() {
+            if (done) return;
+            done = true;
+            fn();
+        }
+        if (promise && promise.then) promise.then(go, go);
+        window.setTimeout(go, ms);
+    }
+
+    /* What the visitor typed, read off whichever lead form they used. */
+    function leadDetails(form) {
+        function val(name) {
+            var el = form && form.querySelector('[name="' + name + '"]');
+            var v = el && el.value ? el.value.trim() : '';
+            if (!v || /^select/i.test(v)) return undefined;
+            return v;
+        }
+        return {
+            name: val('FirstName'), surname: val('LastName'),
+            email: val('Email'), gsm: val('Phone'), city: val('City')
+        };
+    }
+
+    /* Kept on this device so the rest of the demo can address them. The dealer
+       cockpit reads it: a walk in logged for someone who booked on this browser
+       earns an email as well as a notification, which is the difference between
+       a moment that lands and one that depends on notifications having been
+       allowed. It never leaves the browser except in the messages this visitor
+       asked for. */
+    function rememberLead(details) {
+        if (!details || !details.email) return;
+        writeJson(LEAD_KEY, {
+            name: details.name, surname: details.surname,
+            email: details.email, gsm: details.gsm, city: details.city
+        });
+    }
+
+    /* The messages a moment earns, asked for through Dengage's transactional
+       API. The content lives in the panel; this only names the moment and who
+       it is for, and a refusal costs the lead nothing because the relay has
+       already stored it. */
+    function confirmBooking(details, moment) {
+        var url = (window.DEMO_CONFIG || {}).bookingConfirm;
+        if (!url || typeof window.fetch !== 'function') return;
+        var token = null;
+        try {
+            window.dengage('getToken', function (value) { if (value) token = String(value); });
+        } catch (err) { /* the SDK is not there */ }
+        var body = {
+            brand: 'nissan',
+            moment: moment || 'booking',
+            contact_key: (window.DemoIdentity || {}).contactKey,
+            name: details.name, surname: details.surname,
+            email: details.email, gsm: details.gsm,
+            model: details.model, model_id: details.model_id,
+            city: details.city, branch: details.branch,
+            purchase_horizon: details.horizon
+        };
+        if (token) body.device_token = token;
+        try {
+            window.fetch(url, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+                keepalive: true
+            }).then(function (res) { return res.json(); })
+              .then(function (answer) {
+                  try {
+                      document.dispatchEvent(new CustomEvent('dps:' + slug + ':confirmation',
+                          { detail: answer }));
+                  } catch (err) { /* older browser, no CustomEvent constructor */ }
+              })['catch'](function () { /* the lead is already stored */ });
+        } catch (err) { /* no fetch */ }
     }
 
     /* ------------------------------------------------------------------ */
@@ -493,7 +574,16 @@
             if (city && /select/i.test(city)) city = undefined;
             if (horizon && /select/i.test(horizon)) horizon = undefined;
             mintIdentity();
-            relayLead(form, { form: 'booking', model: car.id, city: city, purchase_horizon: horizon });
+            var relayed = relayLead(form, { form: 'booking', model: car.id, city: city, purchase_horizon: horizon });
+            var summary = leadDetails(form);
+            summary.model = car.name; summary.model_id = car.id;
+            summary.city = city || summary.city; summary.horizon = horizon;
+            rememberLead(summary);
+            /* The confirmation follows the relay, because the contact has to
+               exist before Dengage can address a push to it, but it does not
+               wait forever: a slow connection must not cost the visitor their
+               email and their notification. */
+            once(relayed, 2500, function () { confirmBooking(summary); });
             var line = pending() || { id: car.id, quantity: 1, price: car.price };
             window.DengageEvents.order({
                 orderId: 'DPS-' + slug + '-td-' + Date.now(),
@@ -537,7 +627,13 @@
                 if (city && /select/i.test(city)) city = undefined;
                 mintIdentity();
                 if (window.location.pathname.indexOf('request-a-quote') !== -1) {
-                    relayLead(form, { form: 'quote', model: car ? car.id : undefined, city: city, purchase_horizon: horizon });
+                    var quoteRelay = relayLead(form, { form: 'quote', model: car ? car.id : undefined, city: city, purchase_horizon: horizon });
+                    var quoteLead = leadDetails(form);
+                    quoteLead.model = car ? car.name : undefined;
+                    quoteLead.model_id = car ? car.id : undefined;
+                    quoteLead.city = city || quoteLead.city; quoteLead.horizon = horizon;
+                    rememberLead(quoteLead);
+                    once(quoteRelay, 2500, function () { confirmBooking(quoteLead, 'quote'); });
                     if (car) window.DengageEvents.addToCart({ id: car.id, quantity: 1, price: car.price }, cartLines());
                     window.DengageEvents.leadEvent('quote_issued', {
                         model: car ? car.id : undefined, city: city, purchase_horizon: horizon,
@@ -547,7 +643,12 @@
                     return;
                 }
                 if (product === 'tekton' || window.location.pathname.indexOf('tekton') !== -1) {
-                    relayLead(form, { form: 'register_interest', model: 'tekton', city: city });
+                    var tektonRelay = relayLead(form, { form: 'register_interest', model: 'tekton', city: city });
+                    var tektonLead = leadDetails(form);
+                    tektonLead.model = 'Tekton'; tektonLead.model_id = 'tekton';
+                    tektonLead.city = city || tektonLead.city;
+                    rememberLead(tektonLead);
+                    once(tektonRelay, 2500, function () { confirmBooking(tektonLead, 'newsletter'); });
                     window.DengageEvents.leadEvent('register_interest', {
                         model: 'tekton', city: city, source: 'website'
                     });
@@ -562,7 +663,13 @@
                             if (!car && promo.indexOf(c.id) === 0) car = c;
                         });
                     }
-                    relayLead(form, { form: 'register_interest', model: car ? car.id : undefined, city: city, purchase_horizon: horizon });
+                    var promoRelay = relayLead(form, { form: 'register_interest', model: car ? car.id : undefined, city: city, purchase_horizon: horizon });
+                    var promoLead = leadDetails(form);
+                    promoLead.model = car ? car.name : undefined;
+                    promoLead.model_id = car ? car.id : undefined;
+                    promoLead.city = city || promoLead.city; promoLead.horizon = horizon;
+                    rememberLead(promoLead);
+                    once(promoRelay, 2500, function () { confirmBooking(promoLead, 'newsletter'); });
                     window.DengageEvents.leadEvent('register_interest', {
                         model: car ? car.id : undefined, city: city, purchase_horizon: horizon,
                         source: 'website', note: 'offer ' + promo
@@ -632,6 +739,10 @@
                 window.DengageEvents.leadEvent('brochure', {
                     model: car ? car.id : undefined, source: 'website'
                 });
+                confirmBooking({
+                    model: car ? car.name : undefined,
+                    model_id: car ? car.id : undefined
+                }, 'brochure');
                 toast(t('brochureSaved', { model: car ? car.name : 'Nissan' }));
             });
         });

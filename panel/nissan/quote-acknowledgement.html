@@ -1,8 +1,8 @@
-<!-- Lincoln demo message. Paste the block below into
+<!-- Nissan demo message. Paste the block below into
      Content > Email > new content > HTML source, and set:
 
-       Subject    The {%= $Current.model %} details, in one place
-       Preheader  Everything you were reading, kept for whenever you come back.
+       Subject    Your {%= $Current.model %} quote is being prepared
+       Preheader  A specialist is putting your figures together now.
 
      Every $Current value below is sent by the message function. model,
      model_url and booking_url are always sent, so they need no fallback; the
@@ -13,18 +13,14 @@
   <tr><td align="center" style="padding:26px 12px">
     <table role="presentation" width="520" cellpadding="0" cellspacing="0"
            style="width:520px;max-width:520px;background:#ffffff;border-top:3px solid #b45f1a">
-      <tr><td style="padding:0">
-        <img src="{%= $Current.model_image %}" width="520" alt="{%= $Current.model %}"
-             style="display:block;width:100%;max-width:520px;height:auto;border:0">
-      </td></tr>
       <tr><td style="padding:30px 28px 8px">
         <p style="margin:0 0 10px;font:400 11px/1 Arial,sans-serif;letter-spacing:.18em;
-                  text-transform:uppercase;color:#b45f1a">Specifications</p>
+                  text-transform:uppercase;color:#b45f1a">Quote requested</p>
         <h1 style="margin:0 0 12px;font:600 23px/1.25 Georgia,'Times New Roman',serif;color:#324047">
-          The {%= $Current.model %} details, kept for you
+          Your {%= $Current.model %} quote is on its way
         </h1>
         <p style="margin:0 0 20px;font:400 14.5px/1.65 Arial,sans-serif;color:#5b6770">
-          Here is the model you were reading about. The full specification sits on its page, and the showroom team can walk you through any part of it.
+          {% if ($Current.first_name) { %}Thank you {%= $Current.first_name %}. A specialist{% } else { %}Thank you. A specialist{% } %} is putting your figures together and will be in touch with them.
         </p>
       </td></tr>
       <tr><td style="padding:0 28px">
@@ -33,9 +29,9 @@
         <tr><td style="padding:9px 0;border-bottom:1px solid #ecebe8;font:400 12.5px/1.4 Arial,sans-serif;color:#8b9296">Model</td>
             <td style="padding:9px 0;border-bottom:1px solid #ecebe8;text-align:right;font:400 14px/1.4 Arial,sans-serif;color:#1c1f21">{%= $Current.model %}</td></tr>
         {% } %}
-        {% if ($Current.model_seats) { %}
-        <tr><td style="padding:9px 0;border-bottom:1px solid #ecebe8;font:400 12.5px/1.4 Arial,sans-serif;color:#8b9296">Seats</td>
-            <td style="padding:9px 0;border-bottom:1px solid #ecebe8;text-align:right;font:400 14px/1.4 Arial,sans-serif;color:#1c1f21">{%= $Current.model_seats %}</td></tr>
+        {% if ($Current.model_price) { %}
+        <tr><td style="padding:9px 0;border-bottom:1px solid #ecebe8;font:400 12.5px/1.4 Arial,sans-serif;color:#8b9296">From</td>
+            <td style="padding:9px 0;border-bottom:1px solid #ecebe8;text-align:right;font:400 14px/1.4 Arial,sans-serif;color:#1c1f21">{%= $Current.model_price %}</td></tr>
         {% } %}
         {% if ($Current.city) { %}
         <tr><td style="padding:9px 0;border-bottom:1px solid #ecebe8;font:400 12.5px/1.4 Arial,sans-serif;color:#8b9296">City</td>
@@ -51,16 +47,16 @@
         <a href="{%= $Current.model_url %}"
            style="display:inline-block;padding:12px 26px;background:#324047;color:#ffffff;
                   font:400 14px/1 Arial,sans-serif;letter-spacing:.04em;text-decoration:none">
-          Open the model page
+          Explore the model
         </a>
       </td></tr>
       <tr><td style="padding:18px 28px 28px">
-        <p style="margin:0;font:400 13px/1.65 Arial,sans-serif;color:#5b6770">When you would rather feel it than read it, a drive takes twenty minutes.</p>
+        <p style="margin:0;font:400 13px/1.65 Arial,sans-serif;color:#5b6770">A test drive can be arranged for the same visit if you would like one.</p>
       </td></tr>
       <tr><td style="padding:22px 28px 26px;background:#324047">
         <span style="font:700 15px/1 Arial,sans-serif;letter-spacing:.14em;color:#ffffff">DENGAGE</span><br><span style="font:400 9px/1.6 Arial,sans-serif;letter-spacing:.3em;color:#9aa3a8">AUTO DEMO</span>
         <p style="margin:14px 0 0;font:400 11.5px/1.7 Arial,sans-serif;color:#9aa3a8">
-          A demonstration message from a Dengage sales demo. Vehicle names and imagery come from the public Lincoln Saudi Arabia website of Mohamed Yousuf Naghi Motors. It is not sent for Lincoln or the dealer, and no booking was made with them.
+          A demonstration message from a Dengage sales demo, built on the public Nissan Saudi Arabia website. It is not sent for Nissan or any dealer, and no booking was made with them.
         </p>
         <p style="margin:10px 0 0;font:400 11.5px/1.7 Arial,sans-serif;color:#9aa3a8">
           <a href="{{unsubscribe-link}}" style="color:#9aa3a8">Unsubscribe</a>

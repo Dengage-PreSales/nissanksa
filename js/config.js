@@ -33,5 +33,9 @@ window.DEMO_CONFIG = {
        the function validates and rate limits on its own side. An empty
        string turns the relay off and the forms lose nothing but the copy
        of the lead. See panel/README.md section 1a. */
-    leadRelay: 'https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-lead-relay'
+    leadRelay: 'https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-lead-relay',
+    /* The messages a moment earns. The same function serves both demos and
+       tells them apart by the brand each page sends, so the push content is
+       shared and only the email bodies differ. panel/README.md section 12. */
+    bookingConfirm: 'https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-booking-confirm'
 };
