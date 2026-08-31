@@ -82,7 +82,7 @@ const MOMENTS: Record<string, Moment> = {
   no_show: {
     label: 'booked but did not arrive',
     email: Deno.env.get('DENGAGE_TX_EMAIL_NOSHOW') ?? '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_NOSHOW') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_NOSHOW') ?? 'e974aaf2-4b7c-409c-8a57-91565a226bf3',
   },
 };
 const APP_ID = Deno.env.get('DENGAGE_APP_ID') ?? '99d9b8fb-0c62-5a85-3e43-2402554d93a5';
@@ -160,10 +160,15 @@ async function dengageToken(): Promise<string> {
    page, and the demo's page for that model. The site publishes no prices, so
    there is no price here to quote. */
 const DEMO_ORIGIN = 'https://dengage-presales.github.io/nissanksa/lincoln/';
+/* The image a message carries is the source site's own banner for that model,
+   chosen for the shape a message needs rather than the shape a web page needs:
+   1440 by 720, which is the 2:1 a rich push asks for, under 200KB, and JPEG.
+   The range page images are portrait or AVIF, and both fail here: a portrait
+   crop fills a push badly, and no notification or mail client decodes AVIF. */
 const VEHICLES: Record<string, { name: string; seats: number; image: string }> = {
-  navigator: { name: 'Navigator', seats: 8, image: 'assets/cms/storage/lincoln_common/home-page/new-navigator.avif' },
-  aviator: { name: 'Aviator', seats: 7, image: 'assets/cms/storage/lincoln_common/offers/june-26/thumb/Aviator_June_Thumb.webp' },
-  corsair: { name: 'Corsair', seats: 5, image: 'assets/cms/storage/lincoln_common/home-page/CORSAIR_L.jpg' },
+  navigator: { name: 'Navigator', seats: 8, image: 'assets/cms/storage/lincoln_common/navigator-2025/overview/main-banner/desktop/overview-main-banner.jpg' },
+  aviator: { name: 'Aviator', seats: 7, image: 'assets/cms/storage/lincoln_common/Aviator-2025/parent-page/main-banner.jpg' },
+  corsair: { name: 'Corsair', seats: 5, image: 'assets/cms/storage/lincoln_common/Corsair/parent-page/overview-main-banner_D.jpg' },
 };
 
 function vehicleParams(modelId?: string, modelName?: string): Record<string, string> {

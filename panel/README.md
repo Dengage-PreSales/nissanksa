@@ -484,3 +484,34 @@ personalization is only ever through the parameters above. And Dengage holds
 the device token against whichever contact key claimed it last, so a push
 addressed to an older key answers `no device subscribed for this contact`.
 The live flow always addresses the key that just acted, which is why it lands.
+
+## 13. Two things to know about the push image, and about pushing to a persona
+
+Found on 31 August while testing the no-show push on a Mac.
+
+**The image.** A rich push wants a 2:1 image, and neither of two things works:
+a portrait crop, or AVIF, which no notification or mail client decodes. The
+demo now sends the source site's own model banner, 1440 by 720, JPEG, under
+200KB, so the same value serves the push and the email hero.
+
+**Where the image will and will not appear.** The panel says it plainly under
+Web Settings: Media, Icon and Badge are not supported in macOS Safari, and a
+notification on macOS shows as a plain system banner with text only in Chrome
+too, because macOS draws it rather than the browser. So the image is worth
+showing on Windows Chrome or on Android, and a Mac is the wrong machine to
+prove it on. The text personalization works everywhere: the no-show push on a
+Mac read "The Corsair is still here whenever you are", from
+`{%= $Current.model %}`.
+
+**Pushing to a persona from the cockpit.** Dengage holds a device token
+against whichever contact key claimed it last, and the seeded personas
+DPS-1 to DPS-8 have no device of their own, so a cockpit signal for DPS-1
+answers `no device subscribed for this contact` rather than reaching anything.
+To show an offline signal arriving as a notification, open the storefront as
+that persona first:
+
+    https://dengage-presales.github.io/nissanksa/lincoln/?ck=DPS-1
+
+allow notifications, and the browser is then DPS-1's device. Fire the walk in,
+the completed drive or the no-show from the cockpit for DPS-1 and it lands on
+that machine. The cockpit log prints what Dengage answered either way.
