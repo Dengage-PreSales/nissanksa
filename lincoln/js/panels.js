@@ -406,11 +406,22 @@
                     return;
                 }
                 log('Permission before asking: ' + (events.pushStatus() || 'unknown'));
+                /* A visitor who allows notifications has told us nothing about
+                   themselves, and can still be reached. Dengage addresses a
+                   device through the contact key that claimed it, so the key is
+                   minted here, before the subscription registers. It carries no
+                   personal data: it is an anonymous handle, and the same key
+                   later gains a name and an address if they ever fill a form,
+                   which is what keeps one profile rather than two. */
+                if (window.Site && window.Site.mintIdentity) window.Site.mintIdentity();
                 events.pushPrompt();
                 setTimeout(function () {
+                    var key = (window.DemoIdentity || {}).contactKey;
                     log('Permission now: ' + (events.pushStatus() || 'unknown') +
-                        '. Granted means the device is subscribed and a campaign or ' +
-                        'journey in the panel can reach it.');
+                        '. Granted means this device is subscribed' +
+                        (key ? ' as ' + key : '') +
+                        ', and a campaign, a journey or the transactional API can reach it, ' +
+                        'with nothing typed into a form.');
                 }, 1500);
                 if (window.Storefront) window.Storefront.closeOverlays();
                 return;

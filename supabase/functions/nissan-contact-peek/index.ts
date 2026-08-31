@@ -72,7 +72,9 @@ Deno.serve(async (req: Request) => {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
   if (rateLimited(ip)) return json(429, { error: 'rate limited' });
   const key = new URL(req.url).searchParams.get('key') ?? '';
-  if (!/^DPS-\d{1,16}$/.test(key)) return json(400, { error: 'key must be DPS-<digits>' });
+  /* The same shape the relay accepts, so a readable key like DPS-sg can be
+     looked up as easily as a minted DPS-<timestamp> one. */
+  if (!/^DPS-[A-Za-z0-9_-]{1,44}$/.test(key)) return json(400, { error: 'key must be a DPS- demo key' });
   try {
     const token = await dengageToken();
     const fields = ['name', 'surname', 'email', 'gsm', 'email_permission', 'gsm_permission', 'city'].join(',');

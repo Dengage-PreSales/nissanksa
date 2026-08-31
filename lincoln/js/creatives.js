@@ -463,6 +463,7 @@
             if (wantsPush) {
                 wantsPush.disabled = true;
                 wantsPush.textContent = 'Asking your browser';
+                if (window.Site && window.Site.mintIdentity) window.Site.mintIdentity();
                 if (window.DengageEvents && window.DengageEvents.pushPrompt) {
                     window.DengageEvents.pushPrompt();
                 }
