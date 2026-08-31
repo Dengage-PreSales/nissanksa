@@ -19,6 +19,11 @@
 // question "did the confirmation actually go" is answered by the record
 // rather than by an HTTP 200 on the page.
 //
+// It answers the storefront directly, without a project key, because the page
+// that calls it is public and carries none. What keeps it safe is that it
+// accepts nothing but a demo contact key and a known moment, sends only
+// content the panel already holds, and derives every link and image itself.
+//
 // Secrets, all optional, with the demo's own content ids as defaults:
 //   DENGAGE_API_USERKEY, DENGAGE_API_PASSWORD   the API user
 //   DENGAGE_API_BASE                            defaults to production
@@ -26,6 +31,11 @@
 //   DENGAGE_TX_EMAIL_CONTENT_ID                 email content, public id
 //   DENGAGE_TX_PUSH_CONTENT_ID                  push content, public id
 //   DENGAGE_APP_ID                              the web application guid
+//
+// Every other moment reads one variable per channel, named in the table at the
+// top of panel/lincoln/README.md alongside the content it expects. A moment
+// with no id configured sends nothing and says so, so a new one goes live by
+// setting two variables rather than by changing this file.
 
 const ALLOWED_ORIGINS = new Set([
   'https://dengage-presales.github.io',
@@ -176,9 +186,24 @@ const VEHICLES: Record<string, { name: string; seats: number; image: string }> =
   corsair: { name: 'Corsair', seats: 5, image: 'assets/cms/storage/lincoln_common/Corsair/parent-page/overview-main-banner_D.jpg' },
 };
 
+/* When the moment carries no car, the message still needs every tag it uses to
+   resolve to something. A notification that renders a gap where the model
+   should be is the one failure a visitor sees before anything else, so these
+   four are always sent: the brand name stands in for the model, the links go
+   to the range and to the unfiltered form, and the image is the brand's own
+   concept interior, which belongs to no single model. Everything else stays
+   optional and is only ever printed inside a condition, because a city, a
+   showroom or a purchase horizon has no honest stand in. */
+const GENERIC = {
+  model: 'Lincoln',
+  model_url: DEMO_ORIGIN,
+  model_image: DEMO_ORIGIN + 'assets/cms/storage/lincoln_common/100-years-of-lincoln/header-background-image.jpg',
+  booking_url: DEMO_ORIGIN + 'forms/testdrive/',
+};
+
 function vehicleParams(modelId?: string, modelName?: string): Record<string, string> {
   const v = modelId ? VEHICLES[modelId.toLowerCase()] : undefined;
-  if (!v) return modelName ? { model: modelName } : {};
+  if (!v) return { ...GENERIC, ...(modelName ? { model: modelName } : {}) };
   return {
     model: v.name,
     model_id: modelId!.toLowerCase(),
@@ -281,7 +306,7 @@ Deno.serve(async (req: Request) => {
         content: { templateId: moment.email },
         current: params,
         reporting: { trackOpen: true, trackClick: true },
-        tags: ['demo', 'test-drive'],
+        tags: ['demo', momentKey],
       }, token);
       out.email = res.ok ? 'sent' : `error HTTP ${res.status}`;
       notes.push('email: ' + res.text.slice(0, 300));
@@ -313,7 +338,7 @@ Deno.serve(async (req: Request) => {
         current: params,
         customParameters: Object.entries(params).map(([key, value]) => ({ key, value })),
         inboxParams,
-        tags: ['demo', 'test-drive'],
+        tags: ['demo', momentKey],
       }, token);
       out.push = res.ok ? 'sent' : `error HTTP ${res.status}`;
       notes.push('push: ' + res.text.slice(0, 300));
@@ -333,7 +358,7 @@ Deno.serve(async (req: Request) => {
             current: params,
             customParameters: Object.entries(params).map(([key, value]) => ({ key, value })),
             inboxParams,
-            tags: ['demo', 'test-drive'],
+            tags: ['demo', momentKey],
           }, token);
           out.push = direct.ok ? 'sent to this device by token' : `error HTTP ${direct.status}`;
           notes.push('push by token: ' + direct.text.slice(0, 300));

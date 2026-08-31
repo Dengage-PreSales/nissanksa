@@ -1,18 +1,21 @@
-<!-- Paste this into Content > Email > new content, HTML source.
-     Subject:    That helps, and it reaches the right people
-     Preheader:  Your answer is on your profile, so the showroom team sees what matters to you before they 
-     Every {%= $Current.x %} below is sent by the booking confirmation function.
-     A value that was not sent prints its fallback, never the word undefined. -->
+<!-- Lincoln demo message. Paste the block below into
+     Content > Email > new content > HTML source, and set:
+
+       Subject    Thank you, that reaches the right people
+       Preheader  Your answer is on your profile before anyone picks up the phone.
+
+     Every $Current value below is sent by the message function. model,
+     model_url, model_image and booking_url are always sent, so they need no
+     fallback; the rest print only when the visitor gave them. Nothing here
+     reads the contact record, because a transactional send cannot see it. -->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
        style="margin:0;padding:0;background:#f5f4f2">
   <tr><td align="center" style="padding:26px 12px">
     <table role="presentation" width="520" cellpadding="0" cellspacing="0"
            style="width:520px;max-width:520px;background:#ffffff;border-top:3px solid #b45f1a">
       <tr><td style="padding:0">
-        {% if ($Current.model_image) { %}
-        <img src="{%= $Current.model_image %}" width="520" alt="{%= $Current.model || 'Lincoln' %}"
+        <img src="{%= $Current.model_image %}" width="520" alt="{%= $Current.model %}"
              style="display:block;width:100%;max-width:520px;height:auto;border:0">
-        {% } %}
       </td></tr>
       <tr><td style="padding:30px 28px 8px">
         <p style="margin:0 0 10px;font:400 11px/1 Arial,sans-serif;letter-spacing:.18em;
@@ -21,7 +24,7 @@
           That helps, and it reaches the right people
         </h1>
         <p style="margin:0 0 20px;font:400 14.5px/1.65 Arial,sans-serif;color:#5b6770">
-          Your answer is on your profile, so the showroom team sees what matters to you before they pick up the phone.
+          Your answer is on your profile now, so the showroom team can see what matters to you before they pick up the phone.
         </p>
       </td></tr>
       <tr><td style="padding:0 28px">
@@ -37,12 +40,13 @@
         </table>
       </td></tr>
       <tr><td style="padding:24px 28px 6px">
-        <a href="{%= $Current.model_url || 'https://dengage-presales.github.io/nissanksa/lincoln/' %}"
+        <a href="{%= $Current.model_url %}"
            style="display:inline-block;padding:12px 26px;background:#324047;color:#ffffff;
                   font:400 14px/1 Arial,sans-serif;letter-spacing:.04em;text-decoration:none">
           Back to the range
         </a>
       </td></tr>
+
       <tr><td style="padding:18px 28px 28px">
         <p style="margin:0;font:400 13px/1.65 Arial,sans-serif;color:#5b6770">If a drive would help you decide, we can arrange one this week.</p>
       </td></tr>

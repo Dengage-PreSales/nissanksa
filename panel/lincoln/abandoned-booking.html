@@ -1,27 +1,30 @@
-<!-- Paste this into Content > Email > new content, HTML source.
-     Subject:    Your {%= $Current.model || 'Lincoln' %} booking is one step from done
-     Preheader:  You started arranging a drive and did not finish. Nothing is lost: pick it up where you le
-     Every {%= $Current.x %} below is sent by the booking confirmation function.
-     A value that was not sent prints its fallback, never the word undefined. -->
+<!-- Lincoln demo message. Paste the block below into
+     Content > Email > new content > HTML source, and set:
+
+       Subject    One step left on your {%= $Current.model %}
+       Preheader  Your booking is saved. Pick it up where you left off.
+
+     Every $Current value below is sent by the message function. model,
+     model_url, model_image and booking_url are always sent, so they need no
+     fallback; the rest print only when the visitor gave them. Nothing here
+     reads the contact record, because a transactional send cannot see it. -->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
        style="margin:0;padding:0;background:#f5f4f2">
   <tr><td align="center" style="padding:26px 12px">
     <table role="presentation" width="520" cellpadding="0" cellspacing="0"
            style="width:520px;max-width:520px;background:#ffffff;border-top:3px solid #b45f1a">
       <tr><td style="padding:0">
-        {% if ($Current.model_image) { %}
-        <img src="{%= $Current.model_image %}" width="520" alt="{%= $Current.model || 'Lincoln' %}"
+        <img src="{%= $Current.model_image %}" width="520" alt="{%= $Current.model %}"
              style="display:block;width:100%;max-width:520px;height:auto;border:0">
-        {% } %}
       </td></tr>
       <tr><td style="padding:30px 28px 8px">
         <p style="margin:0 0 10px;font:400 11px/1 Arial,sans-serif;letter-spacing:.18em;
                   text-transform:uppercase;color:#b45f1a">Still interested?</p>
         <h1 style="margin:0 0 12px;font:600 23px/1.25 Georgia,'Times New Roman',serif;color:#324047">
-          Your {%= $Current.model || 'Lincoln' %} booking is one step from done
+          Your {%= $Current.model %} booking is one step from done
         </h1>
         <p style="margin:0 0 20px;font:400 14.5px/1.65 Arial,sans-serif;color:#5b6770">
-          You started arranging a drive and did not finish. Nothing is lost: pick it up where you left off and the showroom takes it from there.
+          You started arranging a drive and did not finish. Nothing is lost. Pick it up where you left off and the showroom takes it from there.
         </p>
       </td></tr>
       <tr><td style="padding:0 28px">
@@ -45,12 +48,13 @@
         </table>
       </td></tr>
       <tr><td style="padding:24px 28px 6px">
-        <a href="{%= $Current.booking_url || 'https://dengage-presales.github.io/nissanksa/lincoln/forms/testdrive/' %}"
+        <a href="{%= $Current.booking_url %}"
            style="display:inline-block;padding:12px 26px;background:#324047;color:#ffffff;
                   font:400 14px/1 Arial,sans-serif;letter-spacing:.04em;text-decoration:none">
           Finish my booking
         </a>
       </td></tr>
+
       <tr><td style="padding:18px 28px 28px">
         <p style="margin:0;font:400 13px/1.65 Arial,sans-serif;color:#5b6770">If the timing is wrong, ignore this message and we will leave it there.</p>
       </td></tr>

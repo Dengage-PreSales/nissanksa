@@ -429,7 +429,7 @@ has not allowed notifications answers `Token not found with given ContactKey`.
 The confirmation card offers the permission for exactly that reason: allow it
 and the same confirmation arrives as a notification seconds later.
 
-## 12. The nine moments that can message, and what each still needs
+## 12. The ten moments that can message, and what each still needs
 
 Added 31 August. The demo can ask Dengage for a transactional email and push
 at any of these moments. Booking is live; the rest send nothing until their
@@ -437,6 +437,12 @@ content exists in the panel, and say so rather than failing quietly. Check the
 current state at any time by opening the function URL in a browser:
 `.../functions/v1/nissan-booking-confirm` lists every moment and whether its
 content is configured.
+
+**The content itself is written and waiting in [`lincoln/`](lincoln/README.md):**
+one email body per moment as a file to paste, the push title, message, target
+URL and media for all ten in [`lincoln/PUSH.md`](lincoln/PUSH.md), and the
+table that says which content id goes in which variable. Nothing needs
+composing from scratch.
 
 | Moment | Fires when | State |
 |---|---|---|
@@ -448,7 +454,8 @@ content is configured.
 | `survey` | The on-site survey is answered | Needs content |
 | `showroom_visit` | The cockpit logs a walk in | Needs content |
 | `test_drive_done` | The cockpit logs a completed drive | Needs content |
-| `no_show` | The cockpit logs a no-show | Needs content |
+| `no_show` | The cockpit logs a no-show | **Live**, push |
+| `inbox_message` | Asked for on demand, to fill the inbox drawer during a call | **Live**, push |
 
 **To turn one on**, author the email and the push in the panel and give both
 public ids. They are read from these names, so nothing in the code changes:
@@ -459,7 +466,8 @@ public ids. They are read from these names, so nothing in the code changes:
 `DENGAGE_TX_EMAIL_SURVEY`, `DENGAGE_TX_PUSH_SURVEY`,
 `DENGAGE_TX_EMAIL_WALKIN`, `DENGAGE_TX_PUSH_WALKIN`,
 `DENGAGE_TX_EMAIL_TD_DONE`, `DENGAGE_TX_PUSH_TD_DONE`,
-`DENGAGE_TX_EMAIL_NOSHOW`, `DENGAGE_TX_PUSH_NOSHOW`.
+`DENGAGE_TX_EMAIL_NOSHOW`, `DENGAGE_TX_PUSH_NOSHOW`,
+`DENGAGE_TX_PUSH_INBOX`.
 
 ### What every message can personalize on
 
@@ -471,6 +479,15 @@ price is offered.
 `first_name`, `full_name`, `name`, `surname`, `email`, `gsm`, `city`,
 `branch`, `purchase_horizon`, `booking_ref`, `model`, `model_id`,
 `model_seats`, `model_category`, `model_url`, `model_image`, `booking_url`.
+
+**Four of them are sent every time**, whatever the moment and whatever the
+visitor has told us: `model`, `model_url`, `model_image` and `booking_url`.
+With no car in play the brand name stands in for the model and the links point
+at the range, so a push title, a target URL and the media field can each use
+the bare tag. Those three fields carry no condition, and an empty value there
+leaves a hole a visitor sees before anything else. Everything else is optional
+and is printed only inside `{% if (...) { %} ... {% } %}`, because a city or a
+showroom has no honest stand in.
 
 So the same booking content says Navigator, seats up to 8 and shows the
 Navigator photograph to one visitor, and Corsair, seats up to 5 to the next.
