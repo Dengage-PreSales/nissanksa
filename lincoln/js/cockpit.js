@@ -37,10 +37,10 @@
     };
 
     var SIGNALS = [
-        { id: 'walk_in',           label: 'Walk-in captured',        detail: 'Reception logs a visitor at the showroom',            lead: { source: 'showroom', branch: 'home' } },
+        { id: 'walk_in',           label: 'Walk-in captured',        detail: 'Reception logs a visitor at the showroom',            lead: { source: 'showroom', branch: 'home' }, moment: 'showroom_visit' },
         { id: 'test_drive_booked', label: 'Test drive booked offline', detail: 'Booked at the desk or over the phone',              lead: { source: 'showroom', branch: 'home' }, order: true },
-        { id: 'test_drive_done',   label: 'Test drive completed',    detail: 'The keys came back, the follow-up can start',         lead: { source: 'showroom' } },
-        { id: 'no_show',           label: 'Test drive no-show',      detail: 'Booked, never came; the re-invite journey reacts',    lead: { source: 'showroom' } },
+        { id: 'test_drive_done',   label: 'Test drive completed',    detail: 'The keys came back, the follow-up can start',         lead: { source: 'showroom' }, moment: 'test_drive_done' },
+        { id: 'no_show',           label: 'Test drive no-show',      detail: 'Booked, never came; the re-invite journey reacts',    lead: { source: 'showroom' }, moment: 'no_show' },
         { id: 'call_outcome',      label: 'Call outcome: call later', detail: 'The call center logs the answer instead of closing', lead: { source: 'call-center', note: 'call later' } },
         { id: 'quote_issued',      label: 'Quote issued',            detail: 'A dealer quote enters the follow-up journey',         lead: { source: 'showroom', branch: 'home' } },
         { id: 'whatsapp_intent',   label: 'WhatsApp intent signal',  detail: 'Simulates the Value First chatbot calling Dengage',   lead: { source: 'value-first-whatsapp', note: 'asked about financing' } },
@@ -116,8 +116,41 @@
                     paymentMethod: 'other'
                 }, [{ id: car.id, quantity: 1, price: car.price }]);
             }
+            /* Three of these are moments the customer hears about: the walk in
+               that thanks them, the drive that asks how it went, and the
+               no-show that offers another time. The message goes out through
+               the same transactional endpoint the website uses, addressed to
+               this persona. */
+            if (spec.moment) messageFor(spec.moment, state.persona, car);
             log('Sent ' + spec.id + ' for ' + state.persona, row);
         });
+    }
+
+    function messageFor(moment, personaKey, car) {
+        var url = (window.DEMO_CONFIG || {}).bookingConfirm;
+        if (!url || typeof window.fetch !== 'function') return;
+        var persona = PERSONAS.filter(function (p) { return p.key === personaKey; })[0];
+        if (!persona) return;
+        var body = {
+            moment: moment,
+            contact_key: personaKey,
+            name: persona.name ? persona.name.split(' ')[0] : undefined,
+            city: persona.city,
+            branch: HOME_BRANCH[persona.city],
+            model: car ? car.name : undefined,
+            model_id: car ? car.id : undefined
+        };
+        try {
+            window.fetch(url, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+                keepalive: true
+            }).then(function (res) { return res.json(); })
+              .then(function (answer) {
+                  log('Asked Dengage for the ' + moment + ' message', answer);
+              })['catch'](function () { /* the signal itself is already sent */ });
+        } catch (err) { /* no fetch */ }
     }
 
     function cityOf(key) {

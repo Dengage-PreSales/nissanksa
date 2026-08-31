@@ -428,3 +428,59 @@ carries permission for the transactional API (without it both calls answer
 has not allowed notifications answers `Token not found with given ContactKey`.
 The confirmation card offers the permission for exactly that reason: allow it
 and the same confirmation arrives as a notification seconds later.
+
+## 12. The nine moments that can message, and what each still needs
+
+Added 31 August. The demo can ask Dengage for a transactional email and push
+at any of these moments. Booking is live; the rest send nothing until their
+content exists in the panel, and say so rather than failing quietly. Check the
+current state at any time by opening the function URL in a browser:
+`.../functions/v1/nissan-booking-confirm` lists every moment and whether its
+content is configured.
+
+| Moment | Fires when | State |
+|---|---|---|
+| `booking` | A test drive form is submitted | **Live**, email and push |
+| `abandoned_booking` | The booking page is left after an address was typed and before submit | Needs content |
+| `quote` | The quote form is submitted | Needs content |
+| `brochure` | A specification sheet is downloaded by a known visitor | Needs content |
+| `newsletter` | The newsletter card is completed | Needs content |
+| `survey` | The on-site survey is answered | Needs content |
+| `showroom_visit` | The cockpit logs a walk in | Needs content |
+| `test_drive_done` | The cockpit logs a completed drive | Needs content |
+| `no_show` | The cockpit logs a no-show | Needs content |
+
+**To turn one on**, author the email and the push in the panel and give both
+public ids. They are read from these names, so nothing in the code changes:
+`DENGAGE_TX_EMAIL_ABANDONED`, `DENGAGE_TX_PUSH_ABANDONED`,
+`DENGAGE_TX_EMAIL_QUOTE`, `DENGAGE_TX_PUSH_QUOTE`,
+`DENGAGE_TX_EMAIL_BROCHURE`, `DENGAGE_TX_PUSH_BROCHURE`,
+`DENGAGE_TX_EMAIL_NEWSLETTER`, `DENGAGE_TX_PUSH_NEWSLETTER`,
+`DENGAGE_TX_EMAIL_SURVEY`, `DENGAGE_TX_PUSH_SURVEY`,
+`DENGAGE_TX_EMAIL_WALKIN`, `DENGAGE_TX_PUSH_WALKIN`,
+`DENGAGE_TX_EMAIL_TD_DONE`, `DENGAGE_TX_PUSH_TD_DONE`,
+`DENGAGE_TX_EMAIL_NOSHOW`, `DENGAGE_TX_PUSH_NOSHOW`.
+
+### What every message can personalize on
+
+Sent as `current` on both channels, and as `customParameters` on the push, so
+content built either way resolves. Everything here is either typed by the
+visitor or taken from the source site; the site publishes no prices, so no
+price is offered.
+
+`first_name`, `full_name`, `name`, `surname`, `email`, `gsm`, `city`,
+`branch`, `purchase_horizon`, `booking_ref`, `model`, `model_id`,
+`model_seats`, `model_category`, `model_url`, `model_image`, `booking_url`.
+
+So the same booking content says Navigator, seats up to 8 and shows the
+Navigator photograph to one visitor, and Corsair, seats up to 5 to the next.
+Verified live on 31 August: an Aviator booking sent both channels with the
+Aviator values.
+
+### Two things that decide whether a push lands
+
+The push carries no inline text: every word comes from the saved content, so
+personalization is only ever through the parameters above. And Dengage holds
+the device token against whichever contact key claimed it last, so a push
+addressed to an older key answers `no device subscribed for this contact`.
+The live flow always addresses the key that just acted, which is why it lands.

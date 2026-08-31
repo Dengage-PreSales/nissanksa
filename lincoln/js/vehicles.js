@@ -17,9 +17,9 @@
            payload, while a fabricated one would poison the data it lands
            in. Ids match the option values on the site's own lead forms,
            lowercased. */
-        { id: 'corsair',   name: { en: 'Corsair',   ar: 'كورسير' },    category: 'SUV', price: null, pdp: true },
-        { id: 'aviator',   name: { en: 'Aviator',   ar: 'أفياتور' },   category: 'SUV', price: null, pdp: true },
-        { id: 'navigator', name: { en: 'Navigator', ar: 'نافيجيتور' }, category: 'SUV', price: null, pdp: true }
+        { id: 'corsair',   name: { en: 'Corsair',   ar: 'كورسير' },    category: 'SUV', price: null, pdp: true, seats: 5 },
+        { id: 'aviator',   name: { en: 'Aviator',   ar: 'أفياتور' },   category: 'SUV', price: null, pdp: true, seats: 7 },
+        { id: 'navigator', name: { en: 'Navigator', ar: 'نافيجيتور' }, category: 'SUV', price: null, pdp: true, seats: 8 }
     ];
 
     /* One signature side shot per model, the site's own photography,
@@ -45,6 +45,10 @@
             category: model.category,
             categoryPath: 'Vehicles>' + model.category,
             price: model.price,
+            /* The seat count the source site publishes on its own range page,
+               carried so a message can name it. Never a figure this demo
+               invented. */
+            seats: model.seats || null,
             image: ART[model.id] || null,
             cutout: null,
             pdp: !!model.pdp,

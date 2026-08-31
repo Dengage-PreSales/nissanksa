@@ -509,6 +509,12 @@
                         model: currentModel(), source: 'website', note: 'newsletter card'
                     });
                 }
+                if (window.Site && window.Site.confirmBooking) {
+                    window.Site.confirmBooking({
+                        model: modelName(currentModel()), model_id: currentModel(),
+                        email: email.value.trim()
+                    }, 'newsletter');
+                }
                 thanks(form, 'You are on the list, and your profile in Dengage now carries that consent.');
                 return;
             }
@@ -520,6 +526,12 @@
                     window.DengageEvents.leadEvent('survey_response', {
                         model: currentModel(), source: 'website', note: picked.value
                     });
+                }
+                if (window.Site && window.Site.confirmBooking) {
+                    window.Site.confirmBooking({
+                        model: modelName(currentModel()), model_id: currentModel(),
+                        purchase_horizon: picked.value
+                    }, 'survey');
                 }
                 thanks(form, 'Your answer is on your profile, where a journey can act on it.');
                 return;

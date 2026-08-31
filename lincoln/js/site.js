@@ -146,15 +146,18 @@
        because the contact has to exist before Dengage can address a push to
        it. The messages themselves are panel content; this only asks for them,
        and a refusal costs the booking nothing. */
-    function confirmBooking(details) {
+    function confirmBooking(details, moment) {
         var url = (window.DEMO_CONFIG || {}).bookingConfirm;
         if (!url || typeof window.fetch !== 'function') return;
         var body = {
+            moment: moment || 'booking',
             contact_key: (window.DemoIdentity || {}).contactKey,
             name: details.name, surname: details.surname,
             email: details.email, gsm: details.gsm,
-            model: details.model, city: details.city,
-            branch: details.branch, purchase_horizon: details.horizon
+            model: details.model, model_id: details.model_id,
+            booking_ref: details.booking_ref,
+            city: details.city, branch: details.branch,
+            purchase_horizon: details.horizon
         };
         try {
             window.fetch(url, {
@@ -310,8 +313,9 @@
         mintIdentity();
         var relayed = relayLead(form, { form: 'booking', model: f.car.id, purchase_horizon: f.plan });
         var line = pending() || { id: f.car.id, quantity: 1, price: f.car.price };
+        var bookingRef = 'DPS-' + slug + '-td-' + Date.now();
         window.DengageEvents.order({
-            orderId: 'DPS-' + slug + '-td-' + Date.now(),
+            orderId: bookingRef,
             itemCount: 1,
             paymentMethod: 'other'
         }, [line]);
@@ -335,6 +339,8 @@
         }
         var summary = {
             model: f.car.name,
+            model_id: f.car.id,
+            booking_ref: bookingRef,
             name: typed('firstname'),
             surname: typed('lastname'),
             gsm: typed('mobile'),
@@ -359,6 +365,18 @@
             model: f.car ? f.car.id : undefined, city: f.city, branch: f.branch,
             purchase_horizon: f.plan, source: 'website', note: 'online quote request'
         });
+        function typedIn(name) {
+            var el = form.querySelector('[name="' + name + '"]');
+            var v = el && el.value ? el.value.trim() : '';
+            return (!v || /^select/i.test(v)) ? undefined : v;
+        }
+        confirmBooking({
+            model: f.car ? f.car.name : undefined,
+            model_id: f.car ? f.car.id : undefined,
+            name: typedIn('firstname'), surname: typedIn('lastname'),
+            gsm: typedIn('mobile'), email: typedIn('email'),
+            city: f.city, branch: f.branch, horizon: f.plan
+        }, 'quote');
         if (f.payment === 'Finance') {
             window.DengageEvents.leadEvent('finance_intent', { model: f.car ? f.car.id : undefined, source: 'website' });
         }
@@ -461,7 +479,45 @@
             window.DengageEvents.leadEvent('brochure', {
                 model: car ? car.id : undefined, source: 'website'
             });
+            if ((window.DemoIdentity || {}).contactKey) {
+                confirmBooking({ model: car ? car.name : undefined,
+                                 model_id: car ? car.id : undefined }, 'brochure');
+            }
         });
+    }
+
+    /* The booking begun and left behind. It fires once, only from the booking
+       page, only when the visitor typed an address to reach them at, and never
+       after the booking went through: an abandonment message to someone who
+       already booked is the thing that makes brands look careless. */
+    function watchAbandonedBooking() {
+        if (window.location.pathname.indexOf('forms/testdrive') === -1) return;
+        var asked = false;
+        function ask() {
+            if (asked) return;
+            var form = $('form[action*="leads/submit"]');
+            if (!form || readJson('dps:' + slug + ':booked', false)) return;
+            var email = form.querySelector('[name="email"]');
+            var address = email && email.value ? email.value.trim() : '';
+            if (!address || address.indexOf('@') === -1) return;
+            asked = true;
+            var sel = form.querySelector('select[name="model"]');
+            var car = sel && sel.value ? window.Catalog.get(sel.value.toLowerCase()) : null;
+            mintIdentity();
+            confirmBooking({
+                model: car ? car.name : undefined,
+                model_id: car ? car.id : undefined,
+                name: (form.querySelector('[name="firstname"]') || {}).value,
+                surname: (form.querySelector('[name="lastname"]') || {}).value,
+                gsm: (form.querySelector('[name="mobile"]') || {}).value,
+                email: address
+            }, 'abandoned_booking');
+        }
+        document.addEventListener('mouseout', function (event) {
+            if (event.relatedTarget || event.clientY > 8) return;
+            ask();
+        });
+        window.addEventListener('pagehide', ask);
     }
 
     /* Ownership and service journeys are a later phase; any link that
@@ -552,6 +608,7 @@
     wireOverlays();
     interceptLeadForms();
     trackBrochureDownloads();
+    watchAbandonedBooking();
     wireFunnelSignals();
     guardScope();
     answerThemeRequests();

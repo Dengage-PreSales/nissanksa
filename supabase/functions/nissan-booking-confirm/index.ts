@@ -33,8 +33,58 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 const API_BASE = Deno.env.get('DENGAGE_API_BASE') ?? 'https://api.dengage.com/rest';
 const EGRESS_PROXY = Deno.env.get('DENGAGE_EGRESS_PROXY') ?? '';
-const EMAIL_CONTENT_ID = Deno.env.get('DENGAGE_TX_EMAIL_CONTENT_ID') ?? '2206f32b-8d1a-4058-929c-de600493862a';
-const PUSH_CONTENT_ID = Deno.env.get('DENGAGE_TX_PUSH_CONTENT_ID') ?? '91edd42b-2e43-4e61-a8d5-88bf5a5688af';
+/* One entry per moment the demo can message on. Each names the panel content
+   to send; a moment with no content configured is reported as such and sends
+   nothing, so a new one goes live by setting its ids rather than by changing
+   this code. Booking carries the ids already authored in the panel. */
+type Moment = { email: string; push: string; label: string };
+const MOMENTS: Record<string, Moment> = {
+  booking: {
+    label: 'test drive booked',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_CONTENT_ID') ?? '2206f32b-8d1a-4058-929c-de600493862a',
+    push: Deno.env.get('DENGAGE_TX_PUSH_CONTENT_ID') ?? '91edd42b-2e43-4e61-a8d5-88bf5a5688af',
+  },
+  abandoned_booking: {
+    label: 'booking started and left',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_ABANDONED') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_ABANDONED') ?? '',
+  },
+  quote: {
+    label: 'quote requested',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_QUOTE') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_QUOTE') ?? '',
+  },
+  brochure: {
+    label: 'specification downloaded',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_BROCHURE') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_BROCHURE') ?? '',
+  },
+  newsletter: {
+    label: 'newsletter signup',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_NEWSLETTER') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_NEWSLETTER') ?? '',
+  },
+  survey: {
+    label: 'survey answered',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_SURVEY') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_SURVEY') ?? '',
+  },
+  showroom_visit: {
+    label: 'walk in logged at the showroom',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_WALKIN') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_WALKIN') ?? '',
+  },
+  test_drive_done: {
+    label: 'test drive completed',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_TD_DONE') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_TD_DONE') ?? '',
+  },
+  no_show: {
+    label: 'booked but did not arrive',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_NOSHOW') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_NOSHOW') ?? '',
+  },
+};
 const APP_ID = Deno.env.get('DENGAGE_APP_ID') ?? '99d9b8fb-0c62-5a85-3e43-2402554d93a5';
 const SB_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SB_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -103,6 +153,33 @@ async function dengageToken(): Promise<string> {
   return tokenCache.value;
 }
 
+/* What the messages can say about the car, derived here from the model id
+   rather than taken from the page, so a request cannot put arbitrary text or
+   links into a send. Every value comes from the source site: the three model
+   names, the seat counts it publishes, the image it uses on its own range
+   page, and the demo's page for that model. The site publishes no prices, so
+   there is no price here to quote. */
+const DEMO_ORIGIN = 'https://dengage-presales.github.io/nissanksa/lincoln/';
+const VEHICLES: Record<string, { name: string; seats: number; image: string }> = {
+  navigator: { name: 'Navigator', seats: 8, image: 'assets/cms/storage/lincoln_common/home-page/new-navigator.avif' },
+  aviator: { name: 'Aviator', seats: 7, image: 'assets/cms/storage/lincoln_common/offers/june-26/thumb/Aviator_June_Thumb.webp' },
+  corsair: { name: 'Corsair', seats: 5, image: 'assets/cms/storage/lincoln_common/home-page/CORSAIR_L.jpg' },
+};
+
+function vehicleParams(modelId?: string, modelName?: string): Record<string, string> {
+  const v = modelId ? VEHICLES[modelId.toLowerCase()] : undefined;
+  if (!v) return modelName ? { model: modelName } : {};
+  return {
+    model: v.name,
+    model_id: modelId!.toLowerCase(),
+    model_seats: String(v.seats),
+    model_category: 'SUV',
+    model_url: DEMO_ORIGIN + 'vehicles/' + modelId!.toLowerCase() + '/',
+    model_image: DEMO_ORIGIN + v.image,
+    booking_url: DEMO_ORIGIN + 'forms/testdrive/?model=' + encodeURIComponent(v.name),
+  };
+}
+
 const seen = new Map<string, number[]>();
 function rateLimited(ip: string): boolean {
   const now = Date.now();
@@ -123,8 +200,11 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(origin) });
   if (req.method === 'GET') {
     return reply({
-      email_content: EMAIL_CONTENT_ID ? 'configured' : 'not configured',
-      push_content: PUSH_CONTENT_ID ? 'configured' : 'not configured',
+      moments: Object.fromEntries(Object.entries(MOMENTS).map(([k, m]) => [k, {
+        label: m.label,
+        email: m.email ? 'configured' : 'needs content',
+        push: m.push ? 'configured' : 'needs content',
+      }])),
       app_id: APP_ID,
       api_user_configured: !!(Deno.env.get('DENGAGE_API_USERKEY') && Deno.env.get('DENGAGE_API_PASSWORD')),
       egress_proxy_configured: !!EGRESS_PROXY,
@@ -138,6 +218,10 @@ Deno.serve(async (req: Request) => {
   let raw: Record<string, unknown>;
   try { raw = await req.json(); } catch { return reply({ error: 'body must be JSON' }, 400, origin); }
 
+  const momentKey = clean(raw.moment, 40) ?? 'booking';
+  const moment = MOMENTS[momentKey];
+  if (!moment) return reply({ error: 'unknown moment' }, 400, origin);
+
   const lead = {
     contact_key: clean(raw.contact_key, 48),
     name: clean(raw.name, 100),
@@ -145,6 +229,8 @@ Deno.serve(async (req: Request) => {
     email: clean(raw.email, 160)?.toLowerCase(),
     gsm: clean(raw.gsm, 20),
     model: clean(raw.model, 60),
+    model_id: clean(raw.model_id, 40),
+    booking_ref: clean(raw.booking_ref, 60),
     city: clean(raw.city, 60),
     branch: clean(raw.branch, 120),
     purchase_horizon: clean(raw.purchase_horizon, 60),
@@ -157,10 +243,18 @@ Deno.serve(async (req: Request) => {
     return reply({ error: 'email does not look like an address' }, 400, origin);
   }
 
-  // The values the panel content can address by name. Only what the visitor
-  // typed appears here; a field left empty is left out.
+  // The values the panel content can address by name: what the visitor typed,
+  // plus everything the demo knows about the car they chose. A field left
+  // empty is left out rather than sent blank.
   const params: Record<string, string> = {};
-  for (const [k, v] of Object.entries(lead)) if (v && k !== 'contact_key') params[k] = v as string;
+  for (const [k, v] of Object.entries(lead)) {
+    if (v && k !== 'contact_key' && k !== 'model' && k !== 'model_id') params[k] = v as string;
+  }
+  Object.assign(params, vehicleParams(lead.model_id, lead.model));
+  if (lead.name) params.first_name = lead.name;
+  if (lead.name || lead.surname) {
+    params.full_name = [lead.name, lead.surname].filter(Boolean).join(' ');
+  }
 
   const out = { email: 'not attempted', push: 'not attempted' };
   const notes: string[] = [];
@@ -168,10 +262,10 @@ Deno.serve(async (req: Request) => {
   try {
     const token = await dengageToken();
 
-    if (lead.email && EMAIL_CONTENT_ID) {
+    if (lead.email && moment.email) {
       const res = await dengagePost('/transactional/email', {
         send: { to: lead.email, toLanguage: 'EN' },
-        content: { templateId: EMAIL_CONTENT_ID },
+        content: { templateId: moment.email },
         current: params,
         reporting: { trackOpen: true, trackClick: true },
         tags: ['demo', 'test-drive'],
@@ -179,21 +273,34 @@ Deno.serve(async (req: Request) => {
       out.email = res.ok ? 'sent' : `error HTTP ${res.status}`;
       notes.push('email: ' + res.text.slice(0, 300));
     } else if (!lead.email) {
-      out.email = 'no address on the booking';
+      out.email = 'no address on this contact';
+    } else {
+      out.email = 'needs content for ' + momentKey;
     }
 
-    if (PUSH_CONTENT_ID) {
+    if (moment.push) {
+      /* The push API takes no inline title or body: every word comes from the
+         saved content, personalized through these two. They carry the same
+         values so the content can use whichever tag form it was built with. */
       const res = await dengagePost('/transactional/push', {
-        contentId: PUSH_CONTENT_ID,
+        contentId: moment.push,
         contactKey: lead.contact_key,
         appId: APP_ID,
         sendToAll: true,
         language: 'EN',
         current: params,
+        customParameters: Object.entries(params).map(([key, value]) => ({ key, value })),
         tags: ['demo', 'test-drive'],
       }, token);
       out.push = res.ok ? 'sent' : `error HTTP ${res.status}`;
+      /* The device carries the token, and Dengage keeps it against whichever
+         contact key claimed it last. A key that never subscribed, or that has
+         been overtaken by a newer session, answers this rather than failing
+         silently. */
+      if (/Token not found/i.test(res.text)) out.push = 'no device subscribed for this contact';
       notes.push('push: ' + res.text.slice(0, 300));
+    } else {
+      out.push = 'needs content for ' + momentKey;
     }
   } catch (err) {
     notes.push('failed before sending: ' + String(err).slice(0, 300));
@@ -201,8 +308,9 @@ Deno.serve(async (req: Request) => {
     if (out.push === 'not attempted') out.push = 'error';
   }
 
-  // The record, so the outcome outlives the page that asked for it.
-  if (SB_URL && SB_KEY) {
+  // The record, so the outcome outlives the page that asked for it. Only a
+  // booking has a row of its own to carry it.
+  if (SB_URL && SB_KEY && momentKey === 'booking') {
     try {
       const find = await fetch(
         `${SB_URL}/rest/v1/ni_web_lead?contact_key=eq.${encodeURIComponent(lead.contact_key)}` +
@@ -224,5 +332,6 @@ Deno.serve(async (req: Request) => {
     } catch { /* the sends already happened; the record is a convenience */ }
   }
 
-  return reply({ email: out.email, push: out.push }, 200, origin);
+  return reply({ moment: momentKey, email: out.email, push: out.push,
+                 personalized: Object.keys(params).sort() }, 200, origin);
 });
