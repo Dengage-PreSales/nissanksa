@@ -400,10 +400,12 @@
        ?debug=1 and accepted by the endpoint, and the row is simply not stored,
        which the runbook's verification step is there to catch. Nothing here
        ever deletes or alters what another demo wrote. */
+    /* survey_response carries an on-site answer: the Lincoln demo's survey
+       card writes it, and the note field holds the answer as chosen. */
     var LEAD_STAGES = ['walk_in', 'test_drive_booked', 'test_drive_done',
                        'no_show', 'quote_issued', 'call_outcome',
                        'whatsapp_intent', 'vehicle_sold', 'brochure',
-                       'finance_intent', 'register_interest'];
+                       'finance_intent', 'register_interest', 'survey_response'];
 
     function leadEvent(stage, fields) {
         if (LEAD_STAGES.indexOf(stage) === -1) {

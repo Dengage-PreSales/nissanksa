@@ -119,3 +119,205 @@ footer .dps-brand { color: #ffffff; }
     text-align: center;
   }
 }
+
+/* The Lincoln experiences the demo draws itself, in the site's own palette.
+   js/creatives.js explains why these are page creatives while the shared
+   platform library in the same launcher still comes from Dengage. */
+#dps-lc-host:empty { display: none; }
+.dps-lc-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 26, 30, .55);
+  z-index: 2147483000;
+}
+.dps-lc-panel {
+  position: fixed;
+  z-index: 2147483001;
+  background: #ffffff;
+  color: #1c1f21;
+  box-shadow: 0 18px 48px rgba(20, 26, 30, .28);
+  font-family: "ProximaNova", "Segoe UI", Arial, sans-serif;
+}
+.dps-lc-modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border-top: 3px solid #b45f1a;
+}
+.dps-lc-bar {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  border-top: 3px solid #b45f1a;
+}
+.dps-lc-x {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: 0;
+  background: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #8b9296;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.dps-lc-x:hover { color: #324047; }
+.dps-lc-body { padding: 30px 28px 26px; }
+.dps-lc-body h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 600;
+  color: #324047;
+}
+.dps-lc-body p {
+  margin: 0 0 18px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #5b6770;
+}
+.dps-lc-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.dps-lc-cta {
+  display: inline-block;
+  padding: 11px 22px;
+  background: #324047;
+  color: #ffffff;
+  border: 0;
+  font-size: 14px;
+  letter-spacing: .04em;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.dps-lc-cta:hover { background: #b45f1a; color: #ffffff; }
+.dps-lc-quiet {
+  border: 0;
+  background: none;
+  color: #8b9296;
+  font-size: 13.5px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 6px 0;
+}
+.dps-lc-quiet:hover { color: #324047; }
+.dps-lc-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 18px 56px 18px 28px;
+}
+.dps-lc-bar-inner strong {
+  display: block;
+  font-size: 16px;
+  color: #324047;
+  margin-bottom: 3px;
+}
+.dps-lc-bar-inner span {
+  display: block;
+  font-size: 13.5px;
+  color: #5b6770;
+}
+.dps-lc-field { display: block; margin-bottom: 14px; }
+.dps-lc-field span {
+  display: block;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #5b6770;
+  margin-bottom: 6px;
+}
+.dps-lc-field input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #dcdcd8;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1c1f21;
+  background: #ffffff;
+}
+.dps-lc-field input:focus { outline: 2px solid #b45f1a; outline-offset: -2px; }
+.dps-lc-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #5b6770;
+}
+.dps-lc-check input { margin-top: 2px; flex: none; }
+.dps-lc-choices { margin-bottom: 20px; }
+.dps-lc-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #dcdcd8;
+  margin-bottom: 8px;
+  font-size: 14.5px;
+  color: #1c1f21;
+  cursor: pointer;
+}
+.dps-lc-choice:hover { border-color: #b45f1a; }
+.dps-lc-choice input { flex: none; }
+.dps-lc-done h2 { color: #b45f1a; }
+
+@media (max-width: 560px) {
+  .dps-lc-body { padding: 26px 20px 22px; }
+  .dps-lc-body h2 { font-size: 19px; }
+  .dps-lc-bar-inner { padding: 16px 48px 16px 20px; }
+  .dps-lc-actions { gap: 10px; }
+}
+
+.dps-lc-kicker {
+  display: block;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #b45f1a;
+  margin-bottom: 10px;
+}
+.dps-lc-summary {
+  margin: 0 0 20px;
+  border-top: 1px solid #ecebe8;
+}
+.dps-lc-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid #ecebe8;
+}
+.dps-lc-summary dt {
+  margin: 0;
+  font-size: 12.5px;
+  letter-spacing: .04em;
+  color: #8b9296;
+}
+.dps-lc-summary dd {
+  margin: 0;
+  font-size: 14px;
+  color: #1c1f21;
+  text-align: end;
+  word-break: break-word;
+}
+.dps-lc-done p { margin-top: 4px; }
+
+/* While a bar holds the foot of the page, the demo's own controls step above
+   it rather than hiding underneath. */
+.dps-lc-bar-open .dps-controls { bottom: 124px; }
+@media (max-width: 760px) {
+  .dps-lc-bar-open .dps-controls { bottom: 210px; }
+}

@@ -132,13 +132,51 @@
         };
         for (var k in fields) { if (fields[k] !== undefined) body[k] = fields[k]; }
         try {
-            window.fetch(url, {
+            return window.fetch(url, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(body),
                 keepalive: true
             })['catch'](function () { /* the lead's SDK trail is unaffected */ });
         } catch (err) { /* no fetch, no relay */ }
+        return null;
+    }
+
+    /* The confirmation a booking earns. It runs after the relay has answered,
+       because the contact has to exist before Dengage can address a push to
+       it. The messages themselves are panel content; this only asks for them,
+       and a refusal costs the booking nothing. */
+    function confirmBooking(details) {
+        var url = (window.DEMO_CONFIG || {}).bookingConfirm;
+        if (!url || typeof window.fetch !== 'function') return;
+        var body = {
+            contact_key: (window.DemoIdentity || {}).contactKey,
+            name: details.name, surname: details.surname,
+            email: details.email, gsm: details.gsm,
+            model: details.model, city: details.city,
+            branch: details.branch, purchase_horizon: details.horizon
+        };
+        try {
+            window.fetch(url, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+                keepalive: true
+            }).then(function (res) { return res.json(); })
+              .then(function (answer) {
+                  try {
+                      document.dispatchEvent(new CustomEvent('dps:lincoln:confirmation',
+                          { detail: answer }));
+                  } catch (err) { /* old browser */ }
+              })['catch'](function () { /* the booking is already recorded */ });
+        } catch (err) { /* no fetch */ }
+    }
+
+    /* What the visitor has done, for the creative rules in js/creatives.js.
+       Session scoped: a new session starts the story again. */
+    function signal(name, value) {
+        try { window.sessionStorage.setItem('dps:' + slug + ':' + name, JSON.stringify(value)); }
+        catch (err) { /* private mode */ }
     }
 
     /* ------------------------------------------------------------------ */
@@ -245,11 +283,19 @@
                 var name = e.target && e.target.name;
                 if (name === 'firstname' || name === 'lastname' || name === 'email' || name === 'mobile') {
                     begun = true;
+                    signal('started', true);
                     var line = pending();
                     window.DengageEvents.beginCheckout(line ? [line] : []);
                 }
             });
         }
+
+        /* Choosing finance anywhere is the signal the finance card waits for. */
+        document.addEventListener('change', function (e) {
+            if (e.target && e.target.name === 'paymenttype' && /finance/i.test(e.target.value || '')) {
+                signal('finance', true);
+            }
+        });
     }
 
     function submitBooking(form) {
@@ -262,7 +308,7 @@
         }
         if (demandRequired(form)) return;
         mintIdentity();
-        relayLead(form, { form: 'booking', model: f.car.id, purchase_horizon: f.plan });
+        var relayed = relayLead(form, { form: 'booking', model: f.car.id, purchase_horizon: f.plan });
         var line = pending() || { id: f.car.id, quantity: 1, price: f.car.price };
         window.DengageEvents.order({
             orderId: 'DPS-' + slug + '-td-' + Date.now(),
@@ -277,7 +323,30 @@
             window.DengageEvents.leadEvent('finance_intent', { model: f.car.id, source: 'website' });
         }
         setPending(null);
+        signal('booked', true);
         success(form, t('tdThanks'));
+
+        /* The on-site confirmation repeats back what was typed, and the relay
+           has already been asked for the confirmation email and push. */
+        function typed(name) {
+            var el = form.querySelector('[name="' + name + '"]');
+            var v = el && el.value ? el.value.trim() : '';
+            return (!v || /^select/i.test(v)) ? undefined : v;
+        }
+        var summary = {
+            model: f.car.name,
+            name: typed('firstname'),
+            surname: typed('lastname'),
+            gsm: typed('mobile'),
+            email: typed('email'),
+            city: f.city,
+            branch: f.branch,
+            horizon: f.plan,
+            payment: f.payment
+        };
+        if (window.LincolnCreatives) window.LincolnCreatives.confirm(summary);
+        if (relayed && relayed.then) relayed.then(function () { confirmBooking(summary); });
+        else confirmBooking(summary);
     }
 
     function submitQuote(form) {
@@ -471,6 +540,10 @@
     };
     window.Site = {
         cartLines: cartLines,
+        /* The page creatives capture leads too, through this same relay, and
+           ask for the booking confirmation again once a push token exists. */
+        relayLead: relayLead,
+        confirmBooking: confirmBooking,
         saved: function () { return []; },
         toast: toast,
         mintIdentity: mintIdentity

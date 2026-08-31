@@ -84,8 +84,8 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
   await page.close();
 }
 
-// 2. The launcher renders and firing a brand card raises its data layer
-// event twice in a row; the Nissan-only cards are absent.
+// 2. The launcher renders; the Lincoln cards draw their own creative and
+// raise no nissan_demo_ event, so a Nissan campaign can never answer one.
 {
   const page = await open('index.html');
   await page.click('.dps-launch');
@@ -96,18 +96,83 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
     ['tekton-launch-bar', 'arrival-alert'].filter((s) => document.querySelector(`[data-scenario="${s}"]`)));
   if (absent.length) fail(`Nissan-only cards present: ${absent.join(', ')}`);
   else ok('Nissan-only cards excluded');
-  const fired = await page.evaluate(() => {
+
+  const lincolnSlugs = await page.evaluate(() => window.LincolnCreatives.slugs);
+  const result = await page.evaluate(async (slugs) => {
     window.__dl = [];
     window.dataLayer = { push: (e) => window.__dl.push(e.event) };
-    document.querySelector('[data-scenario="test-drive-invite"]').click();
-    document.body.click();
-    document.querySelector('.dps-launch').click();
-    document.querySelector('[data-scenario="test-drive-invite"]').click();
-    return window.__dl;
+    const drew = [];
+    for (const slug of slugs) {
+      if (slug === 'booking-confirmed') continue;
+      // twice in a row, the way a presenter fires one mid call
+      for (const pass of [1, 2]) {
+        document.querySelector('.dps-launch').click();
+        const card = document.querySelector(`[data-scenario="${slug}"]`);
+        if (!card) { drew.push(slug + ': no card'); break; }
+        card.click();
+        await new Promise((r) => setTimeout(r, 60));
+        const host = document.getElementById('dps-lc-host');
+        const shown = host && host.getAttribute('data-lc-slug') === slug &&
+          host.querySelector('.dps-lc-panel');
+        if (!shown) { drew.push(`${slug}: nothing drawn on pass ${pass}`); break; }
+        if (pass === 2) drew.push(slug + ': ok');
+        document.querySelector('#dps-lc-host [data-lc-close]').click();
+      }
+    }
+    return { drew, dl: window.__dl };
+  }, lincolnSlugs);
+
+  const bad = result.drew.filter((d) => !d.endsWith(': ok'));
+  if (bad.length) fail(`Lincoln creatives: ${bad.join('; ')}`);
+  else ok(`all ${result.drew.length} Lincoln creatives draw, twice in a row`);
+  if (result.dl.length) fail(`a Lincoln card raised data layer events: ${JSON.stringify(result.dl)}`);
+  else ok('Lincoln cards raise no nissan_demo_ event');
+  await page.close();
+}
+
+// 2a. The rules fire the creatives without anyone clicking a card.
+{
+  // the survey meets a reader who gets deep into a model page
+  const page = await open('vehicles/navigator/index.html');
+  await page.waitForTimeout(12500);
+  await page.evaluate(async () => {
+    const step = window.innerHeight;
+    for (let y = 0; y < document.body.scrollHeight; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 60));
+    }
   });
-  if (fired.filter((e) => e === 'nissan_demo_test-drive-invite').length !== 2) {
-    fail(`brand card did not fire twice: ${JSON.stringify(fired)}`);
-  } else ok('brand card fires its nissan_demo_ event, twice in a row');
+  await page.waitForTimeout(900);
+  const slug = await page.evaluate(() => {
+    const h = document.getElementById('dps-lc-host');
+    return h ? h.getAttribute('data-lc-slug') : null;
+  });
+  if (slug !== 'shopping-survey') fail(`scroll rule drew ${slug || 'nothing'}, expected shopping-survey`);
+  else ok('scroll depth on a model page draws the survey by itself');
+
+  // and answering it writes the lead row
+  await page.evaluate(() => {
+    document.querySelector('#dps-lc-host input[name="answer"]').checked = true;
+    document.querySelector('#dps-lc-host form[data-lc-form="survey"]')
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  });
+  await page.waitForTimeout(400);
+  const evs = await events(page);
+  if (!evs.includes('lead:survey_response')) fail(`survey answer wrote no lead row (got ${evs.join(', ')})`);
+  else ok('the survey answer writes lead:survey_response');
+  await page.close();
+}
+
+// 2b. A dwell rule fires on the offers page with no interaction at all.
+{
+  const page = await open('offers/index.html');
+  await page.waitForTimeout(10500);
+  const slug = await page.evaluate(() => {
+    const h = document.getElementById('dps-lc-host');
+    return h ? h.getAttribute('data-lc-slug') : null;
+  });
+  if (slug !== 'national-day') fail(`dwell rule drew ${slug || 'nothing'}, expected national-day`);
+  else ok('dwell on the offers page draws the seasonal creative by itself');
   await page.close();
 }
 
@@ -147,10 +212,23 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
   const missing = want.filter((w) => !evs.includes(w));
   if (missing.length) fail(`booking funnel missing ${missing.join(', ')} (got ${evs.join(', ')})`);
   else ok('booking funnel: addToCart, order, lead row, finance intent');
-  const payload = await page.evaluate(() => window.__lastOrder || null);
   const done = await page.locator('.dps-form-done').count();
   if (!done) fail('booking: no confirmation state after submit');
   else ok('booking confirmation shown');
+
+  // the on-site confirmation, carrying the details the visitor typed
+  const summary = await page.evaluate(() => {
+    const h = document.getElementById('dps-lc-host');
+    if (!h || h.getAttribute('data-lc-slug') !== 'booking-confirmed') return null;
+    return h.innerText.replace(/\s+/g, ' ');
+  });
+  if (!summary) fail('booking: no on-site confirmation drawn');
+  else {
+    const missing = ['Demo', 'Visitor', 'demo@example.com', '0555555555', 'Navigator']
+      .filter((v) => summary.indexOf(v) === -1);
+    if (missing.length) fail(`booking confirmation omits ${missing.join(', ')}: ${summary.slice(0, 200)}`);
+    else ok('on-site confirmation repeats back the typed details');
+  }
   await page.close();
 }
 

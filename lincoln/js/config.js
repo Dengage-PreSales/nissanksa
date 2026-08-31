@@ -32,5 +32,8 @@ window.DEMO_CONFIG = {
        table and upserts the contact through the Dengage REST API. Shared
        with the Nissan demo; the page_url on every lead says which storefront
        it came from. See panel/README.md section 1a. */
-    leadRelay: 'https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-lead-relay'
+    leadRelay: 'https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-lead-relay',
+    /* The confirmation the booking earns: this endpoint asks Dengage to send
+       the transactional email and push, both from panel content. */
+    bookingConfirm: 'https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-booking-confirm'
 };

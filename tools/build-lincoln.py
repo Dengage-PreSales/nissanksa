@@ -157,6 +157,7 @@ MOUNTS = """
 <script src="{rel}js/vehicles.js?v={stamp}"></script>
 <script src="{rel}js/dengageEvents.js?v={stamp}"></script>
 <script src="{rel}js/site.js?v={stamp}"></script>
+<script src="{rel}js/creatives.js?v={stamp}"></script>
 <script src="{rel}js/panels.js?v={stamp}"></script>
 <script src="{rel}js/slots.js?v={stamp}"></script>
 <script src="{rel}js/inbox.js?v={stamp}"></script>

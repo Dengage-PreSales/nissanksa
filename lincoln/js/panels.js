@@ -31,18 +31,18 @@
     var SCENARIOS = [
         /* Nissan one-off campaigns, all pre-purchase. hy: true switches the
            fired prefix to the brand one. */
-        { slug: 'test-drive-invite',  name: 'Test drive invite',  group: 'brand', hy: true },
-        { slug: 'test-drive-rescue',  name: 'Test drive rescue',  group: 'brand', hy: true,
-          gesture: 'gestureExitIntent' },
-        { slug: 'finance-teaser',     name: 'Finance teaser',     group: 'brand', hy: true },
-        { slug: 'national-day',       name: 'National Day offer', group: 'brand', hy: true },
-        { slug: 'ramadan-offer',      name: 'Seasonal offer',     group: 'brand', hy: true },
+        { slug: 'test-drive-invite',  name: 'Test drive invite',  group: 'brand', local: true },
+        { slug: 'test-drive-rescue',  name: 'Test drive rescue',  group: 'brand', local: true,
+          also: 'alsoExitIntent' },
+        { slug: 'finance-teaser',     name: 'Finance teaser',     group: 'brand', local: true },
+        { slug: 'national-day',       name: 'National Day offer', group: 'brand', local: true },
+        { slug: 'ramadan-offer',      name: 'Seasonal offer',     group: 'brand', local: true },
         /* tekton-launch-bar and arrival-alert exist in the panel but carry
            Nissan model copy, so this launcher does not offer them. */
-        { slug: 'newsletter-capture', name: 'Newsletter capture', group: 'brand', hy: true },
-        { slug: 'comeback-offer',     name: 'Welcome back offer', group: 'brand', hy: true },
-        { slug: 'shopping-survey',    name: 'Shopping survey',    group: 'brand', hy: true,
-          gesture: 'gestureScrollDepth' },
+        { slug: 'newsletter-capture', name: 'Newsletter capture', group: 'brand', local: true },
+        { slug: 'comeback-offer',     name: 'Welcome back offer', group: 'brand', local: true },
+        { slug: 'shopping-survey',    name: 'Shopping survey',    group: 'brand', local: true,
+          also: 'alsoScrollDepth' },
 
         /* The shared platform library. Slugs must not change. */
         { slug: 'subscription-popup', name: 'Subscription',     group: 'onsite' },
@@ -161,11 +161,13 @@
                     }
                     var here = !s.target || document.getElementById(s.target);
                     return '<button type="button" class="scenario' + (here ? '' : ' elsewhere') +
-                            (s.hy ? ' brand' : '') +
+                            (s.local ? ' brand' : '') +
                             '" data-scenario="' + s.slug + '">' +
                         '<span class="name">' + s.name + '</span>' +
                         '<span class="slug">' +
-                            (here ? prefixFor(s) + s.slug : text('inlineElsewhere')) +
+                            (s.local
+                                ? text(s.also ? s.also : 'drawnHere')
+                                : (here ? prefixFor(s) + s.slug : text('inlineElsewhere'))) +
                         '</span>' +
                     '</button>';
                 }).join('');
@@ -426,13 +428,23 @@
                     return;
                 }
 
+                if (spec && spec.local) {
+                    /* Drawn by this demo, with Lincoln copy. No nissan_demo_
+                       event is raised, so a Nissan campaign can never answer
+                       one of these cards on a Lincoln page. */
+                    var drew = window.LincolnCreatives && window.LincolnCreatives.show(fired);
+                    log(drew
+                        ? 'Showed the ' + spec.name + ' experience. ' + text('setupNote') + '.'
+                        : 'The ' + fired + ' creative is not on this page.');
+                    if (window.Storefront) window.Storefront.closeOverlays();
+                    return;
+                }
+
                 var name = window.DengageEvents.scenario(fired, spec && spec.hy ? brandPrefix() : undefined);
                 log('Fired ' + name + '. ' +
                     (fired.indexOf('inline-') === 0
                         ? 'Inline content renders into its slot in the page rather than over it.'
-                        : (spec && spec.hy
-                            ? text('setupNote') + '.'
-                            : 'If nothing appears, no campaign has that trigger name.')));
+                        : 'If nothing appears, no campaign has that trigger name.'));
                 if (window.Storefront) window.Storefront.closeOverlays();
                 return;
             }
