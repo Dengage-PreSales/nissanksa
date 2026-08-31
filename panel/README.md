@@ -429,11 +429,12 @@ has not allowed notifications answers `Token not found with given ContactKey`.
 The confirmation card offers the permission for exactly that reason: allow it
 and the same confirmation arrives as a notification seconds later.
 
-## 12. The ten moments that can message, and what each still needs
+## 12. The ten moments that can message
 
-Added 31 August. The demo can ask Dengage for a transactional email and push
-at any of these moments. Booking is live; the rest send nothing until their
-content exists in the panel, and say so rather than failing quietly. Check the
+Added 31 August. The demo asks Dengage for a transactional email and a push at
+any of these moments, and all ten are authored and wired: nine send on both
+channels, and the inbox message is a notification with no email counterpart.
+Each was fired once and accepted on both channels on 31 August. Check the
 current state at any time by opening the function URL in a browser:
 `.../functions/v1/nissan-booking-confirm` lists every moment and whether its
 content is configured.
@@ -447,18 +448,19 @@ composing from scratch.
 | Moment | Fires when | State |
 |---|---|---|
 | `booking` | A test drive form is submitted | **Live**, email and push |
-| `abandoned_booking` | The booking page is left after an address was typed and before submit | Needs content |
-| `quote` | The quote form is submitted | Needs content |
-| `brochure` | A specification sheet is downloaded by a known visitor | Needs content |
-| `newsletter` | The newsletter card is completed | Needs content |
-| `survey` | The on-site survey is answered | Needs content |
-| `showroom_visit` | The cockpit logs a walk in | Needs content |
-| `test_drive_done` | The cockpit logs a completed drive | Needs content |
-| `no_show` | The cockpit logs a no-show | **Live**, push |
+| `abandoned_booking` | The booking page is left after an address was typed and before submit | **Live**, email and push |
+| `quote` | The quote form is submitted | **Live**, email and push |
+| `brochure` | A specification sheet is downloaded by a known visitor | **Live**, email and push |
+| `newsletter` | The newsletter card is completed | **Live**, email and push |
+| `survey` | The on-site survey is answered | **Live**, email and push |
+| `showroom_visit` | The cockpit logs a walk in | **Live**, email and push |
+| `test_drive_done` | The cockpit logs a completed drive | **Live**, email and push |
+| `no_show` | The cockpit logs a no-show | **Live**, email and push |
 | `inbox_message` | Asked for on demand, to fill the inbox drawer during a call | **Live**, push |
 
-**To turn one on**, author the email and the push in the panel and give both
-public ids. They are read from these names, so nothing in the code changes:
+**To replace one**, author the new content and set the variable for that
+channel; the message function carries the current ids as its defaults, so a
+variable is only needed when one changes. The names are:
 `DENGAGE_TX_EMAIL_ABANDONED`, `DENGAGE_TX_PUSH_ABANDONED`,
 `DENGAGE_TX_EMAIL_QUOTE`, `DENGAGE_TX_PUSH_QUOTE`,
 `DENGAGE_TX_EMAIL_BROCHURE`, `DENGAGE_TX_PUSH_BROCHURE`,

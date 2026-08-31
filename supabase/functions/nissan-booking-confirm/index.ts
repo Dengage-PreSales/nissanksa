@@ -43,16 +43,17 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 const API_BASE = Deno.env.get('DENGAGE_API_BASE') ?? 'https://api.dengage.com/rest';
 const EGRESS_PROXY = Deno.env.get('DENGAGE_EGRESS_PROXY') ?? '';
-/* One entry per moment the demo can message on. Each names the panel content
-   to send; a moment with no content configured is reported as such and sends
-   nothing, so a new one goes live by setting its ids rather than by changing
-   this code. Booking carries the ids already authored in the panel. */
+/* One entry per moment the demo can message on, each naming the panel content
+   it sends. All ten are authored, and the public ids sit here as the defaults
+   so this file is the record of what is wired: a variable overrides one
+   without a deploy, and a moment whose id is emptied reports that it needs
+   content and sends nothing rather than failing quietly. */
 type Moment = { email: string; push: string; label: string };
 const MOMENTS: Record<string, Moment> = {
   booking: {
     label: 'test drive booked',
-    email: Deno.env.get('DENGAGE_TX_EMAIL_CONTENT_ID') ?? '2206f32b-8d1a-4058-929c-de600493862a',
-    push: Deno.env.get('DENGAGE_TX_PUSH_CONTENT_ID') ?? '91edd42b-2e43-4e61-a8d5-88bf5a5688af',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_CONTENT_ID') ?? 'a632eb00-198c-4b3a-8a99-cdd85004b04f',
+    push: Deno.env.get('DENGAGE_TX_PUSH_CONTENT_ID') ?? '34a70f7e-4671-4ed9-a482-ae78e5308188',
   },
   abandoned_booking: {
     label: 'booking started and left',
@@ -61,42 +62,44 @@ const MOMENTS: Record<string, Moment> = {
   },
   quote: {
     label: 'quote requested',
-    email: Deno.env.get('DENGAGE_TX_EMAIL_QUOTE') ?? '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_QUOTE') ?? '',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_QUOTE') ?? '24ee6574-0f5c-4c31-a11a-f663e8102c33',
+    push: Deno.env.get('DENGAGE_TX_PUSH_QUOTE') ?? '4bd7ad89-547f-40bc-aef5-d81cf46b9473',
   },
   brochure: {
     label: 'specification downloaded',
-    email: Deno.env.get('DENGAGE_TX_EMAIL_BROCHURE') ?? '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_BROCHURE') ?? '',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_BROCHURE') ?? '9c4bf361-46be-465a-bfdd-8da6d9378a03',
+    push: Deno.env.get('DENGAGE_TX_PUSH_BROCHURE') ?? '6ccb441d-9513-4d4f-a852-99debe03362d',
   },
   newsletter: {
     label: 'newsletter signup',
-    email: Deno.env.get('DENGAGE_TX_EMAIL_NEWSLETTER') ?? '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_NEWSLETTER') ?? '',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_NEWSLETTER') ?? '214ee3c1-9a5a-4355-a8a4-8ce3f6af905e',
+    push: Deno.env.get('DENGAGE_TX_PUSH_NEWSLETTER') ?? 'f8672856-8a11-4d4f-92ab-e036739e2423',
   },
   survey: {
     label: 'survey answered',
-    email: Deno.env.get('DENGAGE_TX_EMAIL_SURVEY') ?? '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_SURVEY') ?? '',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_SURVEY') ?? '926586f0-de55-47cb-b08e-4103f965ce8c',
+    push: Deno.env.get('DENGAGE_TX_PUSH_SURVEY') ?? 'dd33859f-3f41-49ec-86ba-0f42dbf5397f',
   },
   showroom_visit: {
     label: 'walk in logged at the showroom',
-    email: Deno.env.get('DENGAGE_TX_EMAIL_WALKIN') ?? '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_WALKIN') ?? '',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_WALKIN') ?? '6e03aa30-978b-48d7-816b-54a8f895207b',
+    push: Deno.env.get('DENGAGE_TX_PUSH_WALKIN') ?? '9fa61c0c-e033-4644-977f-b6198bb6e759',
   },
   test_drive_done: {
     label: 'test drive completed',
-    email: Deno.env.get('DENGAGE_TX_EMAIL_TD_DONE') ?? '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_TD_DONE') ?? '',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_TD_DONE') ?? '32906767-2cf1-4eb0-8d28-027b0bf1af33',
+    push: Deno.env.get('DENGAGE_TX_PUSH_TD_DONE') ?? '818a45fa-da5e-4846-9fca-0e41ba159cc7',
   },
   inbox_message: {
     label: 'a message waiting in the app inbox',
+    /* The inbox message is a notification and nothing else: there is no
+       email counterpart to it. */
     email: '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_INBOX') ?? '98877652-a619-4c1c-8e32-a1462e6a8bd6',
+    push: Deno.env.get('DENGAGE_TX_PUSH_INBOX') ?? '31aab9e8-1aa8-4ddd-9346-58d06e1f5a2d',
   },
   no_show: {
     label: 'booked but did not arrive',
-    email: Deno.env.get('DENGAGE_TX_EMAIL_NOSHOW') ?? '',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_NOSHOW') ?? '356e1d8d-4aa2-42a1-9596-951e0afd988d',
     push: Deno.env.get('DENGAGE_TX_PUSH_NOSHOW') ?? 'e974aaf2-4b7c-409c-8a57-91565a226bf3',
   },
 };

@@ -395,7 +395,9 @@ folder is served by the site, and nothing here is read at runtime: the panel
 holds the content, and the demo calls the transactional API with a content id
 and the values the message prints.
 
-## What to create, and where its id goes
+## The ten, and where each one's id lives
+
+All ten are authored in the panel and wired, so every moment below sends.
 
 | Moment | Sent as | Email body | Content id variable |
 |---|---|---|---|
@@ -403,10 +405,11 @@ and the values the message prints.
 
 Push copy for all ten is in [PUSH.md](PUSH.md), one section each.
 
-Once a content exists, set its public id on the message function and that
-moment starts sending. Nothing else changes: a moment with no id configured
-reports `needs content` and sends nothing, which is why the set can be filled
-in one at a time.
+The public ids sit in the message function as its defaults, which makes that
+file the record of what is wired. Setting the variable named above overrides
+one without a deploy, which is how a reworked content goes live; emptying one
+makes that moment report `needs content` and send nothing rather than fail
+quietly.
 
     supabase secrets set DENGAGE_TX_EMAIL_QUOTE=<public id> --project-ref <ref>
 
