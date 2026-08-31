@@ -149,6 +149,13 @@
     function confirmBooking(details, moment) {
         var url = (window.DEMO_CONFIG || {}).bookingConfirm;
         if (!url || typeof window.fetch !== 'function') return;
+        /* The token this device holds, sent so a push can still reach it if the
+           contact key has not been bound to a subscription yet. The server
+           addresses the contact first and only falls back to this. */
+        var token = null;
+        try {
+            window.dengage('getToken', function (value) { if (value) token = String(value); });
+        } catch (err) { /* the SDK is not there */ }
         var body = {
             moment: moment || 'booking',
             contact_key: (window.DemoIdentity || {}).contactKey,
@@ -160,6 +167,7 @@
             purchase_horizon: details.horizon
         };
         try {
+            if (token) body.device_token = token;
             window.fetch(url, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
@@ -582,6 +590,16 @@
            thing that makes this demo's rows findable in the shared tables. */
         window.DengageEvents.pageview(
             document.body.getAttribute('data-page-type') || 'other', pageviewDetail());
+
+        /* Claim this device for the contact we are browsing as. Passing the key
+           to initialize names the visitor on the events, but it does not move
+           an existing push subscription: Dengage binds a token to a contact
+           when a subscription is posted, so a device that subscribed under an
+           earlier key stays with that key until this call re-posts it. Without
+           it, ?ck=DPS-1 shows the right name on screen while a push addressed
+           to DPS-1 finds no device. */
+        var claimed = (window.DemoIdentity || {}).contactKey;
+        if (claimed) window.DengageEvents.setContactKey(claimed);
 
         if (window.Panels) window.Panels.init();
         if (window.Slots) window.Slots.init();

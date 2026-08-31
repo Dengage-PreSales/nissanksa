@@ -236,6 +236,7 @@ Deno.serve(async (req: Request) => {
     model: clean(raw.model, 60),
     model_id: clean(raw.model_id, 40),
     booking_ref: clean(raw.booking_ref, 60),
+    device_token: clean(raw.device_token, 400),
     city: clean(raw.city, 60),
     branch: clean(raw.branch, 120),
     purchase_horizon: clean(raw.purchase_horizon, 60),
@@ -253,7 +254,9 @@ Deno.serve(async (req: Request) => {
   // empty is left out rather than sent blank.
   const params: Record<string, string> = {};
   for (const [k, v] of Object.entries(lead)) {
-    if (v && k !== 'contact_key' && k !== 'model' && k !== 'model_id') params[k] = v as string;
+    if (v && k !== 'contact_key' && k !== 'model' && k !== 'model_id' && k !== 'device_token') {
+      params[k] = v as string;
+    }
   }
   Object.assign(params, vehicleParams(lead.model_id, lead.model));
   if (lead.name) params.first_name = lead.name;
@@ -298,12 +301,28 @@ Deno.serve(async (req: Request) => {
         tags: ['demo', 'test-drive'],
       }, token);
       out.push = res.ok ? 'sent' : `error HTTP ${res.status}`;
-      /* The device carries the token, and Dengage keeps it against whichever
-         contact key claimed it last. A key that never subscribed, or that has
-         been overtaken by a newer session, answers this rather than failing
-         silently. */
-      if (/Token not found/i.test(res.text)) out.push = 'no device subscribed for this contact';
       notes.push('push: ' + res.text.slice(0, 300));
+      /* Dengage keeps a device token against whichever contact key claimed it
+         last, so a key the device has not claimed yet reaches nothing. When
+         the page told us which token it holds, the same message goes to that
+         device directly, which is what a demo needs: the contact is still the
+         right way to address a person, and this is the safety net. */
+      if (/Token not found/i.test(res.text)) {
+        out.push = 'no device subscribed for this contact';
+        if (lead.device_token) {
+          const direct = await dengagePost('/transactional/push', {
+            contentId: moment.push,
+            token: lead.device_token,
+            appId: APP_ID,
+            language: 'EN',
+            current: params,
+            customParameters: Object.entries(params).map(([key, value]) => ({ key, value })),
+            tags: ['demo', 'test-drive'],
+          }, token);
+          out.push = direct.ok ? 'sent to this device by token' : `error HTTP ${direct.status}`;
+          notes.push('push by token: ' + direct.text.slice(0, 300));
+        }
+      }
     } else {
       out.push = 'needs content for ' + momentKey;
     }
