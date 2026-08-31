@@ -140,6 +140,17 @@
             model: car ? car.name : undefined,
             model_id: car ? car.id : undefined
         };
+        /* Only when this browser IS the persona, which is what ?ck=DPS-1
+           arranges: then its own token is a fair fallback if Dengage has not
+           bound the key to a subscription yet. Firing a signal for someone
+           else must never push to the machine running the cockpit. */
+        if ((window.DemoIdentity || {}).contactKey === personaKey) {
+            try {
+                window.dengage('getToken', function (value) {
+                    if (value) body.device_token = String(value);
+                });
+            } catch (err) { /* the SDK is not there */ }
+        }
         try {
             window.fetch(url, {
                 method: 'POST',
