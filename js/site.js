@@ -28,7 +28,31 @@
 
     var slug = window.DEMO_SLUG || 'nissanksa';
     var TD_KEY = 'dps:' + slug + ':tdcart';
+    var CAMPAIGN_KEY = 'dps:' + slug + ':campaign';
     var WISH_KEY = 'dps:' + slug + ':wishlist';
+
+    /* The campaign that brought them, kept for as long as the browser keeps
+       anything. It used to be read from the address bar at the moment a form
+       was submitted, so a visitor who arrived on an advertisement and then
+       clicked through to the booking page reached it with a clean address and
+       the one thing a dealer most wants to know about a paid lead was the one
+       thing never sent. First touch wins: a later direct visit must not erase
+       which advertisement bought the lead. */
+    function rememberCampaign() {
+        var params;
+        try { params = new URLSearchParams(window.location.search); } catch (err) { return; }
+        var source = params.get('utm_source');
+        if (!source && params.get('fbclid')) source = 'facebook';
+        if (!source && params.get('gclid')) source = 'google';
+        if (!source) return;
+        if (readJson(CAMPAIGN_KEY, null)) return;
+        writeJson(CAMPAIGN_KEY, {
+            utm_source: source,
+            utm_medium: params.get('utm_medium') || undefined,
+            utm_campaign: params.get('utm_campaign') || undefined
+        });
+    }
+    function campaign() { return readJson(CAMPAIGN_KEY, null) || {}; }
 
     function readJson(key, fallback) {
         try {
@@ -149,8 +173,6 @@
         var consent = form.querySelector('input[name="allOptIn"]');
         var titleValue = val('Title');
         if (titleValue && /select/i.test(titleValue)) titleValue = undefined;
-        var params = null;
-        try { params = new URLSearchParams(window.location.search); } catch (err) { /* old browser */ }
         var body = {
             contact_key: (window.DemoIdentity || {}).contactKey,
             title: titleValue,
@@ -159,9 +181,9 @@
             email: val('Email'),
             gsm: val('Phone'),
             page_url: window.location.href,
-            utm_source: params ? params.get('utm_source') || undefined : undefined,
-            utm_medium: params ? params.get('utm_medium') || undefined : undefined,
-            utm_campaign: params ? params.get('utm_campaign') || undefined : undefined,
+            utm_source: campaign().utm_source,
+            utm_medium: campaign().utm_medium,
+            utm_campaign: campaign().utm_campaign,
             marketing_consent: consent ? !!consent.checked : false
         };
         for (var k in fields) { if (fields[k] !== undefined) body[k] = fields[k]; }
@@ -983,6 +1005,10 @@
     }
 
     function boot() {
+        /* Before the page view, because the campaign that brought them is on
+           the address of this very page and will not be there on the next one. */
+        rememberCampaign();
+
         /* FIRST, before anything else on the page: the page view is the only
            thing that makes this demo's rows findable in the shared tables. */
         window.DengageEvents.pageview(

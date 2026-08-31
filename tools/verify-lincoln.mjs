@@ -408,6 +408,43 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
   await page.close();
 }
 
+/* 3f. A lead carries the campaign that brought the visitor, even though they
+   arrived on the advertisement two pages ago. Reading it from the address bar
+   at submit time loses it on the first click. */
+{
+  const page = await open('index.html?utm_source=facebook&utm_medium=paid_social&utm_campaign=navigator_launch');
+  const relayed = [];
+  page.on('request', (r) => {
+    if (r.url().indexOf('nissan-lead-relay') !== -1) relayed.push(r.postData() || '');
+  });
+  /* Two clean pages between the advertisement and the form, as in real life. */
+  await page.goto(BASE + 'vehicles/navigator/index.html', { waitUntil: 'load' });
+  await page.goto(BASE + 'forms/testdrive/index.html', { waitUntil: 'load' });
+  await page.waitForTimeout(700);
+  await page.fill('input[name="firstname"]', 'Demo');
+  await page.fill('input[name="lastname"]', 'Visitor');
+  await page.fill('input[name="mobile"]', '0555555555');
+  await page.fill('input[name="email"]', 'demo@example.com');
+  await page.evaluate(() => {
+    const form = document.querySelector('form[action*="leads/submit"]');
+    form.querySelectorAll('select').forEach((s) => {
+      if (!s.value && s.options.length > 1) s.selectedIndex = 1;
+      s.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    form.querySelectorAll('input[type="checkbox"][required]').forEach((c) => { c.checked = true; });
+  });
+  await page.waitForTimeout(300);
+  await page.click('.formSubmitBtn');
+  await page.waitForTimeout(900);
+  const lead = relayed[relayed.length - 1] || '';
+  if (lead.indexOf('"utm_source":"facebook"') === -1) {
+    fail('the lead lost the campaign that brought the visitor');
+  } else if (lead.indexOf('navigator_launch') === -1) {
+    fail('the lead carries the source but not the campaign');
+  } else ok('a lead carries the campaign that brought them, two pages later');
+  await page.close();
+}
+
 // 4. The quote form writes the quote lead, never the booking order.
 {
   const page = await open('forms/quote/index.html');

@@ -24,7 +24,8 @@
 
        python3 -m http.server 8101
        python3 -m http.server 8101
-       node tools/rehearse-lincoln.mjs --email you@example.com
+       node tools/rehearse-lincoln.mjs --email you@example.com \\
+            --gsm +9665xxxxxxx --from facebook
 
    The address is required and is used for every form, because a rehearsal
    that types an invented address sends real mail to a domain that does not
@@ -36,8 +37,18 @@ const { chromium } = createRequire('/opt/node22/lib/node_modules/')('playwright'
 const ORIGIN = 'https://dengage-presales.github.io/nissanksa/';
 const LOCAL = 'http://localhost:8101/';
 const BASE = ORIGIN + 'lincoln/';
-const emailArg = process.argv.indexOf('--email');
-const EMAIL = emailArg === -1 ? '' : process.argv[emailArg + 1];
+const arg = (name, fallback) => {
+  const i = process.argv.indexOf('--' + name);
+  return i === -1 ? fallback : process.argv[i + 1];
+};
+const EMAIL = arg('email', '');
+const GSM = arg('gsm', '0555555555');
+/* The advertisement they clicked. It is on the address of the first page only,
+   which is exactly the case worth rehearsing. */
+const CAMPAIGN = arg('from', '');
+const ENTRY = CAMPAIGN
+  ? `index.html?utm_source=${CAMPAIGN}&utm_medium=paid_social&utm_campaign=navigator_launch&debug=1`
+  : 'index.html?debug=1';
 
 const steps = [];
 const note = (step, state, detail) => {
@@ -112,6 +123,10 @@ await ctx.route('**/*', async (route) => {
 
 const answers = [];
 const asked = [];
+const relayed = [];
+ctx.on('request', (req) => {
+  if (req.url().indexOf('nissan-lead-relay') !== -1) relayed.push(req.postData() || '');
+});
 ctx.on('request', (req) => {
   if (req.url().indexOf('nissan-booking-confirm') !== -1) asked.push(req.postData() || '');
 });
@@ -164,12 +179,18 @@ function report(moment) {
 
 /* 1. A visitor nobody has met. */
 {
-  const page = await open('index.html?debug=1');
+  const page = await open(ENTRY);
   const evs = await events(page);
   if (evs[0] !== 'pageView') note('first visit fires pageView first', 'break', evs.join(', '));
   else note('first visit fires pageView first', 'ok');
   const key = await identity(page);
   note('anonymous, no contact key yet', key ? 'note' : 'ok', key || '');
+  if (CAMPAIGN) {
+    const held = await page.evaluate(() => {
+      try { return localStorage.getItem('dps:lincoln:campaign'); } catch (e) { return null; }
+    });
+    note('the campaign that brought them is held', held ? 'ok' : 'break', held || 'nothing stored');
+  }
 }
 
 /* 2. Two models read, which is what earns the invitation. */
@@ -193,7 +214,7 @@ for (const model of ['navigator', 'aviator']) {
   const page = await open('forms/testdrive/index.html?debug=1');
   await page.fill('input[name="firstname"]', 'Rehearsal');
   await page.fill('input[name="lastname"]', 'Visitor');
-  await page.fill('input[name="mobile"]', '0555555555');
+  await page.fill('input[name="mobile"]', GSM);
   if (EMAIL) await page.fill('input[name="email"]', EMAIL);
   await page.evaluate(() => {
     const form = document.querySelector('form[action*="leads/submit"]');
@@ -222,7 +243,7 @@ else {
   const page = await open('forms/testdrive/index.html?debug=1');
   await page.fill('input[name="firstname"]', 'Rehearsal');
   await page.fill('input[name="lastname"]', 'Visitor');
-  await page.fill('input[name="mobile"]', '0555555555');
+  await page.fill('input[name="mobile"]', GSM);
   await page.fill('input[name="email"]', EMAIL);
   await page.evaluate(() => {
     const form = document.querySelector('form[action*="leads/submit"]');
@@ -241,6 +262,13 @@ else {
   const evs = await events(page);
   const missing = ['ec:addToCart', 'ec:order', 'lead:test_drive_booked'].filter((w) => !evs.includes(w));
   note('booking writes the funnel', missing.length ? 'break' : 'ok', missing.join(', '));
+  const lead = relayed[relayed.length - 1] || '';
+  if (CAMPAIGN) {
+    note('the lead carries the campaign', lead.indexOf(CAMPAIGN) !== -1 ? 'ok' : 'break',
+         (lead.match(/"utm_[a-z]+":"[^"]*"/g) || []).join(' '));
+  }
+  note('the lead carries the mobile', lead.indexOf(GSM.replace('+', '')) !== -1 || lead.indexOf(GSM) !== -1
+       ? 'ok' : 'break');
   const drawn = await creative(page);
   note('the booking confirmation is drawn back', drawn === 'booking-confirmed' ? 'ok' : 'break',
        drawn || 'nothing drew');
@@ -254,7 +282,7 @@ if (EMAIL) {
   await open('forms/quote/index.html');
   await page.fill('input[name="firstname"]', 'Rehearsal');
   await page.fill('input[name="lastname"]', 'Visitor');
-  await page.fill('input[name="mobile"]', '0555555555');
+  await page.fill('input[name="mobile"]', GSM);
   await page.fill('input[name="email"]', EMAIL);
   await page.evaluate(() => {
     const form = document.querySelector('form[action*="leads/submit"]');
