@@ -57,6 +57,7 @@
        read each other's preference. Non-negotiable 6. */
     function storeKey() { return 'dps:' + slug() + ':debug'; }
     function eventName() { return 'dps:' + slug() + ':event'; }
+    function messageName() { return 'dps:' + slug() + ':confirmation'; }
 
     function wanted() {
         var value = null;
@@ -321,10 +322,36 @@
         '</li>';
     }
 
+    /* The messages a moment earned, and what Dengage answered for each channel.
+       This one is not a send from the page: it is the page asking Dengage to
+       send, and Dengage's own reply coming back. So it is the only row here
+       that reports something the platform said rather than something the
+       browser did, which is exactly what makes it worth showing on a call. */
+    function renderMessage(row) {
+        function channel(label, outcome) {
+            var good = outcome === 'sent' || outcome === 'sent to this device by token';
+            return '<div class="' + (good ? 'dps-debug-table' : 'dps-debug-warn') + '">' +
+                esc(label + ': ' + outcome) + '</div>';
+        }
+        return '<li class="dps-net">' +
+            '<div class="dps-debug-top">' +
+              '<code>message: ' + esc(row.moment) + '</code>' +
+              '<span class="dps-debug-time">' + esc(clock(row.at)) + '</span>' +
+            '</div>' +
+            channel('email', row.email) +
+            channel('push', row.push) +
+            (row.personalized && row.personalized.length
+                ? '<pre>' + esc(row.personalized.join(', ')) + '</pre>'
+                : '') +
+        '</li>';
+    }
+
     function render() {
         if (!list) return;
         list.innerHTML = rows.map(function (row) {
-            return row.kind === 'net' ? renderNet(row) : renderEvent(row);
+            if (row.kind === 'net') return renderNet(row);
+            if (row.kind === 'message') return renderMessage(row);
+            return renderEvent(row);
         }).join('');
         if (countEl) countEl.textContent = String(rows.length);
     }
@@ -339,6 +366,21 @@
                announceSent in js/dengageEvents.js. */
             accepted: !!detail.accepted,
             at: detail.at || Date.now()
+        });
+    });
+
+    /* js/site.js announces what came back from the message function. Reading it
+       here calls nothing: the ask has already happened and this is its reply. */
+    document.addEventListener(messageName(), function (event) {
+        var d = event.detail || {};
+        if (!d.moment) return;
+        add({
+            kind: 'message',
+            moment: d.moment,
+            email: d.email || 'no answer',
+            push: d.push || 'no answer',
+            personalized: d.personalized || [],
+            at: Date.now()
         });
     });
 

@@ -412,6 +412,23 @@ for (const p of ['submit-a-complaint/index.html', 'offers/navigator-june-26/inde
   const box = await page.locator('#dps-debug').count();
   if (!box) fail('?debug=1 readout missing');
   else ok('?debug=1 readout present');
+  /* The readout is where a call is shown that the messages were really asked
+     for, so the row Dengage's answer produces is pinned here. The answer is
+     supplied directly because the router above refuses the request that would
+     earn one; what is under test is that the readout renders what comes back. */
+  await page.evaluate(() => document.dispatchEvent(new CustomEvent('dps:lincoln:confirmation', {
+    detail: { moment: 'abandoned_booking', email: 'sent', push: 'sent',
+              personalized: ['model', 'city'] },
+  })));
+  await page.waitForTimeout(200);
+  const shown = await page.evaluate(() => {
+    const el = document.querySelector('#dps-debug');
+    return el ? el.innerText.replace(/\s+/g, ' ') : '';
+  });
+  const absent = ['abandoned_booking', 'email: sent', 'push: sent']
+    .filter((v) => shown.indexOf(v) === -1);
+  if (absent.length) fail(`?debug=1 omits ${absent.join(', ')} from the message row`);
+  else ok('?debug=1 shows the messages a moment earned, and what Dengage answered');
   await page.close();
 }
 
