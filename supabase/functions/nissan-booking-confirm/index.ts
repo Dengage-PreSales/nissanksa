@@ -79,6 +79,11 @@ const MOMENTS: Record<string, Moment> = {
     email: Deno.env.get('DENGAGE_TX_EMAIL_TD_DONE') ?? '',
     push: Deno.env.get('DENGAGE_TX_PUSH_TD_DONE') ?? '',
   },
+  inbox_message: {
+    label: 'a message waiting in the app inbox',
+    email: '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_INBOX') ?? '98877652-a619-4c1c-8e32-a1462e6a8bd6',
+  },
   no_show: {
     label: 'booked but did not arrive',
     email: Deno.env.get('DENGAGE_TX_EMAIL_NOSHOW') ?? '',
@@ -290,6 +295,15 @@ Deno.serve(async (req: Request) => {
       /* The push API takes no inline title or body: every word comes from the
          saved content, personalized through these two. They carry the same
          values so the content can use whichever tag form it was built with. */
+      /* Every push is also kept in the app inbox. There is no REST call that
+         posts to the inbox on its own: the inbox API reads and reports, and a
+         message gets there by being sent with these parameters. So the drawer
+         in the storefront fills as the notifications arrive, and a visitor who
+         missed one, or who never allowed notifications, still finds it. */
+      const inboxParams = {
+        enabled: true,
+        expire: { type: 'PERIOD', period: 30, periodType: 'DAY' },
+      };
       const res = await dengagePost('/transactional/push', {
         contentId: moment.push,
         contactKey: lead.contact_key,
@@ -298,6 +312,7 @@ Deno.serve(async (req: Request) => {
         language: 'EN',
         current: params,
         customParameters: Object.entries(params).map(([key, value]) => ({ key, value })),
+        inboxParams,
         tags: ['demo', 'test-drive'],
       }, token);
       out.push = res.ok ? 'sent' : `error HTTP ${res.status}`;
@@ -317,6 +332,7 @@ Deno.serve(async (req: Request) => {
             language: 'EN',
             current: params,
             customParameters: Object.entries(params).map(([key, value]) => ({ key, value })),
+            inboxParams,
             tags: ['demo', 'test-drive'],
           }, token);
           out.push = direct.ok ? 'sent to this device by token' : `error HTTP ${direct.status}`;

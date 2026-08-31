@@ -321,3 +321,54 @@ footer .dps-brand { color: #ffffff; }
 @media (max-width: 760px) {
   .dps-lc-bar-open .dps-controls { bottom: 210px; }
 }
+
+/* The inbox bell sits in the header beside the menu rather than floating over
+   the page. The capture keeps two header clusters, one for each width, so each
+   bell shows only where its cluster belongs. */
+.dps-header-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin: 0 14px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #324047;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.dps-header-bell svg { width: 22px; height: 22px; }
+.dps-header-bell:hover { color: #b45f1a; }
+.dps-header-bell .dps-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #b45f1a;
+  color: #ffffff;
+  font: 600 10px/16px Arial, sans-serif;
+  text-align: center;
+}
+.header-right.desktop-none .dps-header-bell { display: none; }
+@media (max-width: 991px) {
+  .header-right-warpper .dps-header-bell { display: none; }
+  .header-right.desktop-none .dps-header-bell {
+    display: inline-flex;
+    margin: 0 8px 0 0;
+  }
+}
+
+/* Where the header has room the bell sits in it; on a phone the captured
+   header collapses to a hamburger with nowhere to put one, so the floating
+   bell stays there and only there. */
+@media (min-width: 992px) {
+  /* Matched through its container so this outweighs the controls stylesheet's
+     own .dps-controls .dps-bell rule. */
+  .dps-controls .dps-floating-bell { display: none; }
+}

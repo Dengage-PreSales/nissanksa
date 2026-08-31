@@ -37,6 +37,9 @@ for (const file of walkHtml(ROOT)) {
   for (const m of text.matchAll(/(?:href|src|poster)="([^"#?]+)[^"]*"/g)) {
     const url = m[1];
     if (/^(https?:|mailto:|tel:|javascript:|data:)/.test(url) || url === '' || url === '#') continue;
+    /* A message body is not a page: its links are template tags the send
+       engine resolves, so there is no file here to find. */
+    if (url.includes('{%') || url.includes('{{')) continue;
     const target = url.startsWith('/') ? join(ROOT, '..', url) : join(dir, url);
     if (!existsSync(target)) { deadLinks += 1; fail(`dead ref ${url} in ${file.slice(ROOT.length + 1)}`); }
   }

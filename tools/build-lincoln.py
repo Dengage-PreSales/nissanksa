@@ -139,9 +139,9 @@ SCAFFOLD = """
 </div>
 
 <div class="dps-controls">
-  <button type="button" class="dps-bell" data-open="#inbox" aria-label="Lincoln updates">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4a5 5 0 0 1 5 5v4l1.7 2.6H5.3L7 13V9a5 5 0 0 1 5-5z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
-    <span class="dps-badge" id="inbox-badge" hidden>0</span>
+  <button type="button" class="dps-bell dps-floating-bell" data-open="#inbox" aria-label="Lincoln updates">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 4a5 5 0 0 1 5 5v4l1.7 2.6H5.3L7 13V9a5 5 0 0 1 5-5z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+    <span class="dps-badge" hidden>0</span>
   </button>
   <button type="button" class="dps-launch" data-open="#dengage-panel" aria-label="Dengage demo">
     <svg viewBox="0 0 38 38"><path d="M11.3821 34.8307H6.61521V28.0187H11.3821C16.4408 27.824 20.4293 23.6395 20.2348 18.5791C20.1375 13.7133 16.1489 9.82066 11.3821 9.72334H6.61521V15.5623H12.3549V22.3744H0V2.91125H11.3821C20.2348 3.2032 27.1418 10.5019 26.85 19.3576C26.6554 27.824 19.8456 34.6361 11.3821 34.8307Z"/><path d="M36.9964 15.9687C38.288 17.303 38.3802 19.5905 36.9964 20.9248C35.6126 22.2591 33.3986 22.2591 32.0148 20.9248C31.369 20.2576 31 19.3045 31 18.4468C31 16.5406 32.476 14.9203 34.4134 14.9203C34.4134 14.9203 34.4134 14.9203 34.5056 14.9203C35.4281 14.9203 36.3507 15.3015 36.9964 15.9687Z"/></svg>
@@ -302,6 +302,37 @@ def swap_logos(text, rel):
     return text
 
 
+BELL = (
+    '<button type="button" class="dps-bell dps-header-bell" data-open="#inbox" '
+    'aria-label="Lincoln updates">'
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">'
+    '<path d="M12 4a5 5 0 0 1 5 5v4l1.7 2.6H5.3L7 13V9a5 5 0 0 1 5-5z"/>'
+    '<path d="M10 19a2 2 0 0 0 4 0"/></svg>'
+    '<span class="dps-badge" hidden>0</span>'
+    '</button>'
+)
+
+
+def inject_bell(text):
+    """The inbox bell sits in the header beside the menu, where a site puts a
+    notification control, rather than floating over the page. Both header
+    clusters take one: the capture uses a separate block for small screens, and
+    each is hidden at the width the other serves."""
+    placed = 0
+
+    def once(match):
+        nonlocal placed
+        placed += 1
+        return match.group(0) + BELL
+
+    text = re.sub(r'<div class="header-right\s+header-right-warpper">', once, text, count=1)
+    text = re.sub(r'<div class="header-right desktop-none">', once, text, count=1)
+    if not placed:
+        # No header cluster on this page: keep the bell reachable rather than lost.
+        text = text.replace('<div class="dps-controls">', '<div class="dps-controls">' + BELL, 1)
+    return text
+
+
 def inject_slots(text, route):
     def after(pattern, snippet, s, count=1):
         return re.sub(pattern, lambda m: m.group(0) + snippet, s, count=count, flags=re.S)
@@ -379,6 +410,7 @@ def build(capture_dir):
         text = unwrap_leftover_links(text)
         text = swap_logos(text, rel)
         text = inject_slots(text, route)
+        text = inject_bell(text)
         if route == 'branches':
             text = inject_branches(text, capture)
         # The capture's own copy stays, but the repository rule on dashes is

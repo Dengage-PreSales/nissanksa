@@ -306,11 +306,14 @@
             count.hidden = n === 0;
         }
 
-        var badge = $('#inbox-badge');
-        if (badge) {
+        /* A page can carry more than one bell: the header wears one where a
+           site would put it, and a phone keeps the floating one, because the
+           header there is a hamburger with nowhere to sit. Both show the same
+           count, so the badge is addressed by class rather than by id. */
+        Array.prototype.forEach.call(document.querySelectorAll('.dps-badge'), function (badge) {
             badge.textContent = n;
             badge.hidden = n === 0;
-        }
+        });
 
         hideBrokenMedia();
 
