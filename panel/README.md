@@ -364,3 +364,67 @@ asked, or that allowed push, never sees it.
 Before presenting, open the padlock beside the address bar and set
 Notifications for this site to Allow or Ask. A browser that was used to test
 push and answered Block is exactly the case that shows the panel.
+
+## 11. Lincoln: the experiences the demo draws, and the booking confirmation
+
+Added 31 August, and this section is the one to read before a Lincoln call.
+
+### The eight Lincoln scenarios are page creatives, not campaigns
+
+The `nissan_demo_` campaigns carry Nissan model copy, so a Lincoln audience
+cannot be shown them, and rewriting them in the panel would change what the
+Nissan demo shows. The Lincoln launcher's eight cards therefore render from
+`lincoln/js/creatives.js` in the site's own palette, and none of them raises a
+`nissan_demo_` data layer event. A Nissan campaign can never answer one of
+these cards, whether those campaigns are paused or live.
+
+The thirteen cards under On-site messaging are unchanged: they are the shared
+`dengage_demo_` library, brand neutral by design, and still served live from
+Dengage. That is where the on-site engine itself is demonstrated.
+
+### They fire on behaviour, not on a button
+
+Each creative carries a rule, so a visitor meets it by browsing:
+
+| Creative | When it appears by itself |
+|---|---|
+| Test drive invite | On a model page, after two models seen this session and 18 seconds of dwell |
+| Test drive rescue | Exit intent on the booking page, once typing has started |
+| Shopping survey | 60 percent scroll depth on a model or offers page |
+| Finance teaser | A model or offers page, 30 seconds in, once Finance was chosen anywhere |
+| National Day | 9 seconds on the offers page |
+| Seasonal offer | The offers page, after National Day has been seen |
+| Welcome back | The home page on a second visit |
+| Newsletter | 45 percent scroll or 20 seconds, home or article pages, only while the visitor is unidentified, once per visitor |
+
+Three guards keep them civil: one on screen at a time, 25 seconds between
+automatic appearances, and once per session for each rule. Every launcher card
+still fires its creative on demand, twice in a row, which is what a presenter
+needs mid call.
+
+### A booking confirms itself three ways
+
+1. **On-site**, immediately: a card repeating back exactly what was typed,
+   model, name, mobile, email, city, showroom, horizon and payment. Nothing is
+   invented and an empty field is left out.
+2. **Email**, through `POST /rest/transactional/email` with content
+   `2206f32b-8d1a-4058-929c-de600493862a`.
+3. **Push**, through `POST /rest/transactional/push` with content
+   `91edd42b-2e43-4e61-a8d5-88bf5a5688af`.
+
+The sends live in the `nissan-booking-confirm` function, separate from the
+lead relay on purpose: the lead path must never fail, so a refused send costs
+the booking nothing. Every outcome is written onto the lead's row in
+`ni_web_lead` as `tx_email_status`, `tx_push_status` and `tx_detail`, so the
+question "did it actually go" is answered by the record.
+
+**The parameters the content can address by name**, all taken from the form:
+`name`, `surname`, `email`, `gsm`, `model`, `city`, `branch`,
+`purchase_horizon`.
+
+Two things this needed on the account side, both now done: the API user
+carries permission for the transactional API (without it both calls answer
+403 with an empty body), and the push needs a device token, so a browser that
+has not allowed notifications answers `Token not found with given ContactKey`.
+The confirmation card offers the permission for exactly that reason: allow it
+and the same confirmation arrives as a notification seconds later.
