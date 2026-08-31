@@ -431,6 +431,13 @@
             var rule = RULES[i];
             if (rule.on !== kind) continue;
             if (kind === 'scroll' && (context.depth < rule.depth || context.dwell < rule.dwell)) continue;
+            /* A dwell rule waits out its own delay. Without this the three
+               second sweep below shows the first eligible one after three
+               seconds, whatever `after` says, and the invitation meant for a
+               visitor who lingered arrives before they have read anything.
+               Worse, it is once per session, so it is spent before the moment
+               it was written for. */
+            if (kind === 'dwell' && context.dwell < rule.after) continue;
             if (!eligible(rule)) continue;
             if (rule.once === 'visitor') markSeenEver(rule.slug);
             show(rule.slug, null, true);

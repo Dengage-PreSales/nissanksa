@@ -315,6 +315,99 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
   await page.close();
 }
 
+/* 3c. A dwell rule waits out its own delay. The engine sweeps every three
+   seconds, so a rule that does not check its own clock fires on the first
+   sweep and is spent long before the moment it was written for. */
+{
+  const page = await open('vehicles/navigator/index.html');
+  await page.goto(BASE + 'vehicles/aviator/index.html', { waitUntil: 'load' });
+  await page.waitForTimeout(6000);
+  const early = await page.evaluate(() => {
+    const h = document.getElementById('dps-lc-host');
+    return h ? h.getAttribute('data-lc-slug') : null;
+  });
+  if (early === 'test-drive-invite') {
+    fail('the dwell invitation drew after 6s, its rule says 18s');
+  } else ok('a dwell rule holds off until its own delay');
+  await page.waitForTimeout(14000);
+  const later = await page.evaluate(() => {
+    const h = document.getElementById('dps-lc-host');
+    return h ? h.getAttribute('data-lc-slug') : null;
+  });
+  if (later !== 'test-drive-invite') {
+    fail(`the dwell invitation never drew after 20s (drew ${later || 'nothing'})`);
+  } else ok('and it does draw once the visitor has genuinely lingered');
+  await page.close();
+}
+
+/* 3d. The booking confirmation is asked for even when the relay never answers.
+   Chaining it on the relay's reply means a slow network costs the visitor
+   their email and their notification, silently. */
+{
+  const page = await open('forms/testdrive/index.html');
+  const asks = [];
+  page.on('request', (r) => {
+    if (r.url().indexOf('nissan-booking-confirm') !== -1) asks.push(r.postData() || '');
+  });
+  /* The relay is answered by nothing at all here, which is the case under
+     test: the router aborts it, so its promise never resolves normally. */
+  await page.fill('input[name="firstname"]', 'Demo');
+  await page.fill('input[name="lastname"]', 'Visitor');
+  await page.fill('input[name="mobile"]', '0555555555');
+  await page.fill('input[name="email"]', 'demo@example.com');
+  await page.evaluate(() => {
+    const form = document.querySelector('form[action*="leads/submit"]');
+    form.querySelectorAll('select').forEach((s) => {
+      if (!s.value && s.options.length > 1) s.selectedIndex = 1;
+      s.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    form.querySelectorAll('input[type="checkbox"][required]').forEach((c) => { c.checked = true; });
+  });
+  await page.waitForTimeout(300);
+  await page.click('.formSubmitBtn');
+  await page.waitForTimeout(4500);
+  if (!asks.some((a) => a.indexOf('"moment":"booking"') !== -1)) {
+    fail('booking: no confirmation asked for when the relay does not answer');
+  } else ok('booking: the confirmation is asked for even with the relay silent');
+  await page.close();
+}
+
+/* 3e. The cockpit messages a visitor who came in through the website, not only
+   the eight seeded personas. This is the offline half of the story: book
+   online, then walk into a showroom. It used to write the signal, log that it
+   was sent, and send nothing at all. */
+{
+  const page = await open('index.html');
+  await page.evaluate(() => {
+    try {
+      localStorage.setItem('dps:lincoln:ck', 'DPS-9999999999999');
+      localStorage.setItem('dps:lincoln:lead', JSON.stringify({
+        name: 'Demo', surname: 'Visitor', email: 'demo@example.com',
+        gsm: '0555555555', city: 'Jeddah',
+      }));
+    } catch (e) { /* private mode */ }
+  });
+  await page.goto(BASE + 'dealer/index.html', { waitUntil: 'load' });
+  await page.waitForTimeout(900);
+  const acting = await page.evaluate(() => (window.DemoIdentity || {}).contactKey);
+  if (!acting || acting.indexOf('DPS-') !== 0) {
+    fail(`cockpit: the browser identity did not carry over (${acting})`);
+  } else {
+    const asks = [];
+    page.on('request', (r) => {
+      if (r.url().indexOf('nissan-booking-confirm') !== -1) asks.push(r.postData() || '');
+    });
+    await page.click('.ck-signal[data-id="walk_in"]');
+    await page.waitForTimeout(900);
+    const ask = asks.find((a) => a.indexOf('showroom_visit') !== -1);
+    if (!ask) fail('cockpit: a walk in for a website visitor asked for no message');
+    else if (ask.indexOf('demo@example.com') === -1) {
+      fail('cockpit: the message carries no address, so it can only ever push');
+    } else ok('cockpit: a walk in for a website visitor messages them, email included');
+  }
+  await page.close();
+}
+
 // 4. The quote form writes the quote lead, never the booking order.
 {
   const page = await open('forms/quote/index.html');

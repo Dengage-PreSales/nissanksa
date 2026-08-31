@@ -142,6 +142,33 @@
         return null;
     }
 
+    /* What the visitor gave us, kept on this device so the rest of the demo can
+       address them. The dealer cockpit reads it: a walk in logged for someone
+       who booked on this browser earns an email as well as a notification,
+       which is the difference between a moment that lands and one that depends
+       on notifications having been allowed. It never leaves the browser except
+       in the messages this visitor asked for. */
+    function rememberLead(details) {
+        if (!details || !details.email) return;
+        writeJson('dps:' + slug + ':lead', {
+            name: details.name, surname: details.surname,
+            email: details.email, gsm: details.gsm, city: details.city
+        });
+    }
+
+    /* Run something when a promise settles or when the wait is up, whichever
+       comes first, and only ever once. */
+    function once(promise, ms, fn) {
+        var done = false;
+        function go() {
+            if (done) return;
+            done = true;
+            fn();
+        }
+        if (promise && promise.then) promise.then(go, go);
+        window.setTimeout(go, ms);
+    }
+
     /* The confirmation a booking earns. It runs after the relay has answered,
        because the contact has to exist before Dengage can address a push to
        it. The messages themselves are panel content; this only asks for them,
@@ -368,8 +395,14 @@
             payment: f.payment
         };
         if (window.LincolnCreatives) window.LincolnCreatives.confirm(summary);
-        if (relayed && relayed.then) relayed.then(function () { confirmBooking(summary); });
-        else confirmBooking(summary);
+        /* The confirmation follows the relay, because the contact has to exist
+           before Dengage can address a push to it. It does not wait forever:
+           a relay that is slow, or that never answers on a poor connection,
+           must not cost the visitor their confirmation. The message function
+           is happy either way, since it only reads a contact that the relay
+           has usually already created. */
+        rememberLead(summary);
+        once(relayed, 2500, function () { confirmBooking(summary); });
     }
 
     function submitQuote(form) {

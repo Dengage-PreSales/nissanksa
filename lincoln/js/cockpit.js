@@ -126,17 +126,38 @@
         });
     }
 
+    /* What the visitor told the website, if this browser is the visitor. The
+       seeded personas carry a name and a city here in the page; someone who
+       arrived through the storefront carries what they typed into a form, and
+       an address is the difference between a follow-up they can read and a
+       notification they may never have allowed. */
+    function ownLead() {
+        try {
+            var raw = window.localStorage.getItem('dps:lincoln:lead');
+            return raw ? JSON.parse(raw) : null;
+        } catch (err) { return null; }
+    }
+
     function messageFor(moment, personaKey, car) {
         var url = (window.DEMO_CONFIG || {}).bookingConfirm;
         if (!url || typeof window.fetch !== 'function') return;
         var persona = PERSONAS.filter(function (p) { return p.key === personaKey; })[0];
-        if (!persona) return;
+        /* A key that is not one of the eight is a real visitor who came in
+           through the website, and is the whole point of the offline half:
+           they book online, then walk into a showroom. Dropping them here
+           wrote the signal, logged that it was sent, and quietly sent nothing.
+           Whoever it is now gets the message, with the details we have and
+           without the ones we do not. */
+        var own = (window.DemoIdentity || {}).contactKey === personaKey ? ownLead() : null;
         var body = {
             moment: moment,
             contact_key: personaKey,
-            name: persona.name ? persona.name.split(' ')[0] : undefined,
-            city: persona.city,
-            branch: HOME_BRANCH[persona.city],
+            name: persona ? (persona.name || '').split(' ')[0] : (own ? own.name : undefined),
+            surname: own ? own.surname : undefined,
+            email: own ? own.email : undefined,
+            gsm: own ? own.gsm : undefined,
+            city: persona ? persona.city : (own ? own.city : undefined),
+            branch: persona ? HOME_BRANCH[persona.city] : undefined,
             model: car ? car.name : undefined,
             model_id: car ? car.id : undefined
         };
