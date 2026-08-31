@@ -189,6 +189,15 @@
         try { window.sessionStorage.setItem('dps:' + slug + ':' + name, JSON.stringify(value)); }
         catch (err) { /* private mode */ }
     }
+    /* Read one back. It has to come from the same store signal writes to:
+       reading these from localStorage looks right and always answers false,
+       which is how the abandonment guard below came to let a booking through. */
+    function signalled(name) {
+        try {
+            var raw = window.sessionStorage.getItem('dps:' + slug + ':' + name);
+            return raw ? JSON.parse(raw) : false;
+        } catch (err) { return false; }
+    }
 
     /* ------------------------------------------------------------------ */
     /* Mandatory fields: the demo owns validation the moment it owns submit */
@@ -504,7 +513,7 @@
         function ask() {
             if (asked) return;
             var form = $('form[action*="leads/submit"]');
-            if (!form || readJson('dps:' + slug + ':booked', false)) return;
+            if (!form || signalled('booked')) return;
             var email = form.querySelector('[name="email"]');
             var address = email && email.value ? email.value.trim() : '';
             if (!address || address.indexOf('@') === -1) return;
@@ -512,12 +521,22 @@
             var sel = form.querySelector('select[name="model"]');
             var car = sel && sel.value ? window.Catalog.get(sel.value.toLowerCase()) : null;
             mintIdentity();
+            /* Whatever they had already typed travels with it, so the message
+               can name the city and the timing they had chosen rather than
+               starting the conversation over. A field still blank is left out
+               and its line simply does not print. */
+            var field = function (name) {
+                var el = form.querySelector('[name="' + name + '"]');
+                return el && el.value ? el.value.trim() : undefined;
+            };
             confirmBooking({
                 model: car ? car.name : undefined,
                 model_id: car ? car.id : undefined,
-                name: (form.querySelector('[name="firstname"]') || {}).value,
-                surname: (form.querySelector('[name="lastname"]') || {}).value,
-                gsm: (form.querySelector('[name="mobile"]') || {}).value,
+                name: field('firstname'),
+                surname: field('lastname'),
+                gsm: field('mobile'),
+                city: field('city'),
+                horizon: field('purchaseplan'),
                 email: address
             }, 'abandoned_booking');
         }

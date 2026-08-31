@@ -56,8 +56,8 @@ const MOMENTS: Record<string, Moment> = {
   },
   abandoned_booking: {
     label: 'booking started and left',
-    email: Deno.env.get('DENGAGE_TX_EMAIL_ABANDONED') ?? '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_ABANDONED') ?? '',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_ABANDONED') ?? 'e8bc5bcb-3c27-412c-bd85-1d79ffc35e62',
+    push: Deno.env.get('DENGAGE_TX_PUSH_ABANDONED') ?? '7a1aa595-ff4c-498a-b032-c9b11954ab69',
   },
   quote: {
     label: 'quote requested',

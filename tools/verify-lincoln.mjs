@@ -255,6 +255,66 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
   await page.close();
 }
 
+/* 3b. Leaving the booking form after typing an address asks Dengage for the
+   abandoned booking message, and carries what was already filled in. The
+   request is aborted by the router above, so this watches the attempt rather
+   than sending anything into the shared account. */
+{
+  const page = await open('forms/testdrive/index.html');
+  const asks = [];
+  page.on('request', (r) => {
+    if (r.url().indexOf('nissan-booking-confirm') === -1) return;
+    try { asks.push(JSON.parse(r.postData() || '{}')); } catch { asks.push({}); }
+  });
+  await page.fill('input[name="email"]', 'demo@example.com');
+  await page.fill('input[name="firstname"]', 'Demo');
+  await page.evaluate(() => {
+    const form = document.querySelector('form[action*="leads/submit"]');
+    for (const name of ['model', 'city', 'purchaseplan']) {
+      const sel = form.querySelector(`select[name="${name}"]`);
+      if (sel && sel.options.length > 1) {
+        sel.selectedIndex = 1;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+  });
+  await page.waitForTimeout(250);
+  /* Exit intent: the pointer leaves through the top of the window. */
+  await page.mouse.move(700, 300);
+  await page.mouse.move(700, 2);
+  await page.evaluate(() => document.dispatchEvent(
+    new MouseEvent('mouseout', { bubbles: true, clientY: 0, relatedTarget: null })));
+  await page.waitForTimeout(500);
+  const ask = asks.find((a) => a.moment === 'abandoned_booking');
+  if (!ask) fail(`abandoned booking: nothing asked for on exit (${asks.length} calls seen)`);
+  else {
+    const missing = ['contact_key', 'email', 'model', 'city', 'purchase_horizon']
+      .filter((k) => !ask[k]);
+    if (missing.length) fail(`abandoned booking: message would omit ${missing.join(', ')}`);
+    else ok('leaving the booking form asks for the abandoned message, with what was typed');
+  }
+  await page.close();
+}
+
+{
+  const page = await open('forms/testdrive/index.html');
+  const asks = [];
+  page.on('request', (r) => {
+    if (r.url().indexOf('nissan-booking-confirm') !== -1) asks.push(r.postData() || '');
+  });
+  await page.evaluate(() => {
+    try { sessionStorage.setItem('dps:lincoln:booked', 'true'); } catch (e) { /* private mode */ }
+  });
+  await page.fill('input[name="email"]', 'demo@example.com');
+  await page.evaluate(() => document.dispatchEvent(
+    new MouseEvent('mouseout', { bubbles: true, clientY: 0, relatedTarget: null })));
+  await page.waitForTimeout(400);
+  if (asks.some((a) => a.indexOf('abandoned_booking') !== -1)) {
+    fail('abandoned booking: chased someone who had already booked');
+  } else ok('abandoned booking: never sent to someone who already booked');
+  await page.close();
+}
+
 // 4. The quote form writes the quote lead, never the booking order.
 {
   const page = await open('forms/quote/index.html');
