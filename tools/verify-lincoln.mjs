@@ -133,11 +133,15 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
     form.querySelectorAll('input[type="checkbox"][required]').forEach((c) => { c.checked = true; });
   });
   await page.waitForTimeout(300);
-  await page.evaluate(() => {
-    document.querySelector('form[action*="leads/submit"]')
-      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-  });
-  await page.waitForTimeout(400);
+  /* The real gesture, not a synthetic event: the source bundle submits from
+     its own click handler through form.submit(), which raises no submit
+     event at all. A dispatched event passes while a real click leaves the
+     page, so the click is what this check must make. */
+  const before = page.url();
+  await page.click('.formSubmitBtn');
+  await page.waitForTimeout(700);
+  if (page.url() !== before) fail(`booking: the submit button navigated to ${page.url()}`);
+  else ok('booking: the submit button stays on the page');
   evs = await events(page);
   const want = ['ec:addToCart', 'ec:order', 'lead:test_drive_booked', 'lead:finance_intent'];
   const missing = want.filter((w) => !evs.includes(w));
@@ -159,11 +163,10 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
     sel.selectedIndex = 1; sel.dispatchEvent(new Event('change', { bubbles: true }));
   });
   await page.waitForTimeout(250);
-  await page.evaluate(() => {
-    const form = document.querySelector('form[action*="leads/submit"]');
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-  });
-  await page.waitForTimeout(300);
+  const emptyBefore = page.url();
+  await page.click('.formSubmitBtn');
+  await page.waitForTimeout(500);
+  if (page.url() !== emptyBefore) fail(`booking: an empty submit navigated to ${page.url()}`);
   const evs = await events(page);
   if (evs.includes('ec:order') || evs.includes('lead:test_drive_booked')) {
     fail('booking: an empty submit went through');
@@ -190,15 +193,63 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
     form.querySelectorAll('input[type="checkbox"][required]').forEach((c) => { c.checked = true; });
   });
   await page.waitForTimeout(300);
-  await page.evaluate(() => {
-    document.querySelector('form[action*="leads/submit"]')
-      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-  });
-  await page.waitForTimeout(400);
+  const quoteBefore = page.url();
+  await page.click('.formSubmitBtn');
+  await page.waitForTimeout(700);
+  if (page.url() !== quoteBefore) fail(`quote: the submit button navigated to ${page.url()}`);
   const evs = await events(page);
   if (!evs.includes('lead:quote_issued')) fail(`quote: no quote_issued (got ${evs.join(', ')})`);
   else if (evs.includes('lead:test_drive_booked')) fail('quote: booking lead fired from the quote page');
   else ok('quote submit writes quote_issued, never the booking lead');
+  await page.close();
+}
+
+// 4a. Every remaining lead form submits into the demo rather than leaving
+// the page for the dealer's endpoint, which this demo does not host.
+for (const p of ['submit-a-complaint/index.html', 'offers/navigator-june-26/index.html',
+                 'offers/aviator-june-26/index.html', 'offers/corsair-june-26/index.html']) {
+  const page = await open(p);
+  await page.evaluate(() => {
+    const form = document.querySelector('form[action*="leads/submit"]');
+    form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach((i) => {
+      if (i.value) return;
+      i.value = /mail/i.test(i.name + i.type) ? 'demo@example.com'
+        : /mobile|phone/i.test(i.name) ? '0555000555' : 'Demo';
+      i.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    form.querySelectorAll('select').forEach((s) => {
+      if (!s.value && s.options.length > 1) s.selectedIndex = 1;
+      s.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    form.querySelectorAll('input[type="checkbox"]').forEach((c) => { c.checked = true; });
+  });
+  await page.waitForTimeout(300);
+  const was = page.url();
+  await page.click('.formSubmitBtn');
+  await page.waitForTimeout(700);
+  const evs = await events(page).catch(() => []);
+  const lead = evs.some((e) => e.startsWith('lead:'));
+  if (page.url() !== was) fail(`${p}: submit navigated to ${page.url()}`);
+  else if (!lead) fail(`${p}: submit raised no lead event (got ${evs.join(', ') || 'none'})`);
+  else ok(`${p} submits into the demo, lead recorded`);
+  await page.close();
+}
+
+// 4b. A specification download records the interest it shows.
+{
+  const page = await open('download-specifications/index.html');
+  const links = await page.locator('a[href$=".pdf"]').count();
+  if (!links) fail('download-specifications: no specification documents linked');
+  await page.evaluate(() => {
+    const a = document.querySelector('a[href$=".pdf"]');
+    a.setAttribute('target', '_self');
+    a.addEventListener('click', (e) => e.preventDefault(), true);
+    a.click();
+  });
+  await page.waitForTimeout(400);
+  const evs = await events(page);
+  if (!evs.includes('lead:brochure')) fail(`brochure: no lead:brochure on download (got ${evs.join(', ')})`);
+  else ok('specification download records lead:brochure');
   await page.close();
 }
 

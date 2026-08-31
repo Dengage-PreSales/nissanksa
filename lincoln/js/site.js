@@ -318,25 +318,80 @@
         success(form, 'Thank you. Your message is on your profile and our team will be in touch.');
     }
 
+    function isLeadForm(form) {
+        if (!form || !form.getAttribute) return false;
+        var action = form.getAttribute('action') || '';
+        return action.indexOf('leads/submit') !== -1 || !!form.querySelector('[name="endpointPath"]');
+    }
+
+    function routeLead(form) {
+        var path = window.location.pathname;
+        if (path.indexOf('forms/testdrive') !== -1) return submitBooking(form);
+        if (path.indexOf('forms/quote') !== -1) return submitQuote(form);
+        if (path.indexOf('download-specifications') !== -1) return submitBrochure(form);
+        return submitContact(form);
+    }
+
     function interceptLeadForms() {
-        document.addEventListener('submit', function (event) {
-            var form = event.target;
-            if (!form || !form.getAttribute) return;
-            var action = form.getAttribute('action') || '';
-            if (action.indexOf('leads/submit') === -1 && !form.querySelector('[name="endpointPath"]')) return;
+        /* The source bundle binds its own click handler to the submit button
+           and calls form.submit() from it. That DOM method posts the form
+           without ever raising a submit event, so a submit listener alone
+           never sees a real click: the browser leaves for the dealer's lead
+           endpoint, which this demo does not host. The click is therefore
+           taken first, in the capture phase, before their handler runs. */
+        document.addEventListener('click', function (event) {
+            var el = event.target;
+            var control = el && el.closest ? el.closest('button, input[type="submit"], input[type="image"]') : null;
+            if (!control) return;
+            if (control.type === 'button' && !control.classList.contains('formSubmitBtn')) return;
+            var form = control.form || (control.closest ? control.closest('form') : null);
+            if (!isLeadForm(form)) return;
             event.preventDefault();
             if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-            var path = window.location.pathname;
-            if (path.indexOf('forms/testdrive') !== -1) return submitBooking(form);
-            if (path.indexOf('forms/quote') !== -1) return submitQuote(form);
-            if (path.indexOf('download-specifications') !== -1) return submitBrochure(form);
-            return submitContact(form);
+            routeLead(form);
         }, true);
 
-        /* The source markup validates through its own library; the demo owns
-           submit, so it owns the mandatory field check too. */
+        /* Pressing Enter in a field submits without any click, and that path
+           does raise the event. */
+        document.addEventListener('submit', function (event) {
+            if (!isLeadForm(event.target)) return;
+            event.preventDefault();
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+            routeLead(event.target);
+        }, true);
+
         $$('form[action*="leads/submit"]').forEach(function (form) {
+            /* The source markup validates through its own library; the demo
+               owns submit, so it owns the mandatory field check too. */
             form.setAttribute('novalidate', '');
+            /* Last line of defence: whatever calls submit() on a lead form,
+               now or after a capture is refreshed, is answered by the demo
+               rather than by a page navigation. */
+            try {
+                form.submit = function () { routeLead(form); };
+            } catch (e) { /* a form with a field named submit cannot be patched */ }
+        });
+    }
+
+    /* The specification sheets are plain document links rather than a form,
+       so the interest they show is recorded from the download itself. The
+       document still opens: the visitor gets what they clicked. */
+    function trackBrochureDownloads() {
+        var sent = {};
+        document.addEventListener('click', function (event) {
+            var a = event.target.closest ? event.target.closest('a[href$=".pdf"]') : null;
+            if (!a) return;
+            var href = a.getAttribute('href') || '';
+            if (sent[href]) return;
+            sent[href] = true;
+            var name = href.split('/').pop().toLowerCase();
+            var car = null;
+            (window.Catalog ? window.Catalog.all() : []).forEach(function (c) {
+                if (name.indexOf(c.id) !== -1) car = c;
+            });
+            window.DengageEvents.leadEvent('brochure', {
+                model: car ? car.id : undefined, source: 'website'
+            });
         });
     }
 
@@ -423,6 +478,7 @@
 
     wireOverlays();
     interceptLeadForms();
+    trackBrochureDownloads();
     wireFunnelSignals();
     guardScope();
     answerThemeRequests();
