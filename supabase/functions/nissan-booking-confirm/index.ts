@@ -521,6 +521,10 @@ Deno.serve(async (req: Request) => {
     city: clean(raw.city, 60),
     branch: clean(raw.branch, 120),
     purchase_horizon: clean(raw.purchase_horizon, 60),
+    /* The grade a build was configured at. The reservation message prints it,
+       and it is the one value that distinguishes two reservations of the same
+       car at different money. */
+    note: clean(raw.note, 120),
   };
 
   /* A contact key names a person; a push token names the device in front of
