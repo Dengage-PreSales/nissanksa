@@ -761,7 +761,7 @@ def mounts_block(rel):
     scripts = "\n".join(
         f'<script src="{rel}js/{f}.js?v={STAMP}"></script>'
         for f in ["config", "copy", "vehicles", "dengageEvents", "site",
-                  "panels", "slots", "inbox", "debug"])
+                  "creatives", "panels", "slots", "inbox", "debug"])
     return f"""
 <!-- ==================== Dengage demo layer ==================== -->
 <div class="scrim" id="scrim"></div>

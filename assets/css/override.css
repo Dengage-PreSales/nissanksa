@@ -308,3 +308,256 @@ h1.headTop span + span { margin-inline-start: 0.24em; }
 .dps-price-watch span { font-size: 12px; color: #6e7275; }
 .dps-price-watch.on { border-color: #c3002f; }
 .dps-price-watch.on b { color: #c3002f; }
+/* The Nissan experiences the demo draws itself, in the site's own palette.
+   js/creatives.js explains why these are page creatives while the shared
+   platform library in the same launcher still comes from Dengage. */
+#dps-lc-host:empty { display: none; }
+.dps-lc-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 26, 30, .55);
+  z-index: 2147483000;
+}
+.dps-lc-panel {
+  position: fixed;
+  z-index: 2147483001;
+  background: #ffffff;
+  color: #111111;
+  box-shadow: 0 18px 48px rgba(20, 26, 30, .28);
+  font-family: "ProximaNova", "Segoe UI", Arial, sans-serif;
+}
+.dps-lc-modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border-top: 3px solid #c3002f;
+}
+.dps-lc-bar {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  border-top: 3px solid #c3002f;
+}
+.dps-lc-x {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: 0;
+  background: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #8b8f92;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.dps-lc-x:hover { color: #111111; }
+.dps-lc-body { padding: 30px 28px 26px; }
+.dps-lc-body h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 600;
+  color: #111111;
+}
+.dps-lc-body p {
+  margin: 0 0 18px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #6e7275;
+}
+.dps-lc-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.dps-lc-cta {
+  display: inline-block;
+  padding: 11px 22px;
+  background: #111111;
+  color: #ffffff;
+  border: 0;
+  font-size: 14px;
+  letter-spacing: .04em;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.dps-lc-cta:hover { background: #c3002f; color: #ffffff; }
+.dps-lc-quiet {
+  border: 0;
+  background: none;
+  color: #8b8f92;
+  font-size: 13.5px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 6px 0;
+}
+.dps-lc-quiet:hover { color: #111111; }
+.dps-lc-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 18px 56px 18px 28px;
+}
+.dps-lc-bar-inner strong {
+  display: block;
+  font-size: 16px;
+  color: #111111;
+  margin-bottom: 3px;
+}
+.dps-lc-bar-inner span {
+  display: block;
+  font-size: 13.5px;
+  color: #6e7275;
+}
+.dps-lc-field { display: block; margin-bottom: 14px; }
+.dps-lc-field span {
+  display: block;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #6e7275;
+  margin-bottom: 6px;
+}
+.dps-lc-field input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #e3e3e3;
+  font-size: 15px;
+  font-family: inherit;
+  color: #111111;
+  background: #ffffff;
+}
+.dps-lc-field input:focus { outline: 2px solid #c3002f; outline-offset: -2px; }
+.dps-lc-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6e7275;
+}
+.dps-lc-check input { margin-top: 2px; flex: none; }
+.dps-lc-choices { margin-bottom: 20px; }
+.dps-lc-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e3e3e3;
+  margin-bottom: 8px;
+  font-size: 14.5px;
+  color: #111111;
+  cursor: pointer;
+}
+.dps-lc-choice:hover { border-color: #c3002f; }
+.dps-lc-choice input { flex: none; }
+.dps-lc-done h2 { color: #c3002f; }
+
+@media (max-width: 560px) {
+  .dps-lc-body { padding: 26px 20px 22px; }
+  .dps-lc-body h2 { font-size: 19px; }
+  .dps-lc-bar-inner { padding: 16px 48px 16px 20px; }
+  .dps-lc-actions { gap: 10px; }
+}
+
+.dps-lc-kicker {
+  display: block;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #c3002f;
+  margin-bottom: 10px;
+}
+.dps-lc-summary {
+  margin: 0 0 20px;
+  border-top: 1px solid #f4f4f4;
+}
+.dps-lc-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid #f4f4f4;
+}
+.dps-lc-summary dt {
+  margin: 0;
+  font-size: 12.5px;
+  letter-spacing: .04em;
+  color: #8b8f92;
+}
+.dps-lc-summary dd {
+  margin: 0;
+  font-size: 14px;
+  color: #111111;
+  text-align: end;
+  word-break: break-word;
+}
+.dps-lc-done p { margin-top: 4px; }
+
+/* While a bar holds the foot of the page, the demo's own controls step above
+   it rather than hiding underneath. */
+.dps-lc-bar-open .dps-controls { bottom: 124px; }
+@media (max-width: 760px) {
+  .dps-lc-bar-open .dps-controls { bottom: 210px; }
+}
+
+/* The inbox bell sits in the header beside the menu rather than floating over
+   the page. The capture keeps two header clusters, one for each width, so each
+   bell shows only where its cluster belongs. */
+.dps-header-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin: 0 14px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #111111;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.dps-header-bell svg { width: 22px; height: 22px; }
+.dps-header-bell:hover { color: #c3002f; }
+.dps-header-bell .dps-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #c3002f;
+  color: #ffffff;
+  font: 600 10px/16px Arial, sans-serif;
+  text-align: center;
+}
+.header-right.desktop-none .dps-header-bell { display: none; }
+@media (max-width: 991px) {
+  .header-right-warpper .dps-header-bell { display: none; }
+  .header-right.desktop-none .dps-header-bell {
+    display: inline-flex;
+    margin: 0 8px 0 0;
+  }
+}
+
+/* Where the header has room the bell sits in it; on a phone the captured
+   header collapses to a hamburger with nowhere to put one, so the floating
+   bell stays there and only there. */
+@media (min-width: 992px) {
+  /* Matched through its container so this outweighs the controls stylesheet's
+     own .dps-controls .dps-bell rule. */
+  .dps-controls .dps-floating-bell { display: none; }
+}
+

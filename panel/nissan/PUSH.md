@@ -20,22 +20,17 @@ the longest model name in place.
 
 Leave Media empty. This demo's capture has no per model artwork a message can use, and sending the wrong car's photograph is worse than sending none.
 
-**Dengage's inbox does not fill from these, and an earlier version of this
-page said it did.** Every send carries the inbox parameters the API documents,
-and they change nothing here: two pushes fired at a contact holding twenty
-inbox messages left the count at twenty. In this account Dengage's own drawer
-fills from a campaign or a journey, not from a transactional send.
-
-**The bell in the storefront still fills instantly**, because the demo carries
-its own message centre beside it and the drawer shows one merged list. The
-same moment that sends this push writes that message, so the bell moves while
-the notification is still arriving. Nothing here needs configuring for it: see
-"The bell drawer is one list from two sources" in ../README.md for what it is
-and how to edit its copy.
+**The inbox does not fill from these, and an earlier version of this page said
+it did.** Every send carries the inbox parameters the API documents, and they
+change nothing here: two pushes fired at a contact holding twenty inbox
+messages left the count at twenty. In this account the drawer fills from a
+campaign or a journey, not from a transactional send. The drawer itself is
+real and reads correctly, so what it shows is whatever you have sent from the
+panel.
 
 ### Test drive booked
 
-Sent when the test drive form is submitted on the storefront. Its content id goes in `DENGAGE_TX_PUSH_NI_CONTENT_ID`.
+Sent when the test drive form is submitted on the storefront. Its content id goes in `None`.
 
 | Field | Value |
 |---|---|
@@ -46,9 +41,22 @@ Sent when the test drive form is submitted on the storefront. Its content id goe
 
 With the longest model name in place that is 30 characters of title and 65 of message.
 
+### Booking started and left
+
+Sent when the visitor types into the booking form, then leaves without submitting. Its content id goes in `None`.
+
+| Field | Value |
+|---|---|
+| Title | `One step left on your {%= $Current.model %}` |
+| Message | `Your booking is nearly done. Pick it up where you left off.` |
+| Target URL | `{%= $Current.booking_url %}` |
+| Media | leave empty, this demo sends no photograph |
+
+With the longest model name in place that is 31 characters of title and 59 of message.
+
 ### Quote requested
 
-Sent when the online quote form is submitted. Its content id goes in `DENGAGE_TX_PUSH_NI_QUOTE`.
+Sent when the online quote form is submitted. Its content id goes in `None`.
 
 | Field | Value |
 |---|---|
@@ -61,7 +69,7 @@ With the longest model name in place that is 30 characters of title and 56 of me
 
 ### Specification downloaded
 
-Sent when a specification sheet is downloaded from a model page. Its content id goes in `DENGAGE_TX_PUSH_NI_BROCHURE`.
+Sent when a specification sheet is downloaded from a model page. Its content id goes in `None`.
 
 | Field | Value |
 |---|---|
@@ -85,9 +93,22 @@ Sent when the updates card is accepted anywhere on the storefront. Its content i
 
 With the longest model name in place that is 19 characters of title and 40 of message.
 
+### Survey answered
+
+Sent when the shopping survey card is answered. Its content id goes in `None`.
+
+| Field | Value |
+|---|---|
+| Title | `Thank you` |
+| Message | `Your answer is with the showroom team, on your profile.` |
+| Target URL | `{%= $Current.model_url %}` |
+| Media | leave empty, this demo sends no photograph |
+
+With the longest model name in place that is 9 characters of title and 55 of message.
+
 ### Walk in logged at the showroom
 
-Sent when reception logs the visitor on the dealer cockpit. Its content id goes in `DENGAGE_TX_PUSH_NI_WALKIN`.
+Sent when reception logs the visitor on the dealer cockpit. Its content id goes in `None`.
 
 | Field | Value |
 |---|---|
@@ -100,7 +121,7 @@ With the longest model name in place that is 16 characters of title and 71 of me
 
 ### Test drive completed
 
-Sent when the cockpit records that the keys came back. Its content id goes in `DENGAGE_TX_PUSH_NI_TD_DONE`.
+Sent when the cockpit records that the keys came back. Its content id goes in `None`.
 
 | Field | Value |
 |---|---|
@@ -113,7 +134,7 @@ With the longest model name in place that is 22 characters of title and 56 of me
 
 ### Booked but did not arrive
 
-Sent when the cockpit records that a booked drive was missed. Its content id goes in `DENGAGE_TX_PUSH_NI_NOSHOW`.
+Sent when the cockpit records that a booked drive was missed. Its content id goes in `None`.
 
 | Field | Value |
 |---|---|

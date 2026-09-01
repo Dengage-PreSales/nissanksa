@@ -240,6 +240,56 @@
         });
     }
 
+    /* What the visitor has done, for the creative rules in js/creatives.js.
+       Session scoped: a new session starts the story again. */
+    function signal(name, value) {
+        try { window.sessionStorage.setItem('dps:' + slug + ':' + name, JSON.stringify(value)); }
+        catch (err) { /* private mode */ }
+    }
+    /* Read one back. It has to come from the same store signal writes to:
+       reading these from localStorage looks right and always answers false. */
+    function signalled(name) {
+        try {
+            var raw = window.sessionStorage.getItem('dps:' + slug + ':' + name);
+            return raw ? JSON.parse(raw) : false;
+        } catch (err) { return false; }
+    }
+
+    /* THE BOOKING THAT WAS LEFT HALF DONE.
+
+       Asked for once per page, and only when the visitor has given an address
+       to answer: a rescue message with nowhere to go is not a rescue. What
+       they had already typed travels with it, so the message names the car and
+       the city they had chosen rather than starting over. A field still blank
+       is left out and its line simply does not print. */
+    var askedAbandon = false;
+    function abandonedBooking() {
+        if (askedAbandon) return false;
+        /* The booking form specifically, which wireBookingForm marks. Taking
+           the first form on the page instead found the header search and read
+           an empty address out of it, so the rescue never fired. */
+        var form = null;
+        var forms = document.querySelectorAll('form');
+        for (var i = 0; i < forms.length; i++) {
+            if (forms[i].__dpsBooking) { form = forms[i]; break; }
+        }
+        if (!form) return false;
+        var lead = leadDetails(form);
+        if (!lead.email || lead.email.indexOf('@') === -1) return false;
+        if (signalled('booked')) return false;
+        askedAbandon = true;
+        mintIdentity();
+        var line = pending();
+        var car = line && window.Catalog ? window.Catalog.get(line.id) : null;
+        confirmBooking({
+            model: car ? car.name : undefined,
+            model_id: car ? car.id : undefined,
+            name: lead.name, surname: lead.surname, gsm: lead.gsm,
+            email: lead.email, city: lead.city
+        }, 'abandoned_booking');
+        return true;
+    }
+
     /* The messages a moment earns, asked for through Dengage's transactional
        API. The content lives in the panel; this only names the moment and who
        it is for, and a refusal costs the lead nothing because the relay has
@@ -572,6 +622,7 @@
             if (begun) return;
             if (name === 'FirstName' || name === 'LastName' || name === 'Phone' || name === 'Email') {
                 begun = true;
+                signal('started', true);
                 /* A car already standing in the select was never picked up,
                    because pick only ever ran on a change event. */
                 pick(chosen());
@@ -610,6 +661,7 @@
                 totalAmount: car.price,
                 paymentMethod: 'other'
             }, [line]);
+            signal('booked', true);
             window.DengageEvents.leadEvent('test_drive_booked', {
                 model: car.id,
                 city: city,
@@ -1002,6 +1054,7 @@
                not every keystroke. */
             if (interaction && !signalled) {
                 signalled = true;
+                signal('finance', true);
                 window.DengageEvents.leadEvent('finance_intent', { model: car.id, source: 'website' });
             }
         }
@@ -1172,11 +1225,18 @@
         closeOverlays: closeOverlays,
         boot: boot
     };
+    /* js/creatives.js draws the on-site experiences and needs these four: the
+       newsletter and arrival cards capture a lead, the survey and the rescue
+       card each earn a message. Everything they call is the same path the
+       site's own forms use. */
     window.Site = {
         cartLines: cartLines,
         saved: wishlist,
         toast: toast,
-        mintIdentity: mintIdentity
+        mintIdentity: mintIdentity,
+        relayLead: relayLead,
+        confirmBooking: confirmBooking,
+        abandonedBooking: abandonedBooking
     };
 
     function bootOnce() {

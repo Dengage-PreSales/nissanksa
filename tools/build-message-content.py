@@ -351,8 +351,9 @@ def readme(brand):
     for m in for_brand(brand):
         email_env, push_env = m['env']
         email_cell = f'`{m["slug"]}.html`' if m['slug'] else 'push only'
-        env_cell = (f'`{brand["env"](email_env)}`<br>`{brand["env"](push_env)}`'
-                    if email_env else f'`{brand["env"](push_env)}`')
+        cells = [brand['env'](e) for e in (email_env, push_env) if e]
+        cells = [c for c in cells if c]
+        env_cell = '<br>'.join(f'`{c}`' for c in cells) or 'shared with Lincoln'
         lines.append(f'| {m["label"]} | `{m["key"]}` | {email_cell} | {env_cell} |')
     table = '\n'.join(lines)
     figure_label, figure_tag = brand['figure']
@@ -508,6 +509,20 @@ TAG_CHECK = """<!-- Paste this as a throwaway email content and send one booking
 """
 
 # What differs between the two demos. Everything else above is shared.
+def nissan_env(name):
+    """The variable this demo's moment actually reads, or None where it reads
+    none. Nissan shares every push content with Lincoln except the newsletter,
+    whose copy welcomes you to a named dealer, so naming a NI push variable for
+    the others would send the reader to set something the function ignores."""
+    if name == 'EMAIL_CONTENT_ID':
+        return 'DENGAGE_TX_EMAIL_NI_BOOKING'
+    if name.startswith('EMAIL_'):
+        return 'DENGAGE_TX_' + name.replace('EMAIL_', 'EMAIL_NI_', 1)
+    if name == 'PUSH_NEWSLETTER':
+        return 'DENGAGE_TX_PUSH_NI_NEWSLETTER'
+    return None
+
+
 BRANDS = [
     dict(
         key='lincoln', label='Lincoln', title="The Lincoln demo's messages",
@@ -535,13 +550,13 @@ BRANDS = [
         hero=False,
         # Nissan's site publishes starting prices and no seat counts.
         figure=('From', '$Current.model_price'),
-        env=lambda name: 'DENGAGE_TX_' + name.replace('EMAIL_CONTENT_ID', 'EMAIL_NI_BOOKING')
-                                             .replace('EMAIL_', 'EMAIL_NI_')
-                                             .replace('PUSH_', 'PUSH_NI_'),
-        # The abandonment watcher, the survey card and the inbox message are
-        # Lincoln only today, so this demo has no body for them.
-        moments=('booking', 'quote', 'brochure', 'newsletter',
-                 'showroom_visit', 'test_drive_done', 'no_show'),
+        env=lambda name: nissan_env(name),
+        # Every moment the Lincoln build has except the inbox message, which
+        # is a notification and has no email counterpart in either demo. The
+        # abandonment watcher and the survey card now run here too: they come
+        # from js/creatives.js, which this demo gained on 1 September.
+        moments=('booking', 'abandoned_booking', 'quote', 'brochure', 'newsletter',
+                 'survey', 'showroom_visit', 'test_drive_done', 'no_show'),
     ),
 ]
 

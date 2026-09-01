@@ -9,13 +9,15 @@ and the values the message prints.
 
 | Moment | Sent as | Email body | Content id variable |
 |---|---|---|---|
-| Test drive booked | `booking` | `booking-confirmation.html` | `DENGAGE_TX_EMAIL_NI_NI_BOOKING`<br>`DENGAGE_TX_PUSH_NI_CONTENT_ID` |
-| Quote requested | `quote` | `quote-acknowledgement.html` | `DENGAGE_TX_EMAIL_NI_QUOTE`<br>`DENGAGE_TX_PUSH_NI_QUOTE` |
-| Specification downloaded | `brochure` | `brochure-delivery.html` | `DENGAGE_TX_EMAIL_NI_BROCHURE`<br>`DENGAGE_TX_PUSH_NI_BROCHURE` |
+| Test drive booked | `booking` | `booking-confirmation.html` | `DENGAGE_TX_EMAIL_NI_BOOKING` |
+| Booking started and left | `abandoned_booking` | `abandoned-booking.html` | `DENGAGE_TX_EMAIL_NI_ABANDONED` |
+| Quote requested | `quote` | `quote-acknowledgement.html` | `DENGAGE_TX_EMAIL_NI_QUOTE` |
+| Specification downloaded | `brochure` | `brochure-delivery.html` | `DENGAGE_TX_EMAIL_NI_BROCHURE` |
 | Newsletter signup | `newsletter` | `newsletter-welcome.html` | `DENGAGE_TX_EMAIL_NI_NEWSLETTER`<br>`DENGAGE_TX_PUSH_NI_NEWSLETTER` |
-| Walk in logged at the showroom | `showroom_visit` | `showroom-visit.html` | `DENGAGE_TX_EMAIL_NI_WALKIN`<br>`DENGAGE_TX_PUSH_NI_WALKIN` |
-| Test drive completed | `test_drive_done` | `test-drive-done.html` | `DENGAGE_TX_EMAIL_NI_TD_DONE`<br>`DENGAGE_TX_PUSH_NI_TD_DONE` |
-| Booked but did not arrive | `no_show` | `no-show-reinvite.html` | `DENGAGE_TX_EMAIL_NI_NOSHOW`<br>`DENGAGE_TX_PUSH_NI_NOSHOW` |
+| Survey answered | `survey` | `survey-thanks.html` | `DENGAGE_TX_EMAIL_NI_SURVEY` |
+| Walk in logged at the showroom | `showroom_visit` | `showroom-visit.html` | `DENGAGE_TX_EMAIL_NI_WALKIN` |
+| Test drive completed | `test_drive_done` | `test-drive-done.html` | `DENGAGE_TX_EMAIL_NI_TD_DONE` |
+| Booked but did not arrive | `no_show` | `no-show-reinvite.html` | `DENGAGE_TX_EMAIL_NI_NOSHOW` |
 
 Push copy is in [PUSH.md](PUSH.md), one section each.
 

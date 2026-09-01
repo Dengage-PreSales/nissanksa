@@ -98,18 +98,40 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   const cards = await page.locator('#launcher-grid .scenario').count();
   if (cards < 30) fail(`launcher shows ${cards} cards, expected 30+`);
   else ok(`launcher renders ${cards} cards`);
-  const fired = await page.evaluate(() => {
+  /* The brand cards are drawn by js/creatives.js now rather than fired as a
+     nissan_demo_ event, so the whole pre-purchase story runs with nothing
+     configured in the panel. Each one is fired twice, the way a presenter
+     fires one mid call, and none of them may raise a data layer event: a
+     card that both drew and fired would draw twice wherever the campaign
+     has also been pasted into the panel. */
+  const slugs = await page.evaluate(() => window.NissanCreatives.slugs);
+  const result = await page.evaluate(async (list) => {
     window.__dl = [];
     window.dataLayer = { push: (e) => window.__dl.push(e.event) };
-    document.querySelector('[data-scenario="test-drive-invite"]').click();
-    document.body.click();
-    document.querySelector('.dps-launch').click();
-    document.querySelector('[data-scenario="test-drive-invite"]').click();
-    return window.__dl;
-  });
-  if (fired.filter((e) => e === 'nissan_demo_test-drive-invite').length !== 2) {
-    fail(`brand card did not fire twice: ${JSON.stringify(fired)}`);
-  } else ok('brand card fires its nissan_demo_ event, twice in a row');
+    const drew = [];
+    for (const slug of list) {
+      if (slug === 'booking-confirmed') continue;
+      for (const pass of [1, 2]) {
+        document.querySelector('.dps-launch').click();
+        const card = document.querySelector(`[data-scenario="${slug}"]`);
+        if (!card) { drew.push(slug + ': no card'); break; }
+        card.click();
+        await new Promise((r) => setTimeout(r, 60));
+        const host = document.getElementById('dps-lc-host');
+        const shown = host && host.getAttribute('data-lc-slug') === slug &&
+          host.querySelector('.dps-lc-panel');
+        if (!shown) { drew.push(`${slug}: nothing drawn on pass ${pass}`); break; }
+        if (pass === 2) drew.push(slug + ': ok');
+        document.querySelector('#dps-lc-host [data-lc-close]').click();
+      }
+    }
+    return { drew, dl: window.__dl };
+  }, slugs);
+  const bad = result.drew.filter((d) => !d.endsWith(': ok'));
+  if (bad.length) fail(`Nissan creatives: ${bad.join('; ')}`);
+  else ok(`all ${result.drew.length} Nissan creatives draw, twice in a row`);
+  if (result.dl.length) fail(`a brand card raised a data layer event: ${JSON.stringify(result.dl)}`);
+  else ok('brand cards draw locally and raise no nissan_demo_ event');
   await page.close();
 }
 
@@ -252,6 +274,73 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   const rows = await page.locator('#dps-debug').count();
   if (!rows) fail('?debug=1 readout absent');
   else ok('?debug=1 readout present');
+  await page.close();
+}
+
+// The two moments this demo gained with js/creatives.js: a booking left half
+// done, and an answered survey. Both are asked for through the same path as
+// the booking confirmation, and both were missing here while Lincoln had them.
+{
+  const page = await open('book-a-test-drive/index.html?model=x-trail');
+  await page.waitForTimeout(400);
+  await page.fill('input[name="FirstName"]', 'Demo');
+  await page.fill('input[name="Email"]', 'demo@example.com');
+  await page.waitForTimeout(300);
+  const started = await page.evaluate(() => window.sessionStorage.getItem('dps:nissanksa:started'));
+  if (started !== 'true') fail('entering details did not raise the started signal');
+  else ok('entering details raises the started signal the rescue rule reads');
+
+  await page.evaluate(() => document.dispatchEvent(new MouseEvent('mouseout', { clientY: 1, bubbles: true })));
+  await page.waitForTimeout(500);
+  const drew = await page.evaluate(() => {
+    const h = document.getElementById('dps-lc-host');
+    return h ? h.getAttribute('data-lc-slug') : null;
+  });
+  if (drew !== 'test-drive-rescue') fail(`leaving the booking form drew ${drew || 'nothing'}`);
+  else ok('leaving a half finished booking draws the rescue by itself');
+
+  const sent = await page.evaluate(async () => {
+    const seen = [];
+    const real = window.fetch;
+    window.fetch = function (url, opts) {
+      if (String(url).indexOf('nissan-booking-confirm') !== -1 && opts && opts.body) {
+        try { seen.push(JSON.parse(opts.body).moment); } catch (e) { /* not ours */ }
+        return Promise.resolve({ json: () => Promise.resolve({ moment: 'x' }) });
+      }
+      return real.apply(this, arguments);
+    };
+    document.querySelector('#dps-lc-host [data-lc-rescue]').click();
+    await new Promise((r) => setTimeout(r, 300));
+    return seen;
+  });
+  if (!sent.includes('abandoned_booking')) fail(`the rescue asked for ${sent.join(',') || 'nothing'}`);
+  else ok('and finishing from it asks for the abandoned_booking message');
+  await page.close();
+}
+
+{
+  const page = await open('vehicles/patrol/index.html');
+  await page.waitForTimeout(400);
+  const sent = await page.evaluate(async () => {
+    const seen = [];
+    const real = window.fetch;
+    window.fetch = function (url, opts) {
+      if (String(url).indexOf('nissan-booking-confirm') !== -1 && opts && opts.body) {
+        try { seen.push(JSON.parse(opts.body).moment); } catch (e) { /* not ours */ }
+        return Promise.resolve({ json: () => Promise.resolve({ moment: 'x' }) });
+      }
+      return real.apply(this, arguments);
+    };
+    window.NissanCreatives.show('shopping-survey');
+    await new Promise((r) => setTimeout(r, 120));
+    document.querySelector('#dps-lc-host input[name="answer"]').checked = true;
+    document.querySelector('#dps-lc-host form').dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    return seen;
+  });
+  if (!sent.includes('survey')) fail(`the survey asked for ${sent.join(',') || 'nothing'}`);
+  else ok('answering the survey asks for the survey message');
   await page.close();
 }
 

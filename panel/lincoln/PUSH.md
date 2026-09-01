@@ -20,18 +20,13 @@ the longest model name in place.
 
 Every message carries the model's own photograph in the Media field.
 
-**Dengage's inbox does not fill from these, and an earlier version of this
-page said it did.** Every send carries the inbox parameters the API documents,
-and they change nothing here: two pushes fired at a contact holding twenty
-inbox messages left the count at twenty. In this account Dengage's own drawer
-fills from a campaign or a journey, not from a transactional send.
-
-**The bell in the storefront still fills instantly**, because the demo carries
-its own message centre beside it and the drawer shows one merged list. The
-same moment that sends this push writes that message, so the bell moves while
-the notification is still arriving. Nothing here needs configuring for it: see
-"The bell drawer is one list from two sources" in ../README.md for what it is
-and how to edit its copy.
+**The inbox does not fill from these, and an earlier version of this page said
+it did.** Every send carries the inbox parameters the API documents, and they
+change nothing here: two pushes fired at a contact holding twenty inbox
+messages left the count at twenty. In this account the drawer fills from a
+campaign or a journey, not from a transactional send. The drawer itself is
+real and reads correctly, so what it shows is whatever you have sent from the
+panel.
 
 ### Test drive booked
 
