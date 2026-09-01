@@ -370,21 +370,63 @@ Three hosts must be reachable from the machine that presents:
 fails silently when blocked), `push.dengage.com` (push). `?debug=1` on any
 page shows each request and its outcome, which works on a phone too.
 
-## 7. The event dictionary: what is live today, what production defines
+## 7. The event dictionary: every call, and the table it lands in
 
-| Business moment | Live today, on | Production-grade definition |
+Verified against stored rows on 1 September, not against an HTTP 200. A full
+journey was walked on the published site and every table counted before and
+after: twenty eight rows sent, twenty eight rows stored, no table short. The
+counts endpoint in section 7b is how that check is repeated.
+
+| Business moment | The call | Table |
 |---|---|---|
-| Page and model browsing | `page_view_events` via pageView | same |
-| Car picked for booking | `shopping_cart_events` via addToCart | same |
-| Booking form entered | `shopping_cart_events` via beginCheckout | same |
-| Test drive booked, web or offline | `order_events` via order, plus `ni_lead_events` | `test_drive_bookings` fed by Web SDK and DMS |
-| Saved cars | `wishlist_events` | same |
-| Model search | `search_events` | same |
-| Walk-in, no-show, drive done, quote, call outcome | `ni_lead_events` | `test_drive_outcomes`, `quotes` fed by DMS and telephony |
-| WhatsApp intent | `ni_lead_events` (simulated feed) | Value First calling the Dengage API |
-| Brochure, finance intent, register interest | `ni_lead_events` | same shape, Web SDK |
-| Vehicle sold | `ni_lead_events`; exits sales journeys | DMS batch feed |
-| Typed lead details: name, email, phone, consent | lead relay upserts `master_contact` over REST, once the API user in section 1a exists | the brand's web backend calling the same contact API from its own fixed IP |
+| Every page, before anything else | `pageView` | `page_view_events` |
+| A car picked, on the form or the configurator | `ec:addToCart` | `shopping_cart_events` |
+| **The car swapped for another** | `ec:removeFromCart` | `shopping_cart_events` |
+| **A build dropped from My Showroom** | `ec:deleteCart` | `shopping_cart_events` |
+| Details entered, booking or reservation | `ec:beginCheckout` | `shopping_cart_events` |
+| Test drive booked, or a build reserved | `ec:order` | `order_events`, `order_events_detail` |
+| **A booking called off** | `ec:cancelOrder` | `order_events`, `order_events_detail` |
+| Saved cars and price watches | `ec:addToWishlist`, `ec:removeFromWishlist` | `wishlist_events` |
+| Model search | `ec:search` | `search_events` |
+| Everything with no column on a standard table | `sendDeviceEvent` | `ni_lead_events` |
+
+The four in bold arrived on 1 September. `removeFromCart` was the one that
+mattered: Dengage rebuilds a cart from its event stream, so changing the model
+or the grade used to send a second `addToCart` with nothing between it and the
+first, and the cart read as a visitor holding two cars.
+
+**Every `event_type` in `ni_lead_events`**, which is the one custom table:
+
+| Type | Raised when |
+|---|---|
+| `walk_in`, `test_drive_booked`, `test_drive_done`, `no_show`, `test_drive_cancelled` | the showroom side, from the cockpit |
+| `quote_issued`, `call_outcome`, `whatsapp_intent`, `vehicle_sold` | the rest of the offline feed |
+| `brochure`, `finance_intent`, `register_interest`, `survey_response` | the website's own moments |
+| `configure`, `reserve` | a grade chosen, and a build held. `note` carries the grade |
+| `compare` | models put side by side. `note` names them |
+| `chooser` | Find your Nissan answered. **Carries `purchase_horizon`** |
+| `creative_shown`, `creative_action` | an on site experience met, and acted on. `source` separates a rule from the launcher |
+
+Typed lead details are the exception to all of this: name, email, phone and
+consent cannot be written from a page, so the lead relay upserts them onto
+`master_contact` over REST. Section 1a has the detail.
+
+## 7b. Proving a row landed, without opening the panel
+
+An HTTP 200 from the event endpoint means accepted and nothing more. The only
+proof is the row, and this reads the counts:
+
+    curl -s https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-dengage-tables
+
+Run it, use the demo, run it again. Two things worth knowing before you trust
+the answer. **Storage lags by roughly two minutes**, measured on 1 September, so
+a reading taken straight after a click shows nothing and means nothing. And the
+account is shared, so a count that moved is not proof it was your event, while a
+count that did not move is proof it was not.
+
+The endpoint reads and never writes. It has no code path that drops or
+truncates anything and it accepts no table name from the caller: the seven it
+reads are fixed in its source at `supabase/functions/nissan-dengage-tables/`.
 
 ## 7a. Parked: model aware popups
 
