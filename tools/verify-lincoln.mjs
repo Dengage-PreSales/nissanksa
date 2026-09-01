@@ -562,6 +562,22 @@ for (const p of ['submit-a-complaint/index.html', 'offers/navigator-june-26/inde
   const box = await page.locator('#dps-debug').count();
   if (!box) fail('?debug=1 readout missing');
   else ok('?debug=1 readout present');
+  /* It sits over the page it reports on, so it has to fold away without being
+     dismissed and without losing what it has already recorded. */
+  await page.click('#dps-debug [data-debug-min]');
+  await page.waitForTimeout(150);
+  const collapsed = await page.evaluate(() => {
+    const el = document.querySelector('#dps-debug');
+    const list = document.querySelector('#dps-debug-list');
+    return el.classList.contains('dps-debug-min') && list && !list.offsetHeight;
+  });
+  if (!collapsed) fail('?debug=1 readout does not collapse');
+  else ok('?debug=1 readout collapses to its title bar');
+  await page.click('#dps-debug [data-debug-min]');
+  await page.waitForTimeout(150);
+  const reopened = await page.evaluate(() => !!document.querySelector('#dps-debug-list').offsetHeight);
+  if (!reopened) fail('?debug=1 readout does not reopen');
+  else ok('and reopens with its rows intact');
   /* The readout is where a call is shown that the messages were really asked
      for, so the row Dengage's answer produces is pinned here. The answer is
      supplied directly because the router above refuses the request that would

@@ -26,6 +26,7 @@
     var slug = window.DEMO_SLUG || 'lincoln';
     var TD_KEY = 'dps:' + slug + ':td';
     var CAMPAIGN_KEY = 'dps:' + slug + ':campaign';
+    var LEAD_KEY = 'dps:' + slug + ':lead';
 
     function readJson(key, fallback) {
         try {
@@ -173,9 +174,42 @@
        in the messages this visitor asked for. */
     function rememberLead(details) {
         if (!details || !details.email) return;
-        writeJson('dps:' + slug + ':lead', {
+        writeJson(LEAD_KEY, {
             name: details.name, surname: details.surname,
             email: details.email, gsm: details.gsm, city: details.city
+        });
+    }
+
+    function recalledLead() {
+        var held = readJson(LEAD_KEY, null) || {};
+        return { name: held.name, surname: held.surname, email: held.email,
+                 gsm: held.gsm, city: held.city };
+    }
+
+    /* A form a known visitor has already filled in once should not ask again.
+       The browser holds what they typed, so every later lead form starts
+       filled and they correct rather than retype. It is also the honest
+       demonstration of a known contact: the site behaves as if it knows them,
+       because it does. */
+    function prefillFromLead() {
+        var held = recalledLead();
+        if (!held.email) return;
+        var fields = { firstname: held.name, lastname: held.surname,
+                       email: held.email, mobile: held.gsm, city: held.city };
+        Object.keys(fields).forEach(function (name) {
+            if (!fields[name]) return;
+            var el = document.querySelector('[name="' + name + '"]');
+            if (!el || el.value) return;
+            if (el.tagName === 'SELECT') {
+                Array.prototype.forEach.call(el.options, function (opt) {
+                    if (opt.value === fields[name] || opt.textContent.trim() === fields[name]) {
+                        el.value = opt.value;
+                    }
+                });
+            } else {
+                el.value = fields[name];
+            }
+            el.dispatchEvent(new Event('change', { bubbles: true }));
         });
     }
 
@@ -550,8 +584,14 @@
                 model: car ? car.id : undefined, source: 'website'
             });
             if ((window.DemoIdentity || {}).contactKey) {
-                confirmBooking({ model: car ? car.name : undefined,
-                                 model_id: car ? car.id : undefined }, 'brochure');
+                /* Whatever this visitor already told us, so the message can
+               reach them by email as well as by notification. Without it the
+               specification message could only ever be a push, and a visitor
+               who has not allowed notifications got nothing at all. */
+            var known = recalledLead();
+            known.model = car ? car.name : undefined;
+            known.model_id = car ? car.id : undefined;
+            confirmBooking(known, 'brochure');
             }
         });
     }
@@ -661,6 +701,7 @@
         /* Before the page view, because the campaign that brought them is on
            the address of this very page and will not be there on the next one. */
         rememberCampaign();
+        prefillFromLead();
 
         /* FIRST, before anything else on the page: the page view is the only
            thing that makes this demo's rows findable in the shared tables. */

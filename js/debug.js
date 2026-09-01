@@ -57,6 +57,13 @@
        read each other's preference. Non-negotiable 6. */
     function storeKey() { return 'dps:' + slug() + ':debug'; }
     function eventName() { return 'dps:' + slug() + ':event'; }
+    function minKey() { return 'dps:' + slug() + ':debugmin'; }
+    function readJson(key, fallback) {
+        try {
+            var raw = window.sessionStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+        } catch (err) { return fallback; }
+    }
     function messageName() { return 'dps:' + slug() + ':confirmation'; }
 
     function wanted() {
@@ -239,6 +246,7 @@
             '<div class="dps-debug-head">' +
               '<strong>Events and traffic</strong>' +
               '<span id="dps-debug-count">0</span>' +
+              '<button type="button" data-debug-min title="Collapse to the title bar">&minus;</button>' +
               '<button type="button" data-debug-copy title="Copy all as JSON">Copy</button>' +
               '<button type="button" data-debug-clear title="Clear the list">Clear</button>' +
               '<button type="button" data-debug-close title="Hide. Add ?debug=1 to bring it back">&times;</button>' +
@@ -250,9 +258,24 @@
         document.body.appendChild(panel);
         list = panel.querySelector('#dps-debug-list');
         countEl = panel.querySelector('#dps-debug-count');
+        if (panel.classList.contains('dps-debug-min')) {
+            panel.querySelector('[data-debug-min]').innerHTML = '&plus;';
+        }
+
+        /* Collapsed by preference, kept per demo so one open readout does not
+           collapse the other. It sits over the page it is reporting on, and on
+           a laptop it covers the very control somebody is about to press. */
+        if (readJson(minKey(), false)) panel.classList.add('dps-debug-min');
 
         panel.addEventListener('click', function (event) {
             var t = event.target;
+            if (t.hasAttribute && t.hasAttribute('data-debug-min')) {
+                var closed = panel.classList.toggle('dps-debug-min');
+                try { window.sessionStorage.setItem(minKey(), JSON.stringify(closed)); }
+                catch (err) { /* private mode */ }
+                t.innerHTML = closed ? '&plus;' : '&minus;';
+                return;
+            }
             if (t.hasAttribute && t.hasAttribute('data-debug-close')) {
                 try { window.sessionStorage.removeItem(storeKey()); } catch (err) { /* private mode */ }
                 panel.remove();

@@ -666,3 +666,10 @@ html.dps-locked { overflow: hidden; }
 @media (max-width: 640px) {
   #dps-debug { max-height: 38vh; bottom: 8px; inset-inline-start: 8px; }
 }
+
+/* Collapsed to its title bar. The readout sits over the page it reports on,
+   and on a laptop it covers the very control somebody is about to press, so
+   it folds away without being dismissed and without losing what it has. */
+#dps-debug.dps-debug-min #dps-debug-list,
+#dps-debug.dps-debug-min .dps-debug-foot { display: none; }
+#dps-debug.dps-debug-min { width: auto; }

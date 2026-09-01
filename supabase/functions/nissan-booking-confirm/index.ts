@@ -360,8 +360,16 @@ Deno.serve(async (req: Request) => {
     purchase_horizon: clean(raw.purchase_horizon, 60),
   };
 
-  if (!lead.contact_key || !/^DPS-[A-Za-z0-9_-]{1,44}$/.test(lead.contact_key)) {
+  /* A contact key names a person; a push token names the device in front of
+     you. Either is enough to send, and requiring the key meant a visitor who
+     had allowed notifications but not yet filled in a form could never be
+     reached, which is exactly the anonymous half of the story this demo is
+     built to show. A key, when given, still has to be one of this demo's. */
+  if (lead.contact_key && !/^DPS-[A-Za-z0-9_-]{1,44}$/.test(lead.contact_key)) {
     return reply({ error: 'contact_key must be a DPS- demo key' }, 400, origin);
+  }
+  if (!lead.contact_key && !lead.device_token) {
+    return reply({ error: 'send needs a contact_key or a device_token' }, 400, origin);
   }
   if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) {
     return reply({ error: 'email does not look like an address' }, 400, origin);
@@ -417,6 +425,24 @@ Deno.serve(async (req: Request) => {
         enabled: true,
         expire: { type: 'PERIOD', period: 30, periodType: 'DAY' },
       };
+      if (!lead.contact_key) {
+        /* Nobody has told us who this is yet. The device is still reachable,
+           which is the whole point of a token. */
+        const anon = await dengagePost('/transactional/push', {
+          contentId: pushId,
+          token: lead.device_token,
+          appId: APP_ID,
+          language: 'EN',
+          current: params,
+          customParameters: Object.entries(params).map(([key, value]) => ({ key, value })),
+          inboxParams,
+          tags: ['demo', brandKey, momentKey],
+        }, token);
+        out.push = anon.ok ? 'sent to this device, still anonymous' : `error HTTP ${anon.status}`;
+        notes.push('push to anonymous device: ' + anon.text.slice(0, 300));
+        return reply({ brand: brandKey, moment: momentKey, email: out.email, push: out.push,
+                       personalized: Object.keys(params).sort() }, 200, origin);
+      }
       const res = await dengagePost('/transactional/push', {
         contentId: pushId,
         contactKey: lead.contact_key,
@@ -436,7 +462,11 @@ Deno.serve(async (req: Request) => {
          device directly, which is what a demo needs: the contact is still the
          right way to address a person, and this is the safety net. */
       if (/Token not found/i.test(res.text)) {
-        out.push = 'no device subscribed for this contact';
+        /* The device is subscribed; Dengage simply has no device recorded
+           against this contact key yet, which is the normal state for anyone
+           who allowed notifications before they filled in a form. The token
+           reaches them regardless. */
+        out.push = 'this contact has no device bound, and the page sent no token';
         if (lead.device_token) {
           const direct = await dengagePost('/transactional/push', {
             contentId: pushId,
@@ -448,7 +478,8 @@ Deno.serve(async (req: Request) => {
             inboxParams,
             tags: ['demo', brandKey, momentKey],
           }, token);
-          out.push = direct.ok ? 'sent to this device by token' : `error HTTP ${direct.status}`;
+          out.push = direct.ok ? 'sent to this device by token, the contact has none bound'
+                               : `error HTTP ${direct.status}`;
           notes.push('push by token: ' + direct.text.slice(0, 300));
         }
       }
