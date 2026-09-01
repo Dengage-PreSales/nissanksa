@@ -9,11 +9,19 @@
 
    WHAT IS OURS AND WHAT IS DENGAGE'S.
 
-     Dengage holds the messages, one list per device, and records impressions,
-     opens, clicks and deletions against them. All of that goes through
-     js/dengageEvents.js, which is the only module allowed to call the SDK.
+     Dengage holds the messages its campaigns delivered, one list per device,
+     and records impressions, opens, clicks and deletions against them. All of
+     that goes through js/dengageEvents.js, which is the only module allowed to
+     call the SDK, and only ever for a message Dengage sent.
 
-     This file draws the bell, the badge, the drawer and the message list, and
+     The demo holds the messages its own moments raised, in the message centre
+     behind supabase/functions/nissan-booking-confirm. Dengage's inbox is filled
+     by a campaign and by nothing else, so it cannot answer at the second a
+     visitor acts, while an email and a notification both do. See THE SECOND
+     SOURCE further down for what that record is and what it refuses to invent.
+
+     This file draws the bell, the badge, the drawer and the message list, reads
+     both sources into one list, keeps itself current without being asked, and
      decides what an empty inbox says.
 
    THE MESSAGE SHAPE IS DECIDED BY THE SERVER, NOT BY US, and that is the whole
@@ -328,6 +336,7 @@
        rather than as one message with a bad link. So the whole media column is
        removed and the message renders as text, which is still the message. */
     function hideBrokenMedia() {
+        var body = $('#inbox-body');
         var images = document.querySelectorAll('#inbox-body .inbox-media img');
         Array.prototype.forEach.call(images, function (img) {
             /* complete with no natural width means it already failed, which is
@@ -336,9 +345,23 @@
             if (img.complete && img.naturalWidth === 0) { drop(img); return; }
             img.addEventListener('error', function () { drop(img); });
         });
+
+        /* THE COLUMN STAYS, EMPTY. Removing the holder outright left the one
+           message whose image failed flush against the drawer edge while the
+           ones that never carried an image kept their placeholder, so a list
+           with a single bad link rendered with a ragged left edge, which reads
+           as a broken drawer rather than as a missing picture. Same rule as
+           messageBlock: the column is reserved for the whole list or for none
+           of it, which is what settle() decides once the failures are known. */
         function drop(img) {
             var holder = img.parentNode;
-            if (holder && holder.parentNode) holder.parentNode.removeChild(holder);
+            if (!holder) return;
+            holder.removeChild(img);
+            holder.className = 'inbox-media empty';
+            settle();
+        }
+        function settle() {
+            if (body) body.classList.toggle('with-media', !!body.querySelector('.inbox-media img'));
         }
     }
 
@@ -347,12 +370,18 @@
         return !!(drawer && drawer.classList.contains('open'));
     }
 
+    /* A message this demo wrote itself carries a demo- id, which means nothing
+       to Dengage. Reporting an impression, an open or a delete against one
+       would be telling Dengage about a message it never sent, so every report
+       below is addressed only to the ones it did. */
+    function isOwn(id) { return typeof id === 'string' && id.indexOf('demo-') === 0; }
+
     function reportImpressions(list) {
         list.forEach(function (message) {
             var id = messageId(message);
             if (!id || reported[id]) return;
             reported[id] = true;
-            window.DengageEvents.inboxImpression(id);
+            if (!isOwn(id)) window.DengageEvents.inboxImpression(id);
         });
     }
 
@@ -361,13 +390,62 @@
 
     var refreshing = false;
 
+    /* THE SECOND SOURCE, and why the drawer has one.
+
+       Dengage's App Inbox is filled by a campaign and by nothing else: there is
+       no endpoint that writes to it, transactional sends are documented as
+       unavailable for that channel, and a campaign runs on a schedule. So the
+       inbox cannot answer the moment a visitor acts, while the email and the
+       notification both do.
+
+       The demo therefore keeps its own record of what Dengage accepted, written
+       at the instant of the send, and the drawer reads both and shows one list.
+       Nothing here is invented: a row exists only because a send came back
+       accepted, and it names the channels that carried it. A message from a
+       campaign and a message from a booking sit together, which is what the
+       visitor would expect and what a real time inbox would do in production.
+
+       It never fails the drawer. If this endpoint is unreachable the list is
+       whatever Dengage returned, which is the behaviour before it existed. */
+    function ownMessages() {
+        var url = (window.DEMO_CONFIG || {}).bookingConfirm;
+        if (!url || typeof window.fetch !== 'function') return Promise.resolve([]);
+        var query = [];
+        var key = (window.DemoIdentity || {}).contactKey;
+        var token = window.DengageEvents && window.DengageEvents.deviceToken
+            ? window.DengageEvents.deviceToken() : null;
+        if (key) query.push('inbox=' + encodeURIComponent(key));
+        /* The device is asked for as well as the contact, because a visitor who
+           allowed notifications before filling in a form has messages under the
+           token and none under a key. Asking for both is what carries the
+           drawer across the moment they are identified. */
+        if (token) query.push('device=' + encodeURIComponent(token));
+        if (!query.length) return Promise.resolve([]);
+        return window.fetch(url + '?' + query.join('&'))
+            .then(function (res) { return res.json(); })
+            .then(function (body) { return (body && body.messages) || []; })
+            ['catch'](function () { return []; });
+    }
+
+    function newest(message) {
+        var when = messageDate(message);
+        return when ? when.getTime() : 0;
+    }
+
     function refresh() {
         if (refreshing) return Promise.resolve(state);
         refreshing = true;
-        return window.DengageEvents.inboxMessages().then(function (result) {
+        return Promise.all([
+            window.DengageEvents.inboxMessages(),
+            ownMessages()
+        ]).then(function (both) {
+            var result = both[0];
+            var mine = both[1];
             refreshing = false;
-            state = result.status;
-            messages = result.list;
+            state = (result.status === 'starting' && mine.length) ? 'ok' : result.status;
+            messages = result.list.concat(mine).sort(function (a, b) {
+                return newest(b) - newest(a);
+            });
             if (window.console && messages.length) {
                 /* One raw message per refresh. The server decides the shape, so
                    this is the fastest way to see it on a call rather than
@@ -400,6 +478,48 @@
         });
     }
 
+    /* THE BELL HAS TO LIGHT UP BY ITSELF, or the inbox is not a channel.
+
+       An email arrives without being asked for and so does a notification. An
+       inbox that only fills when somebody presses refresh is a page, not a
+       channel, and on a call it reads as the one thing that did not work.
+
+       Two things wake it. A send from this page answers with its outcome, and
+       that event is the instant the drawer can be right, so it refreshes on the
+       spot. Everything raised somewhere else, which is the whole showroom half
+       of the story, arrives on a slow poll instead: the salesperson logs a walk
+       in on the cockpit and the visitor's own phone lights up a few seconds
+       later with nobody touching it.
+
+       It stops while the tab is hidden and reads again on return, so a demo
+       left open in a background tab costs nothing. */
+    var POLL_MS = 15000;
+    var timer = null;
+
+    function polling(on) {
+        if (on && !timer && !document.hidden) {
+            timer = window.setInterval(function () { refresh(); }, POLL_MS);
+        } else if (!on && timer) {
+            window.clearInterval(timer);
+            timer = null;
+        }
+    }
+
+    function listen() {
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) { polling(false); return; }
+            refresh();
+            polling(true);
+        });
+        /* The reply to a send this page made. See confirmBooking in js/site.js:
+           it dispatches the answer so the debug readout and the drawer both see
+           the same outcome rather than each asking again. */
+        document.addEventListener('dps:' + slug + ':confirmation', function () {
+            refresh();
+        });
+        polling(true);
+    }
+
     /* ------------------------------------------------------------------ */
     /* Interaction                                                         */
 
@@ -411,13 +531,13 @@
 
     function open(id) {
         markRead(id);
-        window.DengageEvents.inboxOpen(id);
+        if (!isOwn(id)) window.DengageEvents.inboxOpen(id);
         render();
     }
 
     function click(id, buttonId) {
         markRead(id);
-        window.DengageEvents.inboxClick(id, buttonId);
+        if (!isOwn(id)) window.DengageEvents.inboxClick(id, buttonId);
         render();
     }
 
@@ -430,7 +550,7 @@
             hiddenIds.push(id);
             write(HIDDEN_KEY, hiddenIds);
         }
-        window.DengageEvents.inboxDelete(id);
+        if (!isOwn(id)) window.DengageEvents.inboxDelete(id);
         render();
     }
 
@@ -482,6 +602,7 @@
         wire();
         render();
         settle();
+        listen();
     }
 
     window.Inbox = {

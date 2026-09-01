@@ -62,3 +62,52 @@ alter table public.ni_branch enable row level security;
 alter table public.ni_showroom_lead enable row level security;
 alter table public.ni_existing_customer enable row level security;
 alter table public.ni_dealer_stock enable row level security;
+
+-- ---------------------------------------------------------------------------
+-- The storefront message centre.
+--
+-- Dengage's App Inbox is filled by a campaign and by nothing else: no endpoint
+-- writes to it, transactional sends are documented as unavailable for that
+-- channel, and a campaign runs on a schedule. So the one channel a visitor can
+-- see inside the page was the only one that could not answer the moment they
+-- acted. These two tables are the demo's own inbox, written by
+-- supabase/functions/nissan-booking-confirm and read by the bell drawer, which
+-- shows them merged with whatever Dengage's own inbox holds.
+--
+-- Nothing here is staged: a row exists because a moment genuinely happened,
+-- its copy is filled with the same values the email and the push carried, and
+-- channels records which Dengage channels carried that same moment.
+
+create table if not exists public.ni_inbox_template (
+  brand      text not null,
+  moment     text not null,
+  title      text not null,
+  body       text not null,
+  updated_at timestamptz not null default now(),
+  primary key (brand, moment)
+);
+comment on table public.ni_inbox_template is
+  'Copy for the storefront message centre, one row per brand and moment. Placeholders in braces, such as {model}, are filled with the same send parameters the email and push use. Editable with one update statement and no deploy.';
+
+create table if not exists public.ni_inbox (
+  id           bigint generated always as identity primary key,
+  contact_key  text,
+  device_token text,
+  brand        text not null,
+  moment       text not null,
+  title        text not null,
+  body         text not null,
+  media_url    text,
+  target_url   text,
+  channels     text,
+  sent_at      timestamptz not null default now()
+);
+comment on table public.ni_inbox is
+  'Messages the demo delivered to its own storefront drawer, one row per moment raised. Addressed by contact key, by device token, or by both, so an anonymous visitor keeps their messages after a form gives them a name. channels names which Dengage channels carried the same moment, or reads "inbox only" when neither did.';
+
+-- Read paths the drawer uses: newest first for a contact, and for a device.
+create index if not exists ni_inbox_contact_idx on public.ni_inbox (contact_key, sent_at desc);
+create index if not exists ni_inbox_device_idx  on public.ni_inbox (device_token, sent_at desc);
+
+alter table public.ni_inbox_template enable row level security;
+alter table public.ni_inbox enable row level security;

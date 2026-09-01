@@ -106,7 +106,12 @@ stays inside one segment and carries the STOP opt-out.
 | Sender Name | account dropdown |
 | Message | Nissan KSA: your quote is ready at the branch. Questions? Call 920009058. Reply STOP to opt out. |
 
-## Inbox (the storefront drawer reads these)
+## Inbox (campaign content, shown in the storefront drawer)
+
+These are Dengage's own inbox messages, delivered by a campaign or a journey.
+The drawer shows them merged with the demo's own message centre, which answers
+every moment instantly and needs nothing authored here. See "The bell drawer is
+one list from two sources" in README.md.
 
 ### 11. Welcome card
 | Field | Value |

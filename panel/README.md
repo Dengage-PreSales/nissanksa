@@ -311,7 +311,7 @@ Monday scope.
 |---|---|
 | On-site messaging, inline slots | Live once section 2 is pasted |
 | Web push | Live on the published origin; worker already at the origin root |
-| App inbox | Live; send from a campaign or journey, Refresh in the drawer |
+| App inbox | Live, two sources: the demo's own message centre answers every moment instantly, and campaigns or journeys deliver into Dengage's inbox beside it |
 | SMS, Email | Composer field sheets in `CONTENT.md`; sender id needed for live sends |
 | WhatsApp | Value First's channel; journey step and copy shown, live send via their WABA in production |
 | RCS | Not offered. Say so if asked |
@@ -475,7 +475,7 @@ composing from scratch.
 | `showroom_visit` | The cockpit logs a walk in | **Live**, email and push |
 | `test_drive_done` | The cockpit logs a completed drive | **Live**, email and push |
 | `no_show` | The cockpit logs a no-show | **Live**, email and push |
-| `inbox_message` | Asked for on demand. It sends a notification; it does not fill the drawer, see below | **Live**, push |
+| `inbox_message` | Asked for on demand. It sends a notification and writes the drawer's own message, see below | **Live**, push |
 
 **To replace one**, author the new content and set the variable for that
 channel; the message function carries the current ids as its defaults, so a
@@ -517,18 +517,53 @@ Navigator photograph to one visitor, and Corsair, seats up to 5 to the next.
 Verified live on 31 August: an Aviator booking sent both channels with the
 Aviator values.
 
-### The inbox fills from a campaign, not from these sends
+### The bell drawer is one list from two sources
 
-Measured on 1 September 2026, after an earlier note here said otherwise. Every
-transactional push carries the inbox parameters the API documents, and in this
-account they put nothing in the drawer: two pushes fired at a contact holding
-twenty inbox messages left the count at twenty, read straight from
-`/api/inbox/getMessages`.
+**Dengage's App Inbox cannot answer at the second a visitor acts, so the demo
+carries its own message centre and the drawer shows both.** There is nothing
+to click in the panel for the second source: it is already running.
 
-The drawer itself is real and reads correctly. The SDK asks with both the
-device id and the contact key, and the inbox is contact scoped, so a visitor
-sees exactly what has been sent to their contact. Send from a campaign or a
-journey and press Refresh, which is the path row 314 above already describes.
+Why it exists, measured on 1 September 2026 after an earlier note here said
+otherwise. Every transactional push carries the inbox parameters the API
+documents, and in this account they put nothing in the drawer: two pushes
+fired at a contact holding twenty inbox messages left the count at twenty,
+read straight from `/api/inbox/getMessages`. There is no endpoint that writes
+to that inbox, transactional sends are documented as unavailable for the
+channel, and a campaign is evaluated on a schedule. So the one channel a
+visitor can see inside the page was the only one that could not answer them.
+
+**What the message centre is.** Two tables in the demo's own database, and
+about forty lines in `supabase/functions/nissan-booking-confirm`. Every moment
+the demo raises writes a row the instant it is raised, the same way the email
+and the notification go out. The drawer reads it, merges it with whatever
+Dengage's own inbox holds, sorts by time and draws one list. Nothing in it is
+staged: a row exists because a moment genuinely happened, its copy is filled
+with the same values the email and the push were personalized with, and it
+records which Dengage channels carried that same moment, saying `inbox only`
+when neither did.
+
+**What this changes on a call.** Book a test drive and the bell moves while
+the confirmation is still arriving. Log a walk in on the cockpit, on a
+different machine, and the visitor's own drawer lights up about fifteen
+seconds later with nobody touching their screen. Both are the real behaviour
+of a production build with a real time inbox behind it.
+
+**Editing the copy takes one statement and no deploy.** Ten moments per brand
+live in `ni_inbox_template`, keyed by brand and moment, with `{model}` and the
+other send parameters as placeholders:
+
+```sql
+update ni_inbox_template
+   set title = 'Your {model} drive is booked',
+       body  = 'We have your request. The showroom will call you to agree a time.'
+ where brand = 'nissan' and moment = 'booking';
+```
+
+**Dengage's own inbox still works and is still worth showing.** Send from a
+campaign or a journey and press Refresh, the path row 314 above describes.
+Those messages sit in the same list beside the instant ones, and only they are
+reported back to Dengage: an impression, an open or a delete is never sent
+against a message Dengage did not issue.
 
 ### Two things that decide whether a push lands
 

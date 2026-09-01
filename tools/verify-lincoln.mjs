@@ -51,9 +51,18 @@ console.log(`${pages} lincoln pages scanned: ${dashHits} dash hits, ${deadLinks}
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 let dengageAttempts = 0;
+/* The message centre is answered from a fixture rather than from the live
+   function, for the same reason the SDK hosts are refused above: this suite
+   has to run without writing a row anywhere. What check 7 proves is the
+   drawer's own behaviour, which is where every defect it has had has lived. */
+let inboxFixture = null;
 await ctx.route('**/*', (route) => {
   const url = route.request().url();
   if (/dengage\.com/.test(url)) { dengageAttempts += 1; return route.abort(); }
+  if (inboxFixture && url.indexOf('/functions/v1/nissan-booking-confirm') !== -1) {
+    return route.fulfill({ status: 200, contentType: 'application/json',
+                           body: JSON.stringify({ messages: inboxFixture }) });
+  }
   if (!url.startsWith('http://localhost:8101/')) return route.abort();
   return route.continue();
 });
@@ -596,6 +605,92 @@ for (const p of ['submit-a-complaint/index.html', 'offers/navigator-june-26/inde
   if (absent.length) fail(`?debug=1 omits ${absent.join(', ')} from the message row`);
   else ok('?debug=1 shows the messages a moment earned, and what Dengage answered');
   await page.close();
+}
+
+// 7. The bell drawer is one list from two sources, and it fills itself.
+//
+//    Dengage's App Inbox is filled by a campaign and by nothing else, so the
+//    demo carries its own message centre and the drawer reads both. Everything
+//    asserted here has been a real defect: a ragged left edge when one image
+//    failed, a badge that never moved until somebody pressed refresh, and
+//    impressions reported to Dengage against ids Dengage never issued.
+{
+  const now = Date.now();
+  inboxFixture = [
+    { smsgId: 'demo-901', title: 'Your Navigator drive is booked',
+      message: 'We have your request.', channels: 'email, push', moment: 'booking',
+      mediaUrl: BASE + 'assets/cms/storage/lincoln_common/Aviator-2025/parent-page/main-banner.jpg',
+      sentDate: new Date(now - 60000).toISOString() },
+    { smsgId: 'demo-902', title: 'One step left on your Aviator',
+      message: 'Pick it up where you left off.', channels: 'inbox only',
+      moment: 'abandoned_booking', mediaUrl: 'https://unreachable.invalid/gone.jpg',
+      sentDate: new Date(now - 3 * 3600000).toISOString() },
+  ];
+  const page = await open('index.html?ck=DPS-verify1');
+  await page.evaluate((when) => {
+    window.__impressions = [];
+    const real = window.DengageEvents.inboxImpression;
+    window.DengageEvents.inboxImpression = function (id) {
+      window.__impressions.push(id);
+      return real.apply(this, arguments);
+    };
+    /* One message from Dengage's own inbox, older than the first of ours and
+       newer than the second, so a correct merge interleaves rather than
+       appending one list after the other. */
+    window.DengageEvents.inboxMessages = () => Promise.resolve({
+      status: 'ok',
+      list: [{ smsgId: 'dn-501', messageJson: {
+        title: 'An offer from a campaign', message: 'Authored in the panel.',
+        sendDate: new Date(when - 30 * 60000).toISOString() } }],
+    });
+  }, now);
+
+  await page.locator('[data-open="#inbox"]:visible').first().click();
+  await page.waitForTimeout(300);
+  await page.evaluate(() => window.Inbox.refresh());
+  await page.waitForTimeout(600);
+
+  const drawer = await page.evaluate(() => ({
+    ids: Array.from(document.querySelectorAll('#inbox-body .inbox-item'))
+      .map((el) => el.getAttribute('data-inbox-id')),
+    badge: Number((document.querySelector('.dps-badge') || {}).textContent || 0),
+    /* Reserved for the whole list or for none of it. A mix is the ragged edge. */
+    holders: document.querySelectorAll('#inbox-body .inbox-media').length,
+    items: document.querySelectorAll('#inbox-body .inbox-item').length,
+    impressions: window.__impressions,
+  }));
+
+  const expected = ['demo-901', 'dn-501', 'demo-902'];
+  if (drawer.ids.join(',') !== expected.join(',')) {
+    fail(`drawer shows ${drawer.ids.join(',') || 'nothing'}, not both sources newest first (${expected.join(',')})`);
+  } else ok('drawer merges the message centre and Dengage into one list, newest first');
+
+  if (drawer.badge !== 3) fail(`badge reads ${drawer.badge}, not 3 unread`);
+  else ok('the badge counts both sources');
+
+  if (drawer.holders !== 0 && drawer.holders !== drawer.items) {
+    fail(`${drawer.holders} media columns across ${drawer.items} messages, so the left edge is ragged`);
+  } else ok('the media column is reserved for the whole list or for none of it');
+
+  if (drawer.impressions.some((id) => String(id).indexOf('demo-') === 0)) {
+    fail('an impression was reported to Dengage against a message it never sent');
+  } else ok('only Dengage\'s own messages are reported back to Dengage');
+
+  // The drawer wakes on the reply to a send, without anyone pressing refresh.
+  inboxFixture = inboxFixture.concat([{
+    smsgId: 'demo-903', title: 'Good to meet you', message: 'Thanks for visiting.',
+    channels: 'push', moment: 'showroom_visit', sentDate: new Date().toISOString(),
+  }]);
+  await page.evaluate(() => document.dispatchEvent(
+    new CustomEvent('dps:lincoln:confirmation', { detail: { moment: 'showroom_visit' } })));
+  await page.waitForTimeout(900);
+  const woke = await page.evaluate(() => document.querySelectorAll('#inbox-body .inbox-item').length);
+  if (woke !== 4) fail(`drawer holds ${woke} messages after a send, not 4: it did not refresh itself`);
+  else ok('a send wakes the drawer without anyone pressing refresh');
+
+  if (page.errors.length) fail(`inbox drawer: JS errors: ${page.errors.join(' | ')}`);
+  await page.close();
+  inboxFixture = null;
 }
 
 console.log(dengageAttempts + ' SDK attempts refused by this harness, as intended');

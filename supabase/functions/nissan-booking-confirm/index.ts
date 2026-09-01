@@ -160,7 +160,7 @@ function egress(): unknown {
 function corsHeaders(origin: string): Record<string, string> {
   return {
     'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin) ? origin : 'https://dengage-presales.github.io',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'content-type',
     'Vary': 'Origin',
   };
@@ -289,6 +289,74 @@ function vehicleParams(brandKey: string, modelId?: string, modelName?: string): 
   return out;
 }
 
+
+/* THE STOREFRONT MESSAGE CENTRE, and why it is here rather than in Dengage.
+
+   Dengage's own App Inbox is filled by a campaign and by nothing else. There
+   is no endpoint that puts a message in it, transactional sends are documented
+   as unavailable for that channel, and a campaign is evaluated on a schedule,
+   so the drawer cannot answer the moment a visitor acts. Measured on
+   1 September 2026: two transactional pushes at a contact holding twenty inbox
+   messages left the count at twenty.
+
+   So the demo carries its own inbox, and treats it as a channel rather than
+   as a receipt for the other two. Every moment lands in it the instant it is
+   raised, the same way the email and the push go out, which is the behaviour
+   a production build would have with a real time inbox behind it. Each row
+   names which Dengage channels carried the same moment, and says so plainly
+   when none of them did, so the drawer never implies a send that Dengage
+   refused. The drawer shows these alongside whatever Dengage's own App Inbox
+   holds, so a campaign message and an instant one sit in one list. The copy
+   lives in ni_inbox_template, editable with one statement and no deploy. */
+async function sbFetch(path: string, init: RequestInit) {
+  return await fetch(`${SB_URL}/rest/v1/${path}`, {
+    ...init,
+    headers: {
+      'content-type': 'application/json',
+      'apikey': SB_KEY,
+      'authorization': `Bearer ${SB_KEY}`,
+      ...(init.headers ?? {}),
+    },
+  });
+}
+
+function fill(template: string, params: Record<string, string>): string {
+  return template.replace(/\{([a-z_]+)\}/g, (_m, key) => params[key] ?? '').replace(/\s{2,}/g, ' ').trim();
+}
+
+async function recordMessage(
+  brandKey: string, momentKey: string, lead: { contact_key?: string; device_token?: string },
+  params: Record<string, string>, channels: string[],
+): Promise<string> {
+  if (!SB_URL || !SB_KEY) return 'not configured';
+  try {
+    const res = await sbFetch(
+      `ni_inbox_template?brand=eq.${encodeURIComponent(brandKey)}&moment=eq.${encodeURIComponent(momentKey)}` +
+      `&select=title,body&limit=1`, { method: 'GET' });
+    const rows = await res.json();
+    const tpl = Array.isArray(rows) ? rows[0] : null;
+    if (!tpl) return 'needs copy for ' + momentKey;
+    const wrote = await sbFetch('ni_inbox', {
+      method: 'POST',
+      headers: { 'prefer': 'return=minimal' },
+      body: JSON.stringify({
+        contact_key: lead.contact_key ?? null,
+        device_token: lead.device_token ?? null,
+        brand: brandKey,
+        moment: momentKey,
+        title: fill(tpl.title, params),
+        body: fill(tpl.body, params),
+        media_url: params.model_image ?? null,
+        target_url: params.model_url ?? null,
+        channels: channels.length ? channels.join(', ') : 'inbox only',
+      }),
+    });
+    return wrote.ok ? 'delivered' : `error HTTP ${wrote.status}`;
+  } catch (err) {
+    return 'error ' + String(err).slice(0, 120);
+  }
+}
+
 const seen = new Map<string, number[]>();
 function rateLimited(ip: string): boolean {
   const now = Date.now();
@@ -308,6 +376,56 @@ Deno.serve(async (req: Request) => {
   const origin = req.headers.get('origin') ?? '';
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(origin) });
   if (req.method === 'GET') {
+    /* The message centre, read by the storefront drawer, by contact key and by
+       device token together. An anonymous visitor sees what was sent to their
+       device, and keeps seeing it after a form gives them a name. */
+    const url = new URL(req.url);
+    const who = url.searchParams.get('inbox');
+    /* A device token is opaque to us, so only the characters a token is made of
+       reach the filter. Anything else is dropped rather than escaped, because a
+       comma or a bracket would rewrite the query instead of failing it. */
+    const rawDevice = url.searchParams.get('device') ?? '';
+    const byDevice = /^[A-Za-z0-9:._-]{20,400}$/.test(rawDevice) ? rawDevice : '';
+    if (who || byDevice) {
+      if (who && !/^DPS-[A-Za-z0-9_-]{1,44}$/.test(who)) {
+        return reply({ error: 'inbox must be a DPS- demo key' }, 400, origin);
+      }
+      if (!SB_URL || !SB_KEY) return reply({ messages: [] }, 200, origin);
+      try {
+        /* Both, when the page has both. A visitor who allowed notifications
+           before filling in a form has messages against the device, and the
+           ones sent after they were named are against the contact. Reading
+           either keeps the drawer whole across the moment they are identified,
+           which is the moment the story turns. */
+        const clauses: string[] = [];
+        if (who) clauses.push(`contact_key.eq.${who}`);
+        if (byDevice) clauses.push(`device_token.eq.${byDevice}`);
+        const filter = clauses.length > 1
+          ? `or=(${encodeURIComponent(clauses.join(','))})`
+          : (who ? `contact_key=eq.${encodeURIComponent(who)}`
+                 : `device_token=eq.${encodeURIComponent(byDevice)}`);
+        const res = await sbFetch(
+          `ni_inbox?${filter}&select=id,title,body,media_url,target_url,channels,moment,sent_at` +
+          `&order=sent_at.desc&limit=30`, { method: 'GET' });
+        const rows = await res.json();
+        /* Named the way the drawer already reads a Dengage message, so one
+           renderer draws both without knowing which is which. */
+        // deno-lint-ignore no-explicit-any
+        const messages = (Array.isArray(rows) ? rows : []).map((r: any) => ({
+          smsgId: 'demo-' + r.id,
+          title: r.title,
+          message: r.body,
+          mediaUrl: r.media_url || undefined,
+          targetUrl: r.target_url || undefined,
+          sentDate: r.sent_at,
+          channels: r.channels,
+          moment: r.moment,
+        }));
+        return reply({ messages }, 200, origin);
+      } catch (err) {
+        return reply({ messages: [], error: String(err).slice(0, 200) }, 200, origin);
+      }
+    }
     return reply({
       moments: Object.fromEntries(Object.entries(MOMENTS).map(([k, m]) => [k, {
         label: m.label,
@@ -390,7 +508,7 @@ Deno.serve(async (req: Request) => {
     params.full_name = [lead.name, lead.surname].filter(Boolean).join(' ');
   }
 
-  const out = { email: 'not attempted', push: 'not attempted' };
+  const out = { email: 'not attempted', push: 'not attempted', inbox: 'not attempted' };
   const notes: string[] = [];
 
   try {
@@ -420,10 +538,10 @@ Deno.serve(async (req: Request) => {
          they do not put anything in the inbox. Measured on 1 September 2026:
          two pushes fired at a contact holding twenty inbox messages left the
          count at twenty, read straight from /api/inbox/getMessages. The drawer
-         in the storefront fills from a campaign or a journey instead. They are
-         still sent because they are correct and cost nothing, but nothing here
-         should be described as filling the inbox until a send is watched
-         doing it. */
+         in the storefront fills from its own message centre and from a campaign
+         instead. They are still sent because they are correct and cost nothing,
+         but nothing here should be described as filling Dengage's inbox until a
+         send is watched doing it. */
       const inboxParams = {
         enabled: true,
         expire: { type: 'PERIOD', period: 30, periodType: 'DAY' },
@@ -443,8 +561,9 @@ Deno.serve(async (req: Request) => {
         }, token);
         out.push = anon.ok ? 'sent to this device, still anonymous' : `error HTTP ${anon.status}`;
         notes.push('push to anonymous device: ' + anon.text.slice(0, 300));
+        out.inbox = await recordMessage(brandKey, momentKey, lead, params, anon.ok ? ['push'] : []);
         return reply({ brand: brandKey, moment: momentKey, email: out.email, push: out.push,
-                       personalized: Object.keys(params).sort() }, 200, origin);
+                       inbox: out.inbox, personalized: Object.keys(params).sort() }, 200, origin);
       }
       const res = await dengagePost('/transactional/push', {
         contentId: pushId,
@@ -495,9 +614,17 @@ Deno.serve(async (req: Request) => {
     if (out.push === 'not attempted') out.push = 'error';
   }
 
+  /* The inbox delivers on its own, because it is this demo's channel rather
+     than a report on the other two. The row still records exactly which
+     Dengage channels carried the same moment, so a refusal stays visible. */
+  const carried: string[] = [];
+  if (out.email === 'sent') carried.push('email');
+  if (out.push.indexOf('sent') === 0) carried.push('push');
+  out.inbox = await recordMessage(brandKey, momentKey, lead, params, carried);
+
   // The record, so the outcome outlives the page that asked for it. Only a
   // booking has a row of its own to carry it.
-  if (SB_URL && SB_KEY && momentKey === 'booking') {
+  if (SB_URL && SB_KEY && momentKey === 'booking' && lead.contact_key) {
     try {
       const find = await fetch(
         `${SB_URL}/rest/v1/ni_web_lead?contact_key=eq.${encodeURIComponent(lead.contact_key)}` +
@@ -520,5 +647,5 @@ Deno.serve(async (req: Request) => {
   }
 
   return reply({ brand: brandKey, moment: momentKey, email: out.email, push: out.push,
-                 personalized: Object.keys(params).sort() }, 200, origin);
+                 inbox: out.inbox, personalized: Object.keys(params).sort() }, 200, origin);
 });
