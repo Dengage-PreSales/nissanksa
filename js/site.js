@@ -874,9 +874,16 @@
         var CTA = [
             [/^(book a test drive|book my .*test drive)$/i, go(pre + 'book-a-test-drive/index.html' + modelParam)],
             [/^(get an online quote|request a quote)$/i, go(pre + 'request-a-quote/index.html')],
-            [/^(reserve now|reserve online|buy online|shop@home)$/i, go(pre + 'shop-at-home/index.html')],
+            /* Reserve and buy now reach the reservation, not the brochure page
+               they used to. Shop@Home stays where it is: it is their catalogue
+               browser, a different thing wearing a nearby word. */
+            [/^(reserve now|reserve online|buy now|buy online)$/i, go(pre + 'configure/index.html' + modelParam)],
+            [/^(shop@home)$/i, go(pre + 'shop-at-home/index.html')],
             [/^(prices & specs|prices and specs|compare grades|trim details|view specs and prices)$/i, scrollToGrades],
-            [/^(build your .*|configure your .*|configure)$/i, go(pre + 'book-a-test-drive/index.html' + modelParam)],
+            /* BUILD YOUR X-TRAIL sent people to the booking form, which is
+               not what they asked for. It now builds one. */
+            [/^(build your .*|configure your .*|configure|explore local inventory)$/i,
+                go(pre + 'configure/index.html' + modelParam)],
             [/^(find a showroom|find a nissan center|find a dealer|get directions)$/i, go(pre + 'find-a-showroom/index.html')],
             [/^(explore offers|view all offers|see the offers?)$/i, go(pre + 'offers/index.html')],
             [/^(finance calculator|discover more)$/i, go(pre + 'finance-calculator/index.html')],
@@ -885,7 +892,8 @@
             [/^(call center|call us|920009058)$/i, go('tel:920009058')]
         ];
         $$('main button, main [role="button"], body > div button').forEach(function (b) {
-            if (b.__dps || b.closest('#dengage-panel, #inbox, #test-drive, .dps-controls, #dps-debug, form')) return;
+            if (b.__dps || b.closest('[data-dps-owned]') ||
+                b.closest('#dengage-panel, #inbox, #test-drive, .dps-controls, #dps-debug, form')) return;
             var label = (b.textContent || '').trim();
             var aria = (b.getAttribute('aria-label') || '').trim();
             for (var i = 0; i < CTA.length; i += 1) {
@@ -996,10 +1004,18 @@
 
     /* Whatever is still pressable and unwired after every pass above routes
        to the nearest real link in its own card, and a control with no
-       destination at all leaves the stage rather than lying on it. */
+       destination at all leaves the stage rather than lying on it.
+
+       data-dps-owned is the way out of that. It marks a region this demo
+       authored and wires itself, and both this pass and the call to action
+       router skip it. Without it the safety net does real harm: on the
+       configurator it routed Reserve this build to the Drive it first link
+       sitting beside it, so the button did something plausible and wrong,
+       which is the worst way for a control to fail on a call. */
     function wireRemainingControls() {
         $$('button, [role="button"]').forEach(function (b) {
-            if (b.__dps || b.closest('#dengage-panel, #inbox, #test-drive, .dps-controls, #dps-debug, #dps-lightbox, form, header, .slick-slider')) return;
+            if (b.__dps || b.closest('[data-dps-owned]') ||
+                b.closest('#dengage-panel, #inbox, #test-drive, .dps-controls, #dps-debug, #dps-lightbox, form, header, .slick-slider')) return;
             if (b.hasAttribute('data-dps-wired') || b.hasAttribute('data-demo-dead') ||
                 b.hasAttribute('data-open') || b.hasAttribute('data-close') ||
                 b.hasAttribute('data-save-car')) return;
@@ -1236,7 +1252,14 @@
         mintIdentity: mintIdentity,
         relayLead: relayLead,
         confirmBooking: confirmBooking,
-        abandonedBooking: abandonedBooking
+        abandonedBooking: abandonedBooking,
+        /* The configurator raises its own signals and the creative rules read
+           them, so both halves have to reach the same store through the same
+           pair of functions. Left unexported, configure.js called nothing and
+           wrote nothing, and the rule that catches an abandoned build could
+           never fire. */
+        signal: signal,
+        signalled: signalled
     };
 
     function bootOnce() {

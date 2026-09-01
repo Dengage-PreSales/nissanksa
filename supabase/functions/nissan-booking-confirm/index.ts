@@ -88,6 +88,11 @@ const MOMENTS: Record<string, Moment> = {
     email: Deno.env.get('DENGAGE_TX_EMAIL_SURVEY') ?? '926586f0-de55-47cb-b08e-4103f965ce8c',
     push: Deno.env.get('DENGAGE_TX_PUSH_SURVEY') ?? 'dd33859f-3f41-49ec-86ba-0f42dbf5397f',
   },
+  reserve: {
+    label: 'build reserved online',
+    email: Deno.env.get('DENGAGE_TX_EMAIL_RESERVE') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_RESERVE') ?? '',
+  },
   showroom_visit: {
     label: 'walk in logged at the showroom',
     email: Deno.env.get('DENGAGE_TX_EMAIL_WALKIN') ?? '6e03aa30-978b-48d7-816b-54a8f895207b',
@@ -125,6 +130,7 @@ const NISSAN_EMAIL: Record<string, string> = {
   test_drive_done: Deno.env.get('DENGAGE_TX_EMAIL_NI_TD_DONE') ?? '',
   no_show: Deno.env.get('DENGAGE_TX_EMAIL_NI_NOSHOW') ?? '',
   abandoned_booking: Deno.env.get('DENGAGE_TX_EMAIL_NI_ABANDONED') ?? '',
+  reserve: Deno.env.get('DENGAGE_TX_EMAIL_NI_RESERVE') ?? '',
 };
 /* Push content Nissan needs of its own. Everything absent here falls back to
    the shared content, because that copy names no dealer. */

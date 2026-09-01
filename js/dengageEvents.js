@@ -405,7 +405,11 @@
     var LEAD_STAGES = ['walk_in', 'test_drive_booked', 'test_drive_done',
                        'no_show', 'quote_issued', 'call_outcome',
                        'whatsapp_intent', 'vehicle_sold', 'brochure',
-                       'finance_intent', 'register_interest', 'survey_response'];
+                       'finance_intent', 'register_interest', 'survey_response',
+                       /* Added with the configurator. configure says which
+                          grade a visitor priced themselves into, reserve says
+                          they held it. */
+                       'configure', 'reserve'];
 
     function leadEvent(stage, fields) {
         if (LEAD_STAGES.indexOf(stage) === -1) {

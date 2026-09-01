@@ -15,6 +15,7 @@ and the values the message prints.
 | Specification downloaded | `brochure` | `brochure-delivery.html` | `DENGAGE_TX_EMAIL_BROCHURE`<br>`DENGAGE_TX_PUSH_BROCHURE` |
 | Newsletter signup | `newsletter` | `newsletter-welcome.html` | `DENGAGE_TX_EMAIL_NEWSLETTER`<br>`DENGAGE_TX_PUSH_NEWSLETTER` |
 | Survey answered | `survey` | `survey-thanks.html` | `DENGAGE_TX_EMAIL_SURVEY`<br>`DENGAGE_TX_PUSH_SURVEY` |
+| Build reserved online | `reserve` | `reservation-held.html` | `DENGAGE_TX_EMAIL_RESERVE`<br>`DENGAGE_TX_PUSH_RESERVE` |
 | Walk in logged at the showroom | `showroom_visit` | `showroom-visit.html` | `DENGAGE_TX_EMAIL_WALKIN`<br>`DENGAGE_TX_PUSH_WALKIN` |
 | Test drive completed | `test_drive_done` | `test-drive-done.html` | `DENGAGE_TX_EMAIL_TD_DONE`<br>`DENGAGE_TX_PUSH_TD_DONE` |
 | Booked but did not arrive | `no_show` | `no-show-reinvite.html` | `DENGAGE_TX_EMAIL_NOSHOW`<br>`DENGAGE_TX_PUSH_NOSHOW` |

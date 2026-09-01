@@ -561,3 +561,122 @@ h1.headTop span + span { margin-inline-start: 0.24em; }
   .dps-controls .dps-floating-bell { display: none; }
 }
 
+
+/* ===========================================================================
+   Build and reserve. The configurator page, in the storefront's own palette.
+   =========================================================================== */
+
+.cfg-page { max-width: 1180px; margin: 0 auto; padding: 40px 20px 80px; }
+.cfg-head { max-width: 62ch; margin-bottom: 40px; }
+.cfg-eyebrow {
+    margin: 0 0 10px; font: 400 11px/1 Arial, sans-serif; letter-spacing: .2em;
+    text-transform: uppercase; color: #c3002f;
+}
+.cfg-title { margin: 0 0 14px; font: 700 clamp(26px, 3.6vw, 40px)/1.1 Arial, sans-serif; color: #111111; }
+.cfg-lede { margin: 0; font: 400 16px/1.6 Arial, sans-serif; color: #6e7275; }
+
+.cfg-step { margin-bottom: 42px; }
+.cfg-steph {
+    display: flex; align-items: center; gap: 12px; margin: 0 0 18px;
+    font: 700 15px/1 Arial, sans-serif; letter-spacing: .12em;
+    text-transform: uppercase; color: #111111;
+}
+.cfg-steph span {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #c3002f; color: #ffffff; font-size: 13px; letter-spacing: 0;
+}
+
+.cfg-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.cfg-chip {
+    padding: 11px 20px; border: 1px solid #cfcfcf; background: #ffffff;
+    font: 600 14px/1 Arial, sans-serif; letter-spacing: .06em; color: #111111;
+    cursor: pointer; transition: border-color .15s, background .15s, color .15s;
+}
+.cfg-chip:hover { border-color: #111111; }
+.cfg-chip.is-on { background: #111111; border-color: #111111; color: #ffffff; }
+.cfg-chip:focus-visible, .cfg-trim:focus-visible, .cfg-go:focus-visible {
+    outline: 2px solid #c3002f; outline-offset: 2px;
+}
+
+.cfg-empty { margin: 0; font: 400 15px/1.6 Arial, sans-serif; color: #8b8f92; }
+.cfg-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
+}
+.cfg-trim {
+    display: flex; flex-direction: column; gap: 6px; text-align: left;
+    padding: 0 0 18px; border: 1px solid #e3e3e3; background: #ffffff;
+    cursor: pointer; transition: border-color .15s, box-shadow .15s;
+    font-family: Arial, sans-serif;
+}
+.cfg-trim:hover { border-color: #111111; }
+.cfg-trim.is-on { border-color: #c3002f; box-shadow: inset 0 0 0 1px #c3002f; }
+.cfg-shot { display: block; width: 100%; height: auto; margin-bottom: 10px; background: #f4f4f4; }
+.cfg-noshot {
+    display: flex; align-items: center; justify-content: center; min-height: 118px;
+    padding: 10px; font: 400 12px/1.5 Arial, sans-serif; color: #8b8f92; text-align: center;
+}
+.cfg-name { padding: 0 16px; font: 700 17px/1.25 Arial, sans-serif; color: #111111; }
+.cfg-version { padding: 0 16px; font: 400 13px/1.4 Arial, sans-serif; color: #6e7275; }
+.cfg-price { padding: 2px 16px 0; font: 700 16px/1.3 Arial, sans-serif; color: #c3002f; }
+.cfg-figures { padding: 0 16px; font: 400 12.5px/1.4 Arial, sans-serif; color: #6e7275; }
+.cfg-specs {
+    margin: 8px 0 0; padding: 0 16px 0 32px;
+    font: 400 13px/1.65 Arial, sans-serif; color: #6e7275;
+}
+.cfg-pick {
+    margin-top: 12px; padding: 0 16px; font: 700 12px/1 Arial, sans-serif;
+    letter-spacing: .12em; text-transform: uppercase; color: #111111;
+}
+.cfg-trim.is-on .cfg-pick { color: #c3002f; }
+
+.cfg-summary { border-top: 1px solid #e3e3e3; padding-top: 32px; }
+.cfg-built { margin-bottom: 20px; }
+.cfg-built-model { margin: 0 0 6px; font: 700 22px/1.25 Arial, sans-serif; color: #111111; }
+.cfg-built-price { margin: 0; font: 700 26px/1.2 Arial, sans-serif; color: #c3002f; }
+.cfg-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.cfg-go {
+    padding: 15px 34px; border: 0; background: #c3002f; color: #ffffff;
+    font: 700 14px/1 Arial, sans-serif; letter-spacing: .08em;
+    text-transform: uppercase; cursor: pointer;
+}
+.cfg-go:hover { background: #a30027; }
+.cfg-alt {
+    font: 700 13px/1 Arial, sans-serif; letter-spacing: .08em;
+    text-transform: uppercase; color: #111111; text-underline-offset: 4px;
+}
+
+.cfg-form { margin-top: 28px; max-width: 720px; }
+.cfg-formlede { margin: 0 0 18px; font: 400 14px/1.6 Arial, sans-serif; color: #6e7275; }
+.cfg-fields {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px; margin-bottom: 18px;
+}
+.cfg-form label {
+    display: flex; flex-direction: column; gap: 6px;
+    font: 600 12px/1 Arial, sans-serif; letter-spacing: .1em;
+    text-transform: uppercase; color: #6e7275;
+}
+.cfg-form input[type="text"], .cfg-form input[type="tel"],
+.cfg-form input[type="email"], .cfg-form select {
+    padding: 12px 12px; border: 1px solid #cfcfcf; background: #ffffff;
+    font: 400 15px/1.3 Arial, sans-serif; color: #111111; border-radius: 0;
+}
+.cfg-form input.is-missing, .cfg-form select.is-missing { border-color: #c3002f; }
+.cfg-consent {
+    flex-direction: row; align-items: flex-start; gap: 10px; margin-bottom: 22px;
+    font: 400 13.5px/1.5 Arial, sans-serif; letter-spacing: 0;
+    text-transform: none; color: #6e7275;
+}
+.cfg-consent input { margin-top: 2px; }
+
+.cfg-done { margin-top: 28px; padding: 24px; background: #f4f4f4; max-width: 720px; }
+.cfg-done-head { margin: 0 0 8px; font: 700 20px/1.25 Arial, sans-serif; color: #111111; }
+.cfg-done p { margin: 0; font: 400 15px/1.65 Arial, sans-serif; color: #6e7275; }
+
+@media (max-width: 640px) {
+    .cfg-page { padding: 28px 16px 64px; }
+    .cfg-actions { flex-direction: column; align-items: stretch; }
+    .cfg-go { width: 100%; }
+    .cfg-alt { text-align: center; }
+}

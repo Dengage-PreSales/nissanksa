@@ -106,6 +106,19 @@ Sent when the shopping survey card is answered. Its content id goes in `None`.
 
 With the longest model name in place that is 9 characters of title and 55 of message.
 
+### Build reserved online
+
+Sent when a build is reserved on the configurator. Its content id goes in `None`.
+
+| Field | Value |
+|---|---|
+| Title | `Your {%= $Current.model %} is held` |
+| Message | `The build and the showroom are booked. The team will call about the paperwork.` |
+| Target URL | `{%= $Current.model_url %}` |
+| Media | `{%= $Current.model_image %}` |
+
+With the longest model name in place that is 22 characters of title and 78 of message.
+
 ### Walk in logged at the showroom
 
 Sent when reception logs the visitor on the dealer cockpit. Its content id goes in `None`.

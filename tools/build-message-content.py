@@ -276,6 +276,26 @@ MOMENTS = [
         push_url=RANGE_URL,
     ),
     dict(
+        key='reserve', slug='reservation-held', label='Build reserved online',
+        trigger='when a build is reserved on the configurator',
+        env=('EMAIL_RESERVE', 'PUSH_RESERVE'),
+        subject='Your build is held',
+        preheader='The grade you chose, waiting at the showroom you chose.',
+        kicker='Reservation held',
+        headline='Your {%= $Current.model %} is held at the showroom',
+        lead="We have the exact build you configured and the showroom you picked. Nothing is paid "
+             "yet: the team will call to agree the paperwork and the handover.",
+        detail=lambda b: [('Model', '$Current.model'), ('Grade', '$Current.note'),
+                          (b['figure'][0], '$' + b['figure'][1].split('$')[-1]),
+                          ('Showroom', '$Current.branch'), ('Name', '$Current.full_name'),
+                          ('Mobile', '$Current.gsm')],
+        cta='See the build again', cta_href=lambda b: RANGE_URL,
+        closing='Want a different grade? Reply to this message and the team will change it.',
+        push_title='Your {%= $Current.model %} is held',
+        push_body='The build and the showroom are booked. The team will call about the paperwork.',
+        push_url=RANGE_URL,
+    ),
+    dict(
         key='showroom_visit', slug='showroom-visit', label='Walk in logged at the showroom',
         trigger='when reception logs the visitor on the dealer cockpit',
         env=('EMAIL_WALKIN', 'PUSH_WALKIN'),
@@ -574,7 +594,7 @@ BRANDS = [
         # abandonment watcher and the survey card now run here too: they come
         # from js/creatives.js, which this demo gained on 1 September.
         moments=('booking', 'abandoned_booking', 'quote', 'brochure', 'newsletter',
-                 'survey', 'showroom_visit', 'test_drive_done', 'no_show'),
+                 'survey', 'reserve', 'showroom_visit', 'test_drive_done', 'no_show'),
     ),
 ]
 

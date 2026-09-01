@@ -16,6 +16,7 @@ import pathlib
 import re
 import shutil
 import sys
+from html import escape
 import time
 
 from bs4 import BeautifulSoup, NavigableString
@@ -48,6 +49,9 @@ PAGES = {
     "finance-calculator/index.html":  {"src": "finance-calculator.en", "type": "other",    "title": "Finance Calculator"},
     "find-a-showroom/index.html":     {"src": "showroom.en",          "type": "other",     "title": "Find a Showroom"},
     "shop-at-home/index.html":        {"src": "shop-at-home.en",      "type": "other",     "title": "Shop@Home"},
+    # Build and reserve. Their site's second and third most used actions after
+    # the brochure, and the two this demo could not answer until now.
+    "configure/index.html":           {"src": "shop-at-home.en",      "type": "other",     "authored": "configure", "title": "Build and reserve"},
 }
 
 # Exact internal routes: the source site's href -> this demo's path.
@@ -598,11 +602,147 @@ MAGNITE_MAIN = """
 """
 
 
-def author_magnite(soup, rel):
-    """The source MAGNITE page renders entirely in the browser, so a capture
-    holds nothing to repair. This page is authored instead: the home page
-    lends its header, footer and styles, and the content carries only what
-    the source site itself publishes, its imagery, its price, its tagline."""
+# ---------------------------------------------------------------------------
+# Build and reserve.
+#
+# BUILD YOUR <MODEL> and RESERVE ONLINE are the two most used actions on the
+# source site after the brochure, and this demo answered neither: both landed
+# on the model grid. They matter beyond tidiness. Configuring a car is the
+# richest pre purchase signal an automotive site produces, because it says
+# which trim and therefore which price a visitor talked themselves into, and
+# reserving is the only place the ecommerce abandonment mechanic applies to a
+# car rather than to a form.
+#
+# Every trim below is Nissan's own, read out of the captured pages by
+# tools/extract-grades.py: the grade name, the version, the retail price, the
+# engine, the fuel and the feature list they publish. A grade the source
+# prices at nothing is rendered without a price rather than with a zero.
+
+CONFIG_MODELS = [
+    ("x-trail", "X-TRAIL"), ("pathfinder", "PATHFINDER"), ("altima", "ALTIMA"),
+    ("x-terra", "X-TERRA"), ("z", "Z"),
+]
+
+
+def money(value):
+    return "SAR " + format(int(value), ",d")
+
+
+def trim_card(model, index, trim, rel):
+    price = trim.get("price")
+    img = trim.get("local")
+    # Nissan publishes power as "181 @ 6,000", which is horsepower at rpm, and
+    # as a bare "188" on the models that quote no rpm. Appending hp to the
+    # first form produces "181 @ 6,000 hp", which is not what it says. The
+    # figure is printed as published, and only a bare number earns the unit.
+    power = trim.get("power")
+    if power and "@" not in power:
+        power = power + " hp"
+    figures = [escape(f) for f in (power, trim.get("fuel") and trim["fuel"].title()) if f]
+    specs = "".join(f"<li>{escape(s)}</li>" for s in trim.get("specs", [])[:5])
+    return f'''      <button type="button" class="cfg-trim" data-cfg-trim
+              data-trim-model="{model}" data-trim-name="{escape(trim["name"])}"
+              data-trim-index="{index}"{f' data-trim-price="{price}"' if price else ""}>
+        {f'<img class="cfg-shot" src="{rel}{img}" alt="{escape(trim["name"])}" loading="lazy" width="900" height="506">' if img else '<span class="cfg-shot cfg-noshot">Photograph not published for this grade</span>'}
+        <span class="cfg-name">{escape(trim["name"])}</span>
+        {f'<span class="cfg-version">{escape(trim["version"])}</span>' if trim.get("version") else ""}
+        <span class="cfg-price">{money(price) if price else "Price on request"}</span>
+        {f'<span class="cfg-figures">{" &middot; ".join(figures)}</span>' if figures else ""}
+        <ul class="cfg-specs">{specs}</ul>
+        <span class="cfg-pick" aria-hidden="true">Choose this grade</span>
+      </button>'''
+
+
+def configurator_main(rel):
+    grades = json.loads((ROOT / "reference" / "grades.json").read_text(encoding="utf-8"))
+    panes = []
+    chips = []
+    for model, label in CONFIG_MODELS:
+        trims = grades.get(model) or []
+        if not trims:
+            continue
+        chips.append(f'<button type="button" class="cfg-chip" data-cfg-model="{model}">{label}</button>')
+        cards = "\n".join(trim_card(model, i, t, rel) for i, t in enumerate(trims))
+        panes.append(f'''    <div class="cfg-pane" data-cfg-pane="{model}" hidden>
+      <div class="cfg-grid">
+{cards}
+      </div>
+    </div>''')
+    return '''<main id="container" class="cfg-page" data-dps-owned>
+  <section class="cfg-head">
+    <p class="cfg-eyebrow">Build and reserve</p>
+    <h1 class="cfg-title">Choose your Nissan, then hold it</h1>
+    <p class="cfg-lede">Every grade, price, engine and feature on this page is the
+      one Nissan Saudi Arabia publishes. Pick a model, pick a grade, and the
+      build is yours to reserve without leaving the page.</p>
+  </section>
+
+  <section class="cfg-step" aria-labelledby="cfg-s1">
+    <h2 id="cfg-s1" class="cfg-steph"><span>1</span> Your model</h2>
+    <div class="cfg-chips">
+{chips_html}
+    </div>
+  </section>
+
+  <section class="cfg-step" aria-labelledby="cfg-s2">
+    <h2 id="cfg-s2" class="cfg-steph"><span>2</span> Your grade</h2>
+{panes_html}
+    <p class="cfg-empty" data-cfg-empty>Choose a model above and its grades appear here.</p>
+  </section>
+
+  <section class="cfg-step cfg-summary" data-cfg-summary hidden aria-labelledby="cfg-s3">
+    <h2 id="cfg-s3" class="cfg-steph"><span>3</span> Your build</h2>
+    <div class="cfg-built">
+      <p class="cfg-built-model" data-cfg-built-model></p>
+      <p class="cfg-built-price" data-cfg-built-price></p>
+    </div>
+    <div class="cfg-actions">
+      <button type="button" class="cfg-go" data-cfg-reserve>Reserve this build</button>
+      <a class="cfg-alt" href="{rel}book-a-test-drive/index.html" data-cfg-drive>Drive it first</a>
+    </div>
+
+    <form class="cfg-form" data-cfg-form hidden novalidate>
+      <p class="cfg-formlede">A reservation holds the build at your showroom. No
+        payment is taken here.</p>
+      <div class="cfg-fields">
+        <label>Name<input type="text" name="FirstName" autocomplete="given-name" required></label>
+        <label>Surname<input type="text" name="LastName" autocomplete="family-name" required></label>
+        <label>Mobile<input type="tel" name="Phone" autocomplete="tel" required></label>
+        <label>Email<input type="email" name="Email" autocomplete="email" required></label>
+        <label>City
+          <select name="City" required>
+            <option value="">Choose</option>
+            <option>Riyadh</option><option>Jeddah</option><option>Dammam</option>
+            <option>Khobar</option><option>Makkah</option><option>Madinah</option>
+          </select>
+        </label>
+        <label>Showroom
+          <select name="Branch" required>
+            <option value="">Choose</option>
+            <option>Olaya Showroom</option><option>Exit 5 Showroom</option>
+            <option>Madinah Road Showroom</option><option>Corniche Showroom</option>
+            <option>King Fahd Road Showroom</option><option>Khobar Showroom</option>
+            <option>Makkah Showroom</option><option>Madinah Showroom</option>
+          </select>
+        </label>
+      </div>
+      <label class="cfg-consent"><input type="checkbox" name="allOptIn" value="yes">
+        Keep me posted about this build and Nissan offers.</label>
+      <button type="submit" class="cfg-go">Confirm the reservation</button>
+    </form>
+  </section>
+</main>
+'''.replace("{chips_html}", "\n".join("      " + c for c in chips)) \
+   .replace("{panes_html}", "\n".join(panes)) \
+   .replace("{rel}", rel)
+
+
+def author_page(soup, rel, main_html):
+    """Keep a captured page's header, footer and styles; replace the middle.
+
+    Used where the source renders its content in the browser, so a capture
+    holds nothing to repair, and for the pages this demo authors outright. The
+    authored middle carries only what the source site itself publishes."""
     header = soup.select_one("header")
     footer = soup.select_one("footer")
     body = soup.body
@@ -628,11 +768,15 @@ def author_magnite(soup, rel):
     for el in soup.select(".c_007_v2, .vehiclelisting, .heliostext, .c_001, .c_005, .c_012, .c_030, .c_304, .c_238_v2"):
         if el.find_parent("header") is None and el.find_parent("footer") is None:
             el.extract()
-    main = BeautifulSoup(MAGNITE_MAIN.format(rel=rel), "html.parser")
+    main = BeautifulSoup(main_html, "html.parser")
     if header:
         header.insert_after(main)
     else:
         body.insert(0, main)
+
+
+def author_magnite(soup, rel):
+    author_page(soup, rel, MAGNITE_MAIN.format(rel=rel))
 
 
 BRANCHES = [
@@ -773,7 +917,7 @@ def mounts_block(rel):
     scripts = "\n".join(
         f'<script src="{rel}js/{f}.js?v={STAMP}"></script>'
         for f in ["config", "copy", "vehicles", "dengageEvents", "site",
-                  "creatives", "panels", "slots", "inbox", "debug"])
+                  "creatives", "configure", "panels", "slots", "inbox", "debug"])
     return f"""
 <!-- ==================== Dengage demo layer ==================== -->
 <div class="scrim" id="scrim"></div>
@@ -877,6 +1021,8 @@ def build(out_path: str, spec: dict):
         replace_showroom(soup, rel)
     if spec.get("authored") == "magnite":
         author_magnite(soup, rel)
+    if spec.get("authored") == "configure":
+        author_page(soup, rel, configurator_main(rel))
     host = spec.get("host", "en.nissan-saudiarabia.com")
     swapped = swap_logo(soup, rel)
     css_links = collect_css(soup, rel, host)

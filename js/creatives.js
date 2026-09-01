@@ -128,11 +128,13 @@
     function booked() { return !!readJson('sessionStorage', 'dps:nissanksa:booked', false); }
     function financeSignal() { return !!readJson('sessionStorage', 'dps:nissanksa:finance', false); }
     function bookingStarted() { return !!readJson('sessionStorage', 'dps:nissanksa:started', false); }
+    function signalled(name) { return !!readJson('sessionStorage', 'dps:nissanksa:' + name, false); }
 
     function page() {
         var path = window.location.pathname;
         if (/book-a-test-drive/.test(path)) return 'booking';
         if (/request-a-quote/.test(path)) return 'quote';
+        if (/\/configure\//.test(path)) return 'configure';
         if (/shop-at-home/.test(path)) return 'reserve';
         if (/finance-calculator/.test(path)) return 'finance';
         if (/\/offers\//.test(path) || /\/offers\/?$/.test(path)) return 'offers';
@@ -461,6 +463,16 @@
             slug: 'test-drive-rescue', on: 'exit',
             fits: function () {
                 return (page() === 'booking' || page() === 'reserve') && bookingStarted() && !booked();
+            }
+        },
+        {
+            /* Someone who chose a grade and is leaving without holding it has
+               told the site more than any other visitor: which car, which
+               trim, and therefore what they were willing to pay. It is the
+               one exit worth interrupting. */
+            slug: 'test-drive-rescue', on: 'exit',
+            fits: function () {
+                return page() === 'configure' && signalled('configured') && !signalled('reserved');
             }
         },
         {

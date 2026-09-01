@@ -27,7 +27,13 @@ always used. Create the event definition so those rows are stored:
 - `event_type` values the pages send: `walk_in`, `test_drive_booked`,
   `test_drive_done`, `no_show`, `quote_issued`, `call_outcome`,
   `whatsapp_intent`, `vehicle_sold`, `brochure`, `finance_intent`,
-  `register_interest`
+  `register_interest`, `survey_response`, `configure`, `reserve`
+
+`configure` and `reserve` arrived with the build and reserve page on
+1 September. `configure` carries the grade a visitor chose in `note`, which is
+the most valuable thing an automotive site ever learns about someone: it names
+the price they talked themselves into. `reserve` carries the same grade plus
+the showroom they picked.
 
 **Verify against a stored row, not a green send**: open any demo page with
 `?debug=1`, press a cockpit button, then read the table in Data Space. An

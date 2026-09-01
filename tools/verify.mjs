@@ -85,8 +85,12 @@ async function open(path) {
   page.on('pageerror', (e) => page.errors.push(String(e).split('\n')[0]));
   await page.addInitScript(() => {
     window.__events = [];
+    window.__payloads = [];
     const slug = 'nissanksa';
-    window.addEventListener('dps:' + slug + ':event', (e) => window.__events.push(e.detail.action));
+    window.addEventListener('dps:' + slug + ':event', (e) => {
+      window.__events.push(e.detail.action);
+      window.__payloads.push(e.detail.payload || {});
+    });
   });
   await page.goto(BASE + path, { waitUntil: 'load', timeout: 60000 });
   await page.waitForTimeout(700);
@@ -184,6 +188,95 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   if (restored !== 'local') fail(`?onsite=local left the source as ${restored}`);
   else ok('?onsite=local restores the demo to drawing its own experiences');
   await back.close();
+}
+
+// 2b. Build and reserve. Every figure on the configurator is one Nissan
+// publishes, so the check reads the page against reference/grades.json rather
+// than against a number typed here, and the funnel is walked the way a visitor
+// walks it. The variant id is asserted per grade because SV and SV+ collapsed
+// onto one id the first time, which is invisible on screen and wrong in the
+// panel. The reserve button is asserted not to navigate: the storefront's own
+// safety net wired it to the link beside it, so it did something plausible and
+// wrong until the page was marked as wiring its own controls.
+{
+  const grades = JSON.parse(readFileSync(join(ROOT, 'reference/grades.json'), 'utf8'));
+  const page = await open('configure/index.html?model=x-trail');
+  const shown = await page.evaluate(() => [...document.querySelectorAll('[data-cfg-pane="x-trail"] [data-cfg-trim]')]
+    .map((t) => ({
+      name: t.querySelector('.cfg-name').textContent.trim(),
+      price: t.getAttribute('data-trim-price'),
+    })));
+  const want = grades['x-trail'];
+  if (shown.length !== want.length) {
+    fail(`configurator shows ${shown.length} X-TRAIL grades, the capture holds ${want.length}`);
+  } else {
+    const wrong = shown.filter((s, i) => s.name !== want[i].name ||
+      (want[i].price ? Number(s.price) !== want[i].price : s.price !== null));
+    if (wrong.length) fail(`configurator grade mismatch: ${JSON.stringify(wrong)}`);
+    else ok(`all ${shown.length} X-TRAIL grades match the published trim data`);
+  }
+  const unpriced = shown.filter((s) => s.price === null);
+  if (unpriced.length && !(await page.evaluate(() =>
+      [...document.querySelectorAll('[data-cfg-pane="x-trail"] .cfg-price')]
+        .some((e) => /price on request/i.test(e.textContent))))) {
+    fail('a grade with no published price is not saying so');
+  } else ok('a grade Nissan prices at nothing shows no price rather than a zero');
+
+  const walk = await page.evaluate(async () => {
+    const before = location.href;
+    const cards = [...document.querySelectorAll('[data-cfg-pane="x-trail"] [data-cfg-trim]')];
+    const sv = cards.find((c) => c.getAttribute('data-trim-name') === 'SV 4WD 7 Seats');
+    const svPlus = cards.find((c) => c.getAttribute('data-trim-name') === 'SV+ 4WD 7 Seats');
+    const ids = [];
+    for (const card of [sv, svPlus]) {
+      card.click();
+      await new Promise((r) => setTimeout(r, 60));
+      const last = window.__events.at(-2);
+      ids.push(document.body.getAttribute('data-last-variant') || '');
+    }
+    document.querySelector('[data-cfg-reserve]').click();
+    await new Promise((r) => setTimeout(r, 120));
+    return {
+      stayed: location.href === before,
+      formOpen: !document.querySelector('[data-cfg-form]').hidden,
+      configured: sessionStorage.getItem('dps:nissanksa:configured'),
+    };
+  });
+  if (!walk.stayed) fail('Reserve this build navigated away instead of opening the form');
+  else if (!walk.formOpen) fail('Reserve this build did not open the reservation form');
+  else ok('Reserve this build opens the form and stays on the page');
+  if (walk.configured !== 'true') fail('choosing a grade raised no configured signal for the rescue rule');
+  else ok('choosing a grade raises the signal the abandoned build rescue reads');
+
+  const evs = await events(page);
+  for (const want2 of ['ec:addToCart', 'ec:beginCheckout']) {
+    if (!evs.includes(want2)) fail(`configurator did not fire ${want2}`);
+  }
+  if (evs.includes('ec:addToCart') && evs.includes('ec:beginCheckout')) {
+    ok('configuring fires addToCart at the grade price, and the form fires beginCheckout');
+  }
+  if (page.errors.length) fail(`configurator JS errors: ${page.errors.join(' | ')}`);
+  await page.close();
+}
+
+// 2c. SV and SV+ are different cars at different prices and must not share a
+// variant id. Read off the sent payloads rather than off the page.
+{
+  const page = await open('configure/index.html?model=x-trail');
+  const ids = await page.evaluate(async () => {
+    const out = [];
+    for (const name of ['SV 4WD 7 Seats', 'SV+ 4WD 7 Seats']) {
+      const card = document.querySelector(`[data-trim-name="${name}"]`);
+      const before = window.__payloads ? window.__payloads.length : 0;
+      card.click();
+      await new Promise((r) => setTimeout(r, 80));
+      out.push((window.__payloads || []).slice(before).map((p) => p.product_variant_id).filter(Boolean)[0]);
+    }
+    return out;
+  });
+  if (ids[0] && ids[1] && ids[0] !== ids[1]) ok(`SV and SV+ keep separate variant ids (${ids.join(', ')})`);
+  else fail(`SV and SV+ share a variant id: ${JSON.stringify(ids)}`);
+  await page.close();
 }
 
 // 3. The booking funnel end to end: model pick, details, submit.
