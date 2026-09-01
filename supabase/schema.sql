@@ -100,6 +100,11 @@ create table if not exists public.ni_inbox (
   media_url    text,
   target_url   text,
   channels     text,
+  /* What Dengage answered for each channel of this moment. channels says a
+     push was accepted; it cannot say whether the contact was addressed or the
+     token fallback ran, and when a notification does not appear that is the
+     first thing worth knowing. Server side only: the drawer never reads it. */
+  detail       text,
   sent_at      timestamptz not null default now()
 );
 comment on table public.ni_inbox is

@@ -565,13 +565,48 @@ Those messages sit in the same list beside the instant ones, and only they are
 reported back to Dengage: an impression, an open or a delete is never sent
 against a message Dengage did not issue.
 
-### Two things that decide whether a push lands
+### What decides whether a push lands, and how to check
 
 The push carries no inline text: every word comes from the saved content, so
 personalization is only ever through the parameters above. And Dengage holds
 the device token against whichever contact key claimed it last, so a push
 addressed to an older key answers `no device subscribed for this contact`.
 The live flow always addresses the key that just acted, which is why it lands.
+
+**HTTP 200 is not a success, and reading it as one hid a real failure.**
+Recorded from live sends on 1 September 2026: every transactional endpoint
+answers 200 for a refusal as well as for a send, and puts the outcome in the
+body, `{transactionId, code, message, data}`, where `code` 0 is Successful.
+Code 11 is `Token not found with given ContactKey`, the normal state for a
+device that has not claimed this contact yet, and the one refusal with a second
+path worth trying: the demo then addresses the token the page is holding. The
+send function now reads that code rather than the status, so a refusal is never
+reported as a send.
+
+**A token send is accepted blind.** Dengage answers code 0 for a device token
+it has never seen, so `sent to this device` means Dengage took the request, not
+that a browser drew a notification. The storefront therefore refreshes the
+token it holds every thirty seconds rather than caching the first one it saw
+and never asking again: a token that has since been replaced would otherwise
+produce a message reported as sent that reached nobody.
+
+**Where to look when a notification does not appear.** Every moment now records
+what Dengage answered, per channel, in `ni_inbox.detail`. One statement gives
+the whole run:
+
+```sql
+select sent_at, moment, channels, detail
+  from ni_inbox
+ where sent_at > now() - interval '1 hour'
+ order by sent_at desc;
+```
+
+`channels` says which channels carried the moment. `detail` carries Dengage's
+own reply, so a push that was refused, a push that went to the contact and a
+push that went to the token are told apart at a glance. Until now only a
+booking kept this, on `ni_web_lead`, which is why a rescue push that did not
+arrive left nothing to read. The `?debug=1` readout shows the same outcome on
+the page as it happens.
 
 ## 13. Two things to know about the push image, and about pushing to a persona
 

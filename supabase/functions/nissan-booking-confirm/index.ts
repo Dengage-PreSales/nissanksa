@@ -188,6 +188,34 @@ async function dengagePost(path: string, body: unknown, token?: string) {
   return { ok: res.ok, status: res.status, text: await res.text() };
 }
 
+/* WHAT DENGAGE CALLS A SUCCESS, and why the HTTP status is not it.
+   Every transactional endpoint answers HTTP 200 for a refusal as well as for a
+   send, and puts the real outcome in the body: {transactionId, code, message,
+   data}, where code 0 is Successful and anything else is not. Reading only
+   res.ok therefore reported a push as sent whenever Dengage accepted the
+   request and then declined to deliver it, which is the one failure a demo
+   cannot see from the room. Recorded on 1 September 2026 from a live send:
+   code 11 is "Token not found with given ContactKey", the normal state for a
+   device that has not claimed this contact yet, and the one refusal with a
+   second path worth trying.
+   A body that is not JSON is read as accepted, because the endpoint has always
+   answered with this envelope and the raw text is kept in the record either
+   way; inventing a failure from an unfamiliar shape would be worse. */
+type Answer = { sent: boolean; code: number; message: string };
+function outcome(res: { ok: boolean; status: number; text: string }): Answer {
+  if (!res.ok) return { sent: false, code: -1, message: `HTTP ${res.status}` };
+  try {
+    const body = JSON.parse(res.text) as { code?: number; message?: string };
+    const code = typeof body.code === 'number' ? body.code : 0;
+    return { sent: code === 0, code, message: body.message ?? '' };
+  } catch {
+    return { sent: true, code: 0, message: '' };
+  }
+}
+function refused(a: Answer): string {
+  return a.code === -1 ? `error ${a.message}` : `refused by Dengage: ${a.message || 'code ' + a.code}`;
+}
+
 async function dengageToken(): Promise<string> {
   if (tokenCache && tokenCache.expiresAt > Date.now() + 60000) return tokenCache.value;
   const userkey = Deno.env.get('DENGAGE_API_USERKEY') ?? '';
@@ -326,7 +354,7 @@ function fill(template: string, params: Record<string, string>): string {
 
 async function recordMessage(
   brandKey: string, momentKey: string, lead: { contact_key?: string; device_token?: string },
-  params: Record<string, string>, channels: string[],
+  params: Record<string, string>, channels: string[], detail?: string,
 ): Promise<string> {
   if (!SB_URL || !SB_KEY) return 'not configured';
   try {
@@ -349,6 +377,13 @@ async function recordMessage(
         media_url: params.model_image ?? null,
         target_url: params.model_url ?? null,
         channels: channels.length ? channels.join(', ') : 'inbox only',
+        /* What Dengage actually answered, for every moment rather than only
+           for a booking. channels says a push was accepted; it cannot say
+           whether the contact was addressed or the token fallback ran, and
+           when a notification does not appear that is the first thing worth
+           knowing. Never returned to the browser: the drawer read does not
+           select it. */
+        detail: detail ? detail.slice(0, 1500) : null,
       }),
     });
     return wrote.ok ? 'delivered' : `error HTTP ${wrote.status}`;
@@ -522,7 +557,8 @@ Deno.serve(async (req: Request) => {
         reporting: { trackOpen: true, trackClick: true },
         tags: ['demo', brandKey, momentKey],
       }, token);
-      out.email = res.ok ? 'sent' : `error HTTP ${res.status}`;
+      const mail = outcome(res);
+      out.email = mail.sent ? 'sent' : refused(mail);
       notes.push('email: ' + res.text.slice(0, 300));
     } else if (!lead.email) {
       out.email = 'no address on this contact';
@@ -559,9 +595,11 @@ Deno.serve(async (req: Request) => {
           inboxParams,
           tags: ['demo', brandKey, momentKey],
         }, token);
-        out.push = anon.ok ? 'sent to this device, still anonymous' : `error HTTP ${anon.status}`;
+        const anonymous = outcome(anon);
+        out.push = anonymous.sent ? 'sent to this device, still anonymous' : refused(anonymous);
         notes.push('push to anonymous device: ' + anon.text.slice(0, 300));
-        out.inbox = await recordMessage(brandKey, momentKey, lead, params, anon.ok ? ['push'] : []);
+        out.inbox = await recordMessage(brandKey, momentKey, lead, params,
+                                        anonymous.sent ? ['push'] : [], notes.join(' | '));
         return reply({ brand: brandKey, moment: momentKey, email: out.email, push: out.push,
                        inbox: out.inbox, personalized: Object.keys(params).sort() }, 200, origin);
       }
@@ -576,14 +614,15 @@ Deno.serve(async (req: Request) => {
         inboxParams,
         tags: ['demo', brandKey, momentKey],
       }, token);
-      out.push = res.ok ? 'sent' : `error HTTP ${res.status}`;
+      const byContact = outcome(res);
+      out.push = byContact.sent ? 'sent' : refused(byContact);
       notes.push('push: ' + res.text.slice(0, 300));
       /* Dengage keeps a device token against whichever contact key claimed it
          last, so a key the device has not claimed yet reaches nothing. When
          the page told us which token it holds, the same message goes to that
          device directly, which is what a demo needs: the contact is still the
          right way to address a person, and this is the safety net. */
-      if (/Token not found/i.test(res.text)) {
+      if (byContact.code === 11 || /Token not found/i.test(res.text)) {
         /* The device is subscribed; Dengage simply has no device recorded
            against this contact key yet, which is the normal state for anyone
            who allowed notifications before they filled in a form. The token
@@ -600,8 +639,9 @@ Deno.serve(async (req: Request) => {
             inboxParams,
             tags: ['demo', brandKey, momentKey],
           }, token);
-          out.push = direct.ok ? 'sent to this device by token, the contact has none bound'
-                               : `error HTTP ${direct.status}`;
+          const byToken = outcome(direct);
+          out.push = byToken.sent ? 'sent to this device by token, the contact has none bound'
+                                  : refused(byToken);
           notes.push('push by token: ' + direct.text.slice(0, 300));
         }
       }
@@ -620,7 +660,9 @@ Deno.serve(async (req: Request) => {
   const carried: string[] = [];
   if (out.email === 'sent') carried.push('email');
   if (out.push.indexOf('sent') === 0) carried.push('push');
-  out.inbox = await recordMessage(brandKey, momentKey, lead, params, carried);
+  out.inbox = await recordMessage(brandKey, momentKey, lead, params, carried,
+                                  ['email: ' + out.email, 'push: ' + out.push]
+                                    .concat(notes).join(' | '));
 
   // The record, so the outcome outlives the page that asked for it. Only a
   // booking has a row of its own to carry it.

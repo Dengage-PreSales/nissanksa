@@ -14,7 +14,7 @@ seed is deterministic (`setseed`) so the segment sizes quoted in
 | `ni_existing_customer` | 261 | the sample standing in for the 500K customer base, for the upgrade audience |
 | `ni_dealer_stock` | 72 | per-branch availability; X-TRAIL is in stock at 6 of 8 branches by design |
 | `ni_inbox_template` | 20 | the copy the storefront message centre sends, ten moments per brand |
-| `ni_inbox` | grows | the messages it has delivered, one row per moment raised |
+| `ni_inbox` | grows | the messages it has delivered, one row per moment raised, with `detail` carrying what Dengage answered per channel |
 
 `schema.sql` is the DDL as applied (RLS enabled, no policies: the tables are
 read through the Dengage remote-source connection and the service role,

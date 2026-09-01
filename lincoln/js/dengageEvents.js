@@ -682,17 +682,29 @@
     }
     function deviceToken() { return cachedToken; }
 
-    /* Ask now, then keep asking for a couple of minutes. Permission is usually
-       granted well after the page loaded, and the token does not exist before
-       it is granted, so one attempt at boot would answer nothing on exactly
-       the visits that matter. It stops as soon as there is a token. */
+    /* Ask often until there is a token, then keep asking slowly, and never
+       stop. Two different things are being covered.
+
+       Before permission: the token does not exist until the visitor grants it,
+       which is usually well after the page loaded, so one attempt at boot
+       answers nothing on exactly the visits that matter. Every three seconds
+       until it appears.
+
+       After permission: a subscription can be replaced while the page is still
+       open, and this used to cache the first token it saw and stop asking
+       forever. A send addressed to a token that has since been replaced is
+       still answered HTTP 200 by Dengage, so a stale one produced a message
+       reported as sent that reached nobody, with nothing on screen to say so.
+       Every thirty seconds keeps what is cached the same as what the browser
+       holds, and costs one local call. */
     function watchToken() {
         rememberToken();
-        var tries = 0;
         var timer = window.setInterval(function () {
-            tries += 1;
-            if (cachedToken || tries > 40) { window.clearInterval(timer); return; }
             rememberToken();
+            if (cachedToken) {
+                window.clearInterval(timer);
+                window.setInterval(rememberToken, 30000);
+            }
         }, 3000);
     }
     watchToken();

@@ -318,6 +318,25 @@ html.dps-locked { overflow: hidden; }
 }
 #site-menu a.dps-menu-link:hover { background: var(--hy-tint); color: var(--hy-blue); }
 
+/* ---- jump to the cockpit ------------------------------------------------ */
+
+/* The cockpit stands in for the dealer's own systems, so it is reached from
+   the presenter's panel rather than from the storefront's navigation: a link
+   to it in the site's own menu would read as part of the shop. It sits above
+   the quick reference because on a call it is opened far more often. */
+.dps-jump {
+  display: block;
+  margin: 0 0 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--hy-line);
+  border-radius: var(--dps-radius);
+  font-family: var(--dps-font-medium);
+  font-size: 13px;
+  color: var(--hy-navy);
+  text-decoration: none;
+}
+.dps-jump:hover, .dps-jump:focus-visible { border-color: var(--hy-navy); }
+
 /* ---- quick reference ---------------------------------------------------- */
 
 .ref-details { margin: 0 0 12px; border: 1px solid var(--hy-line); border-radius: var(--dps-radius); }

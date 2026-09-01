@@ -121,6 +121,7 @@ SCAFFOLD = """
   </div>
   <div class="dps-modal-body">
     <p class="dps-note">Fire any experience on this page, live. Everything lands in the Dengage panel as it happens.</p>
+    <a class="dps-jump" href="{rel}dealer/index.html">Dealer cockpit, the showroom side of the same profile</a>
     <details class="ref-details">
       <summary>Quick reference</summary>
       <div id="ref-grid"></div>
@@ -441,7 +442,7 @@ def build(capture_dir):
         head = HEAD_INJECT.format(rel=rel, stamp=STAMP)
         text = re.sub(r'(<head[^>]*>)', lambda m: m.group(1) + head, text, count=1)
 
-        mounts = SCAFFOLD + MOUNTS.format(rel=rel, stamp=STAMP)
+        mounts = SCAFFOLD.replace('{rel}', rel) + MOUNTS.format(rel=rel, stamp=STAMP)
         if '</footer>' in text:
             text = text.replace('</footer>', FOOT_NOTE + '</footer>', 1)
         else:
