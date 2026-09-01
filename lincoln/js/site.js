@@ -202,10 +202,7 @@
         /* The token this device holds, sent so a push can still reach it if the
            contact key has not been bound to a subscription yet. The server
            addresses the contact first and only falls back to this. */
-        var token = null;
-        try {
-            window.dengage('getToken', function (value) { if (value) token = String(value); });
-        } catch (err) { /* the SDK is not there */ }
+        var token = window.DengageEvents.deviceToken();
         var body = {
             moment: moment || 'booking',
             contact_key: (window.DemoIdentity || {}).contactKey,

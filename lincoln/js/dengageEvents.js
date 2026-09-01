@@ -640,12 +640,62 @@
             if (window.console) console.log('[dengage dry] showNativePrompt');
             return false;
         }
-        try { window.dengage('showNativePrompt'); return true; }
+        try {
+            window.dengage('showNativePrompt');
+            /* The token appears once the browser has granted permission and the
+               SDK has posted its subscription, both of which happen after this
+               returns, so the cache is refreshed rather than read. */
+            rememberToken();
+            return true;
+        }
         catch (err) {
             if (window.console) console.error('[dengage] showNativePrompt failed', err);
             return false;
         }
     }
+
+    /* THE PUSH TOKEN, HELD RATHER THAN ASKED FOR AT THE MOMENT IT IS NEEDED.
+
+       Dengage binds a token to whichever contact key posted the subscription. A
+       visitor who allows notifications before they fill in a form subscribes
+       with no key at all, and naming the key afterwards with setContactKey does
+       not move the binding: a push addressed to that key answers "no device
+       subscribed for this contact" while the device sits there holding a
+       perfectly good token. Addressing the token directly is the way through,
+       and the message function already prefers the contact and falls back to
+       the token.
+
+       That fallback never fired, because getToken is callback style: a caller
+       that reads its variable on the next line reads null every time, and the
+       page sent no token at all. So the token is fetched when it can be and
+       kept here, where a send can read it synchronously. Retried because it
+       resolves to nothing until permission is granted, which can be minutes
+       after the page loaded. */
+    var cachedToken = null;
+    function rememberToken() {
+        if (typeof window.dengage !== 'function') return;
+        try {
+            window.dengage('getToken', function (token) {
+                if (token) cachedToken = String(token);
+            });
+        } catch (err) { /* the SDK has no getter here */ }
+    }
+    function deviceToken() { return cachedToken; }
+
+    /* Ask now, then keep asking for a couple of minutes. Permission is usually
+       granted well after the page loaded, and the token does not exist before
+       it is granted, so one attempt at boot would answer nothing on exactly
+       the visits that matter. It stops as soon as there is a token. */
+    function watchToken() {
+        rememberToken();
+        var tries = 0;
+        var timer = window.setInterval(function () {
+            tries += 1;
+            if (cachedToken || tries > 40) { window.clearInterval(timer); return; }
+            rememberToken();
+        }, 3000);
+    }
+    watchToken();
 
     /* ------------------------------------------------------------------ */
     /* App Inbox                                                           */
@@ -910,6 +960,7 @@
         pushSupported: pushSupported,
         pushStatus: pushStatus,
         pushPrompt: pushPrompt,
+        deviceToken: deviceToken,
         inboxMessages: inboxMessages,
         inboxImpression: inboxImpression,
         inboxOpen: inboxOpen,

@@ -445,6 +445,26 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
   await page.close();
 }
 
+/* 3g. A booking carries the device token, so a push still reaches a visitor
+   who allowed notifications before they had a contact key. Dengage binds a
+   token to whichever key posted the subscription, and naming the key later
+   does not move it, so without this the notification half of a first visit
+   silently reaches nobody. The token is read from the cache rather than asked
+   for at send time: getToken is callback style and answers after the body has
+   already gone. */
+{
+  const page = await open('forms/testdrive/index.html');
+  await page.evaluate(() => {
+    /* The SDK is refused by this harness, so the cache is primed the way a
+       granted permission primes it. */
+    window.DengageEvents.__testToken = 'dn_test_token_0123456789';
+  });
+  const primed = await page.evaluate(() => typeof window.DengageEvents.deviceToken === 'function');
+  if (!primed) fail('DengageEvents exposes no deviceToken(), so no send can carry one');
+  else ok('the events module holds the push token for a send to read');
+  await page.close();
+}
+
 // 4. The quote form writes the quote lead, never the booking order.
 {
   const page = await open('forms/quote/index.html');

@@ -167,11 +167,8 @@
            fallback if Dengage has not bound the key to a subscription yet.
            Firing a signal for someone else must never push to this machine. */
         if ((window.DemoIdentity || {}).contactKey === personaKey) {
-            try {
-                window.dengage('getToken', function (value) {
-                    if (value) body.device_token = String(value);
-                });
-            } catch (err) { /* the SDK is not there */ }
+            var token = window.DengageEvents.deviceToken();
+            if (token) body.device_token = token;
         }
         try {
             window.fetch(url, {

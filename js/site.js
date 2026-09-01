@@ -247,10 +247,7 @@
     function confirmBooking(details, moment) {
         var url = (window.DEMO_CONFIG || {}).bookingConfirm;
         if (!url || typeof window.fetch !== 'function') return;
-        var token = null;
-        try {
-            window.dengage('getToken', function (value) { if (value) token = String(value); });
-        } catch (err) { /* the SDK is not there */ }
+        var token = window.DengageEvents.deviceToken();
         var body = {
             brand: 'nissan',
             moment: moment || 'booking',
