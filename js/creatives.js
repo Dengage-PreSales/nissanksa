@@ -447,6 +447,18 @@
         document.body.classList.toggle('dps-lc-bar-open', !!el.querySelector('.dps-lc-bar'));
         markSeen(slug);
         if (automatic) lastShownAt = Date.now();
+        /* An impression, recorded in Dengage. The panel records its own for a
+           served campaign, and until now these drew with nothing written at
+           all, so the on site half of the demo was the one half nobody could
+           report on. automatic separates a creative a visitor met by browsing
+           from one a presenter fired on demand, which is the difference
+           between a measurement and a demonstration. */
+        if (window.DengageEvents && window.DengageEvents.leadEvent) {
+            window.DengageEvents.leadEvent('creative_shown', {
+                model: currentModel(), note: slug,
+                source: automatic ? 'rule' : 'launcher'
+            });
+        }
         try {
             document.dispatchEvent(new CustomEvent('dps:nissanksa:creative',
                 { detail: { slug: slug, automatic: !!automatic } }));
@@ -599,6 +611,21 @@
                the visitor is leaving a half finished booking and the page
                already holds what they typed. Lincoln fires the same moment
                from its own rescue card. */
+            /* Anything a visitor presses on a creative that is not the close
+               control is an action on it. Recorded once, with which creative
+               it was, so the panel can tell a card that was seen from one that
+               worked. Closing is not an action: a dismissal is the absence of
+               one, and the impression row already carries that. */
+            var acted = el.closest && el.closest('.dps-lc-cta, [data-lc-rescue], [data-lc-form] button[type="submit"]');
+            var host0 = document.getElementById(HOST_ID);
+            if (acted && !(el.closest && el.closest('[data-lc-close]')) &&
+                window.DengageEvents && window.DengageEvents.leadEvent) {
+                window.DengageEvents.leadEvent('creative_action', {
+                    model: currentModel(),
+                    note: host0 ? host0.getAttribute('data-lc-slug') : undefined,
+                    source: 'website'
+                });
+            }
             var rescued = el.closest ? el.closest('[data-lc-rescue]') : null;
             if (rescued) {
                 if (window.Site && window.Site.abandonedBooking) window.Site.abandonedBooking();

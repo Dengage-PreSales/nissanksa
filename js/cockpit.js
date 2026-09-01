@@ -46,6 +46,7 @@
         { id: 'test_drive_booked', label: 'Test drive booked offline', detail: 'Booked at the desk or over the phone',              lead: { source: 'showroom', branch: 'home' }, order: true },
         { id: 'test_drive_done',   label: 'Test drive completed',    detail: 'The keys came back, the follow-up can start',         lead: { source: 'showroom' }, moment: 'test_drive_done' },
         { id: 'no_show',           label: 'Test drive no-show',      detail: 'Booked, never came; the re-invite journey reacts',    lead: { source: 'showroom' }, moment: 'no_show' },
+        { id: 'test_drive_cancelled', label: 'Test drive cancelled',   detail: 'The customer called it off, and the order is reversed', lead: { source: 'showroom' }, cancel: true },
         { id: 'call_outcome',      label: 'Call outcome: call later', detail: 'The call center logs the answer instead of closing', lead: { source: 'call-center', note: 'call later' } },
         { id: 'quote_issued',      label: 'Quote issued',            detail: 'A dealer quote enters the follow-up journey',         lead: { source: 'showroom', branch: 'home' } },
         { id: 'whatsapp_intent',   label: 'WhatsApp intent signal',  detail: 'Simulates the Value First chatbot calling Dengage',   lead: { source: 'value-first-whatsapp', note: 'asked about financing' } },
@@ -113,6 +114,21 @@
             var row = window.DengageEvents.leadEvent(spec.id, fields);
             /* An offline booking is still a booking: the same funnel event the
                website sends, so the shared journeys see it identically. */
+            /* A cancellation reverses a real order rather than inventing one,
+               so it names the last order this browser placed. With none to
+               reverse it says so instead of writing a row about nothing. */
+            if (spec.cancel) {
+                var last = window.DengageEvents.lastOrder && window.DengageEvents.lastOrder();
+                if (last && last.orderId) {
+                    window.DengageEvents.cancelOrder({
+                        orderId: last.orderId, itemCount: last.itemCount,
+                        totalAmount: last.totalAmount, paymentMethod: 'other'
+                    }, last.lines || []);
+                    log('Cancelled ' + last.orderId + '. The reversal is in order_events beside the booking.');
+                } else {
+                    log('Nothing to cancel: this browser has not booked yet. Book a drive first, here or on the site.');
+                }
+            }
             if (spec.order && car) {
                 window.DengageEvents.order({
                     orderId: 'DPS-' + window.DEMO_SLUG + '-offline-' + Date.now(),

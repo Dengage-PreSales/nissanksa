@@ -212,7 +212,27 @@
     /* payment_method uses the documented values only: credit_card, debit_card,
        mobile_payment, bank_transfer, prepaid_card, crypto, cod, online_payment,
        other. Anything else and the order reads oddly in the panel. */
+    /* The last order this browser placed, so a cancellation can name it. Kept
+       here rather than at each call site because every order has to be
+       remembered for the cancel to be honest, and there are three callers. */
+    function lastOrderKey() { return 'dps:' + slug() + ':lastOrder'; }
+    function rememberOrder(details, lines) {
+        try {
+            window.localStorage.setItem(lastOrderKey(), JSON.stringify({
+                orderId: details.orderId, itemCount: details.itemCount,
+                totalAmount: details.totalAmount, lines: lines || [], at: Date.now()
+            }));
+        } catch (err) { /* private mode */ }
+    }
+    function lastOrder() {
+        try {
+            var raw = window.localStorage.getItem(lastOrderKey());
+            return raw ? JSON.parse(raw) : null;
+        } catch (err) { return null; }
+    }
+
     function order(details, lines) {
+        rememberOrder(details, lines);
         return send('ec:order', {
             order_id: String(details.orderId),
             item_count: count(details.itemCount),
@@ -221,6 +241,22 @@
                 ? details.discountedTotal : details.totalAmount),
             payment_method: details.paymentMethod || 'credit_card',
             coupon_code: details.couponCode,
+            cartItems: cartItems(lines)
+        });
+    }
+
+    /* A booking that is called off. The SDK's own cancel call, so the row
+       lands in order_events beside the order it reverses rather than in a
+       custom table pretending to be one. It takes the order id it is
+       cancelling, which is why the demo keeps the last one it wrote. */
+    function cancelOrder(details, lines) {
+        return send('ec:cancelOrder', {
+            order_id: String(details.orderId),
+            item_count: count(details.itemCount),
+            total_amount: money(details.totalAmount),
+            discounted_price: money(details.discountedTotal !== undefined
+                ? details.discountedTotal : details.totalAmount),
+            payment_method: details.paymentMethod || 'other',
             cartItems: cartItems(lines)
         });
     }
@@ -413,7 +449,15 @@
                        /* Compare says a browser became a shortlist. Chooser
                           carries the purchase horizon, asked of someone nobody
                           has named yet. */
-                       'compare', 'chooser'];
+                       'compare', 'chooser',
+                       /* A booking called off. The reversal itself goes to
+                          order_events through ec:cancelOrder; this row is the
+                          reason, which that table has no column for. */
+                       'test_drive_cancelled',
+                       /* The on site half, made reportable. The panel records
+                          impressions for a campaign it served; these two carry
+                          the same for the ones this demo draws itself. */
+                       'creative_shown', 'creative_action'];
 
     function leadEvent(stage, fields) {
         if (LEAD_STAGES.indexOf(stage) === -1) {
@@ -971,6 +1015,8 @@
         deleteCart: deleteCart,
         beginCheckout: beginCheckout,
         order: order,
+        cancelOrder: cancelOrder,
+        lastOrder: lastOrder,
         search: search,
         addToWishlist: addToWishlist,
         removeFromWishlist: removeFromWishlist,

@@ -270,7 +270,14 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
       const before = window.__payloads ? window.__payloads.length : 0;
       card.click();
       await new Promise((r) => setTimeout(r, 80));
-      out.push((window.__payloads || []).slice(before).map((p) => p.product_variant_id).filter(Boolean)[0]);
+      /* Read the addToCart, not whatever came first. Choosing a grade now
+         removes the previous line before adding the new one, so the first
+         payload in the window belongs to the grade being replaced. */
+      let found = null;
+      for (let i = before; i < window.__events.length; i += 1) {
+        if (window.__events[i] === 'ec:addToCart') { found = window.__payloads[i].product_variant_id; break; }
+      }
+      out.push(found);
     }
     return out;
   });
@@ -349,6 +356,77 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   } else ok('the chooser narrows on published prices and carries the purchase horizon');
   if (ch.errors.length) fail(`chooser JS errors: ${ch.errors.join(' | ')}`);
   await ch.close();
+}
+
+// 2e. Cart coverage. Dengage rebuilds a cart from its event stream, so a demo
+// that only ever adds shows a cart holding every car anyone looked at. All
+// four of the cart calls have to be reachable, and the two that were exposed
+// and never called are the ones this asserts.
+{
+  const page = await open('configure/index.html?model=x-trail');
+  const seq = await page.evaluate(async () => {
+    for (const name of ['S 2WD 7 Seats', 'SV 4WD 7 Seats', 'SV+ 4WD 7 Seats']) {
+      document.querySelector(`[data-trim-name="${name}"]`).click();
+      await new Promise((r) => setTimeout(r, 70));
+    }
+    return window.__events.filter((e) => /Cart/.test(e));
+  });
+  const adds = seq.filter((e) => e === 'ec:addToCart').length;
+  const removes = seq.filter((e) => e === 'ec:removeFromCart').length;
+  if (adds !== 3 || removes !== 2) {
+    fail(`three grades in a row produced ${adds} addToCart and ${removes} removeFromCart`);
+  } else ok('swapping grade replaces the cart line rather than stacking a second');
+  await page.close();
+
+  const sr = await open('my-showroom/index.html');
+  const dropped = await sr.evaluate(async () => {
+    localStorage.setItem('dps:nissanksa:build',
+      JSON.stringify({ model: 'altima', trim: 'SV', price: 127500, at: Date.now() }));
+    location.reload();
+  }).catch(() => null);
+  await sr.close();
+  const sr2 = await open('my-showroom/index.html');
+  const out = await sr2.evaluate(async () => {
+    const btn = document.querySelector('[data-sr-drop]');
+    if (!btn) return { control: false };
+    btn.click();
+    await new Promise((r) => setTimeout(r, 120));
+    return { control: true, events: window.__events, gone: !localStorage.getItem('dps:nissanksa:build') };
+  });
+  if (!out.control) fail('My Showroom offers no way to drop a build, so deleteCart never fires');
+  else if (!out.events.includes('ec:deleteCart')) fail('dropping a build did not fire deleteCart');
+  else if (!out.gone) fail('dropping a build fired deleteCart but kept the build');
+  else ok('dropping a build empties the cart through deleteCart');
+  await sr2.close();
+}
+
+// 2f. A booking called off reverses the order it names, in order_events,
+// rather than inventing a row in a custom table.
+{
+  const page = await open('dealer/index.html');
+  const out = await page.evaluate(async () => {
+    localStorage.setItem('dps:nissanksa:lastOrder', JSON.stringify({
+      orderId: 'DPS-nissanksa-td-verify', itemCount: 1, totalAmount: 104999,
+      lines: [{ id: 'x-trail', quantity: 1, price: 104999 }], at: Date.now(),
+    }));
+    document.querySelector('.ck-persona[data-key="DPS-1"]').click();
+    await new Promise((r) => setTimeout(r, 80));
+    const btn = document.querySelector('[data-id="test_drive_cancelled"]');
+    if (!btn) return { control: false };
+    btn.click();
+    await new Promise((r) => setTimeout(r, 200));
+    const at = window.__events.indexOf('ec:cancelOrder');
+    return {
+      control: true, events: window.__events,
+      orderId: at === -1 ? null : window.__payloads[at].order_id,
+    };
+  });
+  if (!out.control) fail('the cockpit has no way to cancel a booking');
+  else if (!out.events.includes('ec:cancelOrder')) fail('cancelling fired no cancelOrder');
+  else if (out.orderId !== 'DPS-nissanksa-td-verify') {
+    fail(`the cancellation named ${out.orderId} rather than the order it reverses`);
+  } else ok('a cancelled booking reverses the order it names, in order_events');
+  await page.close();
 }
 
 // 3. The booking funnel end to end: model pick, details, submit.

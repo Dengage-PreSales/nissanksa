@@ -563,6 +563,15 @@
         function pick(car) {
             if (!car || car.id === lastPickId) return;
             lastPickId = car.id;
+            /* Changing the model has to take the old one out of the cart.
+               Dengage rebuilds a cart from its event stream, so two addToCart
+               calls with nothing between them read as a visitor holding two
+               cars, and a demo whose cart table can only ever grow shows half
+               of what that table does. */
+            var previous = pending();
+            if (previous && previous.id !== car.id) {
+                window.DengageEvents.removeFromCart(previous, []);
+            }
             var line = { id: car.id, quantity: 1, price: car.price };
             setPending(line);
             window.DengageEvents.addToCart(line, cartLines());

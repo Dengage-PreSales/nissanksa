@@ -103,6 +103,8 @@
         if (form) form.hidden = true;
     }
 
+    var chosen = null;
+
     function chooseTrim(button) {
         state.trim = button.getAttribute('data-trim-name');
         var raw = button.getAttribute('data-trim-price');
@@ -129,6 +131,13 @@
         }
 
         var one = line();
+        /* Same rule as the booking form: swapping grade replaces the line, it
+           does not add a second one. Without this, walking a prospect up the
+           range on a call leaves a cart holding every grade they looked at. */
+        if (chosen && chosen.variantId !== one.variantId) {
+            events().removeFromCart(chosen, []);
+        }
+        chosen = one;
         events().addToCart(one, [one]);
         events().leadEvent('configure', {
             model: state.model, note: state.trim, source: 'website'

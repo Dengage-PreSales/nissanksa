@@ -109,8 +109,11 @@
                   '<p class="sr-buildname">' + esc(b ? b.name : build.model) +
                     (build.trim ? ', ' + esc(build.trim) : '') + '</p>' +
                   (build.price ? '<p class="sr-buildprice">' + money(build.price) + '</p>' : '') +
-                  '<a class="sr-go" href="' + rel() + 'configure/index.html?model=' +
-                    encodeURIComponent(build.model) + '">Pick it up where you left it</a>' +
+                  '<div class="sr-actions">' +
+                    '<a class="sr-go" href="' + rel() + 'configure/index.html?model=' +
+                      encodeURIComponent(build.model) + '">Pick it up where you left it</a>' +
+                    '<button type="button" class="sr-alt sr-drop" data-sr-drop>Not this one</button>' +
+                  '</div>' +
                 '</div>'));
         }
 
@@ -259,11 +262,25 @@
 
         /* Marked as wired once they are, so the everything works census can
            tell a delegated handler from a dead control. */
-        $$('[data-sr-pick], [data-sr-answer]').forEach(function (el) {
+        $$('[data-sr-pick], [data-sr-answer], [data-sr-drop]').forEach(function (el) {
             el.setAttribute('data-dps-wired', '1');
         });
 
         document.addEventListener('click', function (event) {
+            var drop = event.target.closest && event.target.closest('[data-sr-drop]');
+            if (drop) {
+                /* The one place a visitor genuinely empties a cart, which is
+                   why deleteCart lives here and nowhere else. An order closes
+                   a cart on its own; this is the other way it can end. */
+                if (read('localStorage', BUILD_KEY, null)) {
+                    /* The call takes no payload: emptying a cart says nothing
+                       about what was in it, and the addToCart rows already do. */
+                    events().deleteCart();
+                    try { window.localStorage.removeItem(BUILD_KEY); } catch (err) { /* noop */ }
+                }
+                paintShowroom();
+                return;
+            }
             var pick = event.target.closest && event.target.closest('[data-sr-pick]');
             if (pick) { event.preventDefault(); togglePick(pick.getAttribute('data-sr-pick')); return; }
             var ans = event.target.closest && event.target.closest('[data-sr-answer]');
