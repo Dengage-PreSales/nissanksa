@@ -20,9 +20,13 @@ the longest model name in place.
 
 Leave Media empty. This demo's capture has no per model artwork a message can use, and sending the wrong car's photograph is worse than sending none.
 
-Every push also lands in the storefront's inbox drawer, because the function
-sends it with inbox parameters and a thirty day life. There is no separate
-inbox copy to write: the push content is what the drawer shows.
+**The inbox does not fill from these, and an earlier version of this page said
+it did.** Every send carries the inbox parameters the API documents, and they
+change nothing here: two pushes fired at a contact holding twenty inbox
+messages left the count at twenty. In this account the drawer fills from a
+campaign or a journey, not from a transactional send. The drawer itself is
+real and reads correctly, so what it shows is whatever you have sent from the
+panel.
 
 ### Test drive booked
 

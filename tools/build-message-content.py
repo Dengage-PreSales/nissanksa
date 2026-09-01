@@ -467,9 +467,13 @@ the longest model name in place.
 
 {media_note}
 
-Every push also lands in the storefront's inbox drawer, because the function
-sends it with inbox parameters and a thirty day life. There is no separate
-inbox copy to write: the push content is what the drawer shows.
+**The inbox does not fill from these, and an earlier version of this page said
+it did.** Every send carries the inbox parameters the API documents, and they
+change nothing here: two pushes fired at a contact holding twenty inbox
+messages left the count at twenty. In this account the drawer fills from a
+campaign or a journey, not from a transactional send. The drawer itself is
+real and reads correctly, so what it shows is whatever you have sent from the
+panel.
 
 """ + '\n'.join(push_section(brand, m) for m in for_brand(brand))
 

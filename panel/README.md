@@ -475,7 +475,7 @@ composing from scratch.
 | `showroom_visit` | The cockpit logs a walk in | **Live**, email and push |
 | `test_drive_done` | The cockpit logs a completed drive | **Live**, email and push |
 | `no_show` | The cockpit logs a no-show | **Live**, email and push |
-| `inbox_message` | Asked for on demand, to fill the inbox drawer during a call | **Live**, push |
+| `inbox_message` | Asked for on demand. It sends a notification; it does not fill the drawer, see below | **Live**, push |
 
 **To replace one**, author the new content and set the variable for that
 channel; the message function carries the current ids as its defaults, so a
@@ -516,6 +516,19 @@ So the same booking content says Navigator, seats up to 8 and shows the
 Navigator photograph to one visitor, and Corsair, seats up to 5 to the next.
 Verified live on 31 August: an Aviator booking sent both channels with the
 Aviator values.
+
+### The inbox fills from a campaign, not from these sends
+
+Measured on 1 September 2026, after an earlier note here said otherwise. Every
+transactional push carries the inbox parameters the API documents, and in this
+account they put nothing in the drawer: two pushes fired at a contact holding
+twenty inbox messages left the count at twenty, read straight from
+`/api/inbox/getMessages`.
+
+The drawer itself is real and reads correctly. The SDK asks with both the
+device id and the contact key, and the inbox is contact scoped, so a visitor
+sees exactly what has been sent to their contact. Send from a campaign or a
+journey and press Refresh, which is the path row 314 above already describes.
 
 ### Two things that decide whether a push lands
 

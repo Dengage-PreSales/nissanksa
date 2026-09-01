@@ -416,11 +416,14 @@ Deno.serve(async (req: Request) => {
       /* The push API takes no inline title or body: every word comes from the
          saved content, personalized through these two. They carry the same
          values so the content can use whichever tag form it was built with. */
-      /* Every push is also kept in the app inbox. There is no REST call that
-         posts to the inbox on its own: the inbox API reads and reports, and a
-         message gets there by being sent with these parameters. So the drawer
-         in the storefront fills as the notifications arrive, and a visitor who
-         missed one, or who never allowed notifications, still finds it. */
+      /* These are the inbox parameters the API documents, and in this account
+         they do not put anything in the inbox. Measured on 1 September 2026:
+         two pushes fired at a contact holding twenty inbox messages left the
+         count at twenty, read straight from /api/inbox/getMessages. The drawer
+         in the storefront fills from a campaign or a journey instead. They are
+         still sent because they are correct and cost nothing, but nothing here
+         should be described as filling the inbox until a send is watched
+         doing it. */
       const inboxParams = {
         enabled: true,
         expire: { type: 'PERIOD', period: 30, periodType: 'DAY' },
