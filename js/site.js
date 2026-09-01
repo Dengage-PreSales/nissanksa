@@ -516,6 +516,26 @@
             var line = { id: car.id, quantity: 1, price: car.price };
             setPending(line);
             window.DengageEvents.addToCart(line, cartLines());
+            sendBeginCheckout();
+        }
+
+        /* THE DETAILS STEP NAMES THE CAR, or it does not go out at all.
+
+           beginCheckout used to fire on the first keystroke, falling back to
+           a line built from whatever the select held, which for a visitor who
+           types their name before choosing a model is a cart item whose id
+           and price are both undefined. That row is the abandoned booking,
+           and one that names no car is a row no segment can target and no
+           rescue journey can personalize, which is the whole reason it is
+           sent. So the event waits for both conditions, details started and a
+           car known, and whichever happens second sends it, exactly once. */
+        var checkoutSent = false;
+        function sendBeginCheckout() {
+            if (!begun || checkoutSent) return;
+            var line = pending();
+            if (!line) return;
+            checkoutSent = true;
+            window.DengageEvents.beginCheckout([line]);
         }
 
         /* Arriving from a model page's own Book button preselects that car
@@ -552,8 +572,10 @@
             if (begun) return;
             if (name === 'FirstName' || name === 'LastName' || name === 'Phone' || name === 'Email') {
                 begun = true;
-                window.DengageEvents.beginCheckout(cartLines().length ? cartLines()
-                    : [{ id: (chosen() || {}).id, quantity: 1, price: (chosen() || {}).price }]);
+                /* A car already standing in the select was never picked up,
+                   because pick only ever ran on a change event. */
+                pick(chosen());
+                sendBeginCheckout();
             }
         });
 

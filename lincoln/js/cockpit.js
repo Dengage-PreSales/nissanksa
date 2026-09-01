@@ -178,6 +178,16 @@
             }).then(function (res) { return res.json(); })
               .then(function (answer) {
                   log('Asked Dengage for the ' + moment + ' message', answer);
+                  /* The same announcement the storefront makes, so ?debug=1
+                     shows a cockpit send exactly as it shows a website one.
+                     Without it the three offline buttons wrote their signals,
+                     sent their messages and left the readout empty, which
+                     reads on a call as three buttons that did nothing. */
+                  try {
+                      document.dispatchEvent(new CustomEvent(
+                          'dps:' + (window.DEMO_SLUG || 'demo') + ':confirmation',
+                          { detail: answer }));
+                  } catch (err) { /* old browser */ }
               })['catch'](function () { /* the signal itself is already sent */ });
         } catch (err) { /* no fetch */ }
     }

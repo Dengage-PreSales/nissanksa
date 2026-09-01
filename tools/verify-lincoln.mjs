@@ -56,12 +56,24 @@ let dengageAttempts = 0;
    has to run without writing a row anywhere. What check 7 proves is the
    drawer's own behaviour, which is where every defect it has had has lived. */
 let inboxFixture = null;
+/* Off by default, so every other check keeps proving that this suite sends
+   nothing: an unanswered POST is an aborted one. */
+let answerSends = false;
 await ctx.route('**/*', (route) => {
   const url = route.request().url();
   if (/dengage\.com/.test(url)) { dengageAttempts += 1; return route.abort(); }
-  if (inboxFixture && url.indexOf('/functions/v1/nissan-booking-confirm') !== -1) {
-    return route.fulfill({ status: 200, contentType: 'application/json',
-                           body: JSON.stringify({ messages: inboxFixture }) });
+  if (url.indexOf('/functions/v1/nissan-booking-confirm') !== -1) {
+    if (route.request().method() === 'POST') {
+      if (!answerSends) return route.abort();
+      return route.fulfill({ status: 200, contentType: 'application/json',
+                             body: JSON.stringify({ moment: 'showroom_visit', email: 'sent',
+                                                    push: 'sent', inbox: 'delivered',
+                                                    personalized: ['model'] }) });
+    }
+    if (inboxFixture) {
+      return route.fulfill({ status: 200, contentType: 'application/json',
+                             body: JSON.stringify({ messages: inboxFixture }) });
+    }
   }
   if (!url.startsWith('http://localhost:8101/')) return route.abort();
   return route.continue();
@@ -73,7 +85,11 @@ async function open(path) {
   page.on('pageerror', (e) => page.errors.push(String(e).split('\n')[0]));
   await page.addInitScript(() => {
     window.__events = [];
-    window.addEventListener('dps:lincoln:event', (e) => window.__events.push(e.detail.action));
+    window.__sent = [];
+    window.addEventListener('dps:lincoln:event', (e) => {
+      window.__events.push(e.detail.action);
+      window.__sent.push({ action: e.detail.action, payload: e.detail.payload });
+    });
   });
   await page.goto(BASE + path, { waitUntil: 'load', timeout: 60000 });
   await page.waitForTimeout(700);
@@ -691,6 +707,94 @@ for (const p of ['submit-a-complaint/index.html', 'offers/navigator-june-26/inde
   if (page.errors.length) fail(`inbox drawer: JS errors: ${page.errors.join(' | ')}`);
   await page.close();
   inboxFixture = null;
+}
+
+// 8. The abandoned booking names the car, and the cart is written once.
+//
+//    Both seen in a live run on 1 September 2026. ec:beginCheckout went out
+//    with an empty cart whenever the visitor typed their name before touching
+//    the model select, and that row IS the abandoned booking: one naming no
+//    car is a row no segment can target and no rescue journey can personalize.
+//    The quote form wrote the same product into the cart twice, three seconds
+//    apart, once on the pick and once on the submit.
+{
+  let page = await open('forms/testdrive/index.html');
+  /* One browser context runs the whole suite, so the pending cart an earlier
+     check left in localStorage would answer for a car this visitor has not
+     chosen. Cleared, then reloaded, so this is a genuine cold start. */
+  await page.evaluate(() => window.localStorage.removeItem('dps:lincoln:td'));
+  await page.close();
+  page = await open('forms/testdrive/index.html');
+  const sent = () => page.evaluate(() => window.__sent);
+
+  // Details first, with no car chosen: nothing may go out yet.
+  await page.fill('input[name="firstname"]', 'Demo');
+  await page.fill('input[name="lastname"]', 'Visitor');
+  await page.waitForTimeout(300);
+  let begun = (await sent()).filter((e) => e.action === 'ec:beginCheckout');
+  const empty = begun.filter((e) => !(e.payload.cartItems || []).length);
+  if (empty.length) fail('beginCheckout went out with an empty cart before a car was chosen');
+  else ok('the details step holds beginCheckout back until a car is known');
+
+  // Now choose one: the details step goes out, naming it.
+  await page.evaluate(() => {
+    const s = document.querySelector('form[action*="leads/submit"] select[name="model"]');
+    for (const o of s.options) if (/navigator/i.test(o.value)) s.value = o.value;
+    s.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await page.waitForTimeout(400);
+  begun = (await sent()).filter((e) => e.action === 'ec:beginCheckout');
+  const named = begun.filter((e) => (e.payload.cartItems || []).some((i) => i.product_id === 'navigator'));
+  if (begun.length !== 1) fail(`beginCheckout fired ${begun.length} times, expected once`);
+  else if (!named.length) {
+    fail('beginCheckout fired without naming the chosen car, it carried ' +
+         JSON.stringify(begun[0].payload));
+  } else ok('and sends it once the car is chosen, naming it');
+  await page.close();
+}
+
+{
+  const page = await open('forms/quote/index.html?model=Aviator');
+  await page.waitForTimeout(400);
+  await page.fill('input[name="firstname"]', 'Demo');
+  await page.fill('input[name="lastname"]', 'Visitor');
+  await page.fill('input[name="mobile"]', '0555555555');
+  await page.fill('input[name="email"]', 'demo@example.com');
+  await page.evaluate(() => {
+    const form = document.querySelector('form[action*="leads/submit"]');
+    form.querySelectorAll('select').forEach((s) => {
+      if (!s.value && s.options.length > 1) s.selectedIndex = 1;
+      s.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    form.querySelectorAll('input[type="checkbox"][required]').forEach((c) => { c.checked = true; });
+  });
+  await page.waitForTimeout(300);
+  await page.click('.formSubmitBtn');
+  await page.waitForTimeout(700);
+  const adds = (await page.evaluate(() => window.__sent))
+    .filter((e) => e.action === 'ec:addToCart');
+  if (adds.length !== 1) fail(`quote wrote ${adds.length} addToCart events for one car, expected 1`);
+  else ok('the quote form writes the cart once, not once per step');
+  await page.close();
+}
+
+// 9. A cockpit signal reports its message the way a website one does.
+{
+  answerSends = true;
+  const page = await open('dealer/index.html?debug=1&ck=DPS-1');
+  await page.waitForTimeout(400);
+  await page.locator('.ck-signal, [data-signal]').first().click();
+  await page.waitForTimeout(900);
+  const shown = await page.evaluate(() => {
+    const el = document.querySelector('#dps-debug');
+    return el ? el.innerText.replace(/\s+/g, ' ') : '';
+  });
+  if (shown.indexOf('showroom_visit') === -1) {
+    fail('a cockpit signal left the ?debug=1 readout with no message row');
+  } else ok('a cockpit signal reports its message in the debug readout');
+  if (page.errors.length) fail(`cockpit: JS errors: ${page.errors.join(' | ')}`);
+  await page.close();
+  answerSends = false;
 }
 
 console.log(dengageAttempts + ' SDK attempts refused by this harness, as intended');

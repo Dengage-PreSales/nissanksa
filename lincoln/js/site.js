@@ -352,6 +352,30 @@
         var line = { id: car.id, quantity: 1, price: car.price };
         setPending(line);
         window.DengageEvents.addToCart(line, cartLines());
+        sendBeginCheckout();
+    }
+
+    /* THE DETAILS STEP NAMES THE CAR, or it does not go out at all.
+
+       beginCheckout used to fire on the first keystroke with whatever had
+       been picked so far, which for anyone who typed their name before
+       touching the model select was nothing: an ec:beginCheckout carrying an
+       empty cart. Seen in a live run on 1 September 2026. That row is the
+       abandoned booking, and one that names no car is a row no segment can
+       target and no rescue journey can personalize, which is the whole
+       reason the event is sent.
+
+       So the two conditions are held separately and the event waits for
+       both: the visitor has started entering their details, and a car is
+       known. Whichever happens second sends it, exactly once. */
+    var detailsStarted = false;
+    var checkoutSent = false;
+    function sendBeginCheckout() {
+        if (!detailsStarted || checkoutSent) return;
+        var line = pending();
+        if (!line) return;
+        checkoutSent = true;
+        window.DengageEvents.beginCheckout([line]);
     }
 
     function wireFunnelSignals() {
@@ -378,15 +402,17 @@
         }
 
         if (window.location.pathname.indexOf('forms/testdrive') !== -1) {
-            var begun = false;
             document.addEventListener('input', function (e) {
-                if (begun) return;
+                if (detailsStarted) return;
                 var name = e.target && e.target.name;
                 if (name === 'firstname' || name === 'lastname' || name === 'email' || name === 'mobile') {
-                    begun = true;
+                    detailsStarted = true;
                     signal('started', true);
-                    var line = pending();
-                    window.DengageEvents.beginCheckout(line ? [line] : []);
+                    /* A car already standing in the select was never picked
+                       up, because pickCar only ever ran on a change event. */
+                    var form = e.target.form || $('form[action*="leads/submit"]');
+                    if (form) pickCar(harvest(form).car);
+                    sendBeginCheckout();
                 }
             });
         }
@@ -464,7 +490,9 @@
         var f = harvest(form);
         mintIdentity();
         relayLead(form, { form: 'quote', model: f.car ? f.car.id : undefined, purchase_horizon: f.plan });
-        if (f.car) window.DengageEvents.addToCart({ id: f.car.id, quantity: 1, price: f.car.price }, cartLines());
+        /* Through pickCar, so choosing the car and then submitting does not
+           write the same product into the cart twice, three seconds apart. */
+        pickCar(f.car);
         window.DengageEvents.leadEvent('quote_issued', {
             model: f.car ? f.car.id : undefined, city: f.city, branch: f.branch,
             purchase_horizon: f.plan, source: 'website', note: 'online quote request'
