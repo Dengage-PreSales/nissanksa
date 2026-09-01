@@ -145,7 +145,37 @@ The two supporting mechanisms are unchanged:
   same eight rows in the account's import template columns, kept as
   the manual Audience alternative.
 
-## 2. Ten campaigns, one paste each. Content > On-Site
+## 2. Ten campaigns. Optional since 1 September, and here is why
+
+**Read this before spending an hour on it.** The Nissan storefront now draws
+these ten experiences itself, from `js/creatives.js`, exactly as the Lincoln
+storefront has since 31 August. Every launcher card works, twice in a row, with
+nothing configured in the panel, and each creative also appears on its own from
+a browsing rule rather than only from a button. So the demo is complete without
+this section.
+
+What pasting them into the panel adds is a different claim on the call: the
+same experience arriving from Dengage rather than from the site. It is worth
+doing if the audience wants to see the on-site engine control the message, and
+it changes nothing about the story if it is skipped.
+
+**If you do paste them, switch the demo over with `?onsite=panel`.** Add it to
+any demo URL and the ten brand cards raise their `nissan_demo_` event for the
+engine to answer, the demo's own browsing rules stand down so nobody sees the
+same message twice, and each launcher card prints the campaign name it fires.
+`?onsite=local` puts it back. The choice is remembered for that browser, so it
+survives a click through to a model page and a presenter sets it once before
+a call.
+
+It is a switch rather than a race on purpose: firing both and letting whichever
+answers first win would mean nobody could say, on a call, where the popup on
+screen came from. The one exception is the booking confirmation, which is drawn
+either way. It answers a form the visitor just submitted rather than a trigger,
+and no panel content draws it.
+
+The thirteen cards under On-site messaging are a separate matter and are not
+optional in the same way: they are the shared `dengage_demo_` library, already
+live, and they are where the on-site engine itself is demonstrated.
 
 Every campaign: content type **Custom HTML**, trigger **Data Layer Event**
 with the exact event name below (native trigger noted where it should be used
@@ -210,11 +240,57 @@ copied onto the contact itself: segmentation reaches it through the
 relation, the demo owner's call of 30 August. Columns are never added to
 the six standard event tables.
 
-Remote data: connect the `DPS - supabase` Postgres (the same source
-`dps_product` and the `hy_` tables already use) and add the four tables
-below, then build the segments. Every row is synthetic and self-announcing
-(DEMO VINs, 555-block mobiles, DPS- keys); the seed is deterministic, so
-these counts are exact:
+### 4a. The remote data source: what to connect, and the one thing that silently breaks it
+
+Dengage reads this data over a direct Postgres connection, so it needs a login
+of its own. **Data Space > Remote Data Sources > New**, type PostgreSQL:
+
+| Field | Value |
+|---|---|
+| Host | `db.raextqlludkagdntyzwn.supabase.co` |
+| Port | `5432` |
+| Database | `postgres` |
+| Schema | `public` |
+| User | `dengage_reader` |
+| Password | sent separately. It is deliberately not in this repository, which is public |
+| SSL | required |
+
+If the panel cannot open a direct connection outbound, use the pooler instead:
+host `aws-0-ap-northeast-1.pooler.supabase.com`, port `6543`, user
+`dengage_reader.raextqlludkagdntyzwn`, same password. The database is in
+`ap-northeast-1`.
+
+`dengage_reader` was created for this and can do nothing else: select on the
+five `ni_` tables and the seven views below, no insert, no update, no delete,
+no `ni_inbox`. That was verified as the role rather than assumed. It is defined
+in `supabase/schema.sql`, without the password.
+
+**The failure worth knowing about in advance**, because it does not look like a
+failure. These tables have row level security enabled and had no policies. A
+role reading a table in that state does not get an error: it connects fine,
+authenticates fine, and every query returns zero rows. A remote source wired
+this way tests green and every segment built on it is empty. The policies now
+exist, one read-only policy per table, so this is fixed; it is written down
+because the next table added here will have the same trap and the same silence.
+
+### 4b. Seven views, so a segment is one filter rather than a join
+
+The panel builds segments over a single remote table at a time, so the joins
+live in the database and the panel sees flat tables. Counts are as of the
+seeding and are exact unless noted.
+
+| View | Rows | What it is, and the segment it makes |
+|---|---|---|
+| `v_ni_contact_360` | 508 | One row per person the demo knows anything about, web and showroom and owner base merged on the contact key. `known_both_sides` is the composable CDP claim made checkable: it is true only where the same person exists on both sides. Today that is DPS-1, by design, and it grows every time a persona fills in a form on the site. `last_web_site` scopes a segment to `nissan` or `lincoln` |
+| `v_ni_hot_leads` | 72 | Buying within a month, from whichever side of the business said so. This is the segment the run of show opens in the panel. The equivalent filter on `ni_showroom_lead` alone is 45: the view is larger because it also counts people whose horizon came from the website form |
+| `v_ni_no_show` | 12 | Booked a test drive, did not arrive, and has not been driven or sold to since. The re-invite journey reads this one |
+| `v_ni_quote_open` | 43 | Quotes that never became a sale, with `days_since_quote` so the segment picks its own quiet period. 32 of them are older than 14 days today, and that number moves with the calendar |
+| `v_ni_upgrade_candidates` | 228 | Owners three years in or more: the pre-purchase moment for their next car. This is the 500K story, made queryable. The narrower 2016 to 2020 Altima, Patrol and X-TRAIL cut is 76 |
+| `v_ni_stock_gap` | 11 | Model and branch combinations with nothing on the ground, so a campaign can send people to a showroom that can actually hand them the keys |
+| `v_ni_dealer_leads` | 216 | Every lead with its showroom attached, for the dealer-scoped segments a sub-account would own. Three of the 219 leads have no branch and are correctly absent: they came in over WhatsApp before any showroom was involved |
+
+The four base tables are readable too, and remain the right source for anything
+the views do not cover:
 
 | Table | Rows | Holds |
 |---|---|---|
@@ -222,19 +298,22 @@ these counts are exact:
 | `ni_existing_customer` | 261 | the sample standing in for the 500K base |
 | `ni_branch` | 8 | the showroom list the site's Find a Showroom page shows |
 | `ni_dealer_stock` | 72 | per-branch availability; X-TRAIL is in stock at 6 of 8 branches |
+| `ni_web_lead` | grows | every lead the website itself captured, with its UTM source. Starts small on purpose: it fills up during the demo |
 
-Segments to build, with their exact seeded sizes:
+Named filters worth having ready, since they are the ones the story asks for:
 
-| Segment | Filter | Size |
-|---|---|---|
-| Hot leads, buying within a month | `ni_showroom_lead.purchase_horizon = 'Within 1 Month'` | 45 |
-| Test-drive no-shows | `stage = 'no_show'` | 12 |
-| Quotes gone quiet, 14 days | `stage = 'quote_issued'` and `stage_date` older than 14 days | 30 |
-| WhatsApp intents from Value First | `stage = 'whatsapp_intent'` | 19 |
-| Upgrade audience | `ni_existing_customer.model_year` 2016 to 2020, model in altima, patrol, x-trail | 76 |
+| Segment | Source | Filter | Size |
+|---|---|---|---|
+| Hot leads, buying within a month | `v_ni_hot_leads` | none, the view is the segment | 72 |
+| Test-drive no-shows | `v_ni_no_show` | none | 12 |
+| Quotes gone quiet, 14 days | `v_ni_quote_open` | `days_since_quote >= 14` | 32 |
+| WhatsApp intents from Value First | `ni_showroom_lead` | `stage = 'whatsapp_intent'` | 19 |
+| Upgrade audience | `v_ni_upgrade_candidates` | `years_owned >= 5` for the 2016 to 2020 cut | 76 |
+| Known on both sides | `v_ni_contact_360` | `known_both_sides = true` | 1 today, and rising during the demo |
+| Dealer scoped, Olaya | `v_ni_dealer_leads` | `branch_name` = the branch | per branch |
 
-Two more audiences build on the standard tables rather than the remote ones,
-so their size grows as the demo is used:
+Two more audiences build on the standard ecommerce tables rather than the
+remote ones, so their size grows as the demo is used:
 
 | Segment | Filter |
 |---|---|

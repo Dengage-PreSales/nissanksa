@@ -125,7 +125,19 @@
     function dcfg() { return (window.DEMO_CONFIG && window.DEMO_CONFIG.dengage) || {}; }
     function scenarioPrefix() { return dcfg().scenarioPrefix || 'dengage_demo_'; }
     function brandPrefix() { return dcfg().brandPrefix || 'nissan_demo_'; }
-    function prefixFor(spec) { return spec && spec.hy ? brandPrefix() : scenarioPrefix(); }
+    /* True when this demo has been switched to the Dengage on-site campaigns
+       with ?onsite=panel, so a brand card prints the event name it will raise
+       rather than saying the demo draws it. */
+    function panelMode() {
+        return !!(window.NissanCreatives && window.NissanCreatives.source() === 'panel');
+    }
+
+    /* The brand cards carry the nissan_demo_ prefix whether they are drawn
+       here or served from the panel, because that is the campaign name a
+       reader would go looking for. Everything else is the shared library. */
+    function prefixFor(spec) {
+        return spec && (spec.hy || spec.local) ? brandPrefix() : scenarioPrefix();
+    }
 
     function text(key) {
         return (window.Storefront && window.Storefront.t) ? window.Storefront.t(key) : key;
@@ -166,7 +178,9 @@
                         '<span class="name">' + s.name + '</span>' +
                         '<span class="slug">' +
                             (s.local
-                                ? text(s.also ? s.also : 'drawnHere')
+                                ? (panelMode()
+                                    ? prefixFor(s) + s.slug
+                                    : text(s.also ? s.also : 'drawnHere'))
                                 : (here ? prefixFor(s) + s.slug : text('inlineElsewhere'))) +
                         '</span>' +
                     '</button>';
@@ -429,12 +443,23 @@
                 }
 
                 if (spec && spec.local) {
-                    /* Drawn by this demo. No nissan_demo_ event is raised, so
-                       a card that is also pasted into the panel cannot answer
-                       twice on the same page. */
-                    var drew = window.NissanCreatives && window.NissanCreatives.show(fired);
+                    /* One source or the other, never both, so what appears on
+                       screen always has one explainable origin. ?onsite=panel
+                       switches this demo to the Dengage campaigns; the default
+                       draws the experience here, which is why the demo works
+                       with nothing configured. */
+                    var creatives = window.NissanCreatives;
+                    if (creatives && creatives.source() === 'panel') {
+                        var served = window.DengageEvents.scenario(fired, brandPrefix());
+                        log('Fired ' + served + '. This demo is in panel mode, so the ' +
+                            'on-site engine answers this card. ' + text('setupNote') +
+                            '. Add ?onsite=local to draw it here instead.');
+                        if (window.Storefront) window.Storefront.closeOverlays();
+                        return;
+                    }
+                    var drew = creatives && creatives.show(fired);
                     log(drew
-                        ? 'Showed the ' + spec.name + ' experience. ' + text('setupNote') + '.'
+                        ? 'Showed the ' + spec.name + ' experience. ' + text('drawnHere') + '.'
                         : 'The ' + fired + ' creative is not on this page.');
                     if (window.Storefront) window.Storefront.closeOverlays();
                     return;

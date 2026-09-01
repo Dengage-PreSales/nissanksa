@@ -135,6 +135,39 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   await page.close();
 }
 
+// 2a. ?onsite=panel hands the same ten to the Dengage on-site engine: the card
+// raises its nissan_demo_ event, nothing is drawn here, and the demo's own
+// browsing rules stand down so the visitor cannot meet the message twice.
+// ?onsite=local puts it back, which is asserted rather than assumed: the
+// choice is stored, so a stuck panel mode would silently blank every later
+// check in this run.
+{
+  const page = await open('index.html?onsite=panel');
+  const mode = await page.evaluate(() => window.NissanCreatives.source());
+  if (mode !== 'panel') fail(`?onsite=panel left the source as ${mode}`);
+  const res = await page.evaluate(async () => {
+    window.__dl = [];
+    window.dataLayer = { push: (e) => window.__dl.push(e.event) };
+    document.querySelector('.dps-launch').click();
+    document.querySelector('[data-scenario="test-drive-invite"]').click();
+    await new Promise((r) => setTimeout(r, 120));
+    const host = document.getElementById('dps-lc-host');
+    return { dl: window.__dl, drew: !!(host && host.querySelector('.dps-lc-panel')) };
+  });
+  if (!res.dl.includes('nissan_demo_test-drive-invite')) {
+    fail(`panel mode did not raise the campaign event: ${JSON.stringify(res.dl)}`);
+  } else if (res.drew) {
+    fail('panel mode drew the creative here as well as firing the campaign');
+  } else ok('?onsite=panel fires nissan_demo_ and draws nothing locally');
+  await page.close();
+
+  const back = await open('index.html?onsite=local');
+  const restored = await back.evaluate(() => window.NissanCreatives.source());
+  if (restored !== 'local') fail(`?onsite=local left the source as ${restored}`);
+  else ok('?onsite=local restores the demo to drawing its own experiences');
+  await back.close();
+}
+
 // 3. The booking funnel end to end: model pick, details, submit.
 {
   const page = await open('book-a-test-drive/index.html?model=x-trail');

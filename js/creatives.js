@@ -39,8 +39,36 @@
     var MODELS_KEY = 'dps:nissanksa:modelViews';
     var LAST_MODEL_KEY = 'dps:nissanksa:lastModel';
     var ONCE_KEY = 'dps:nissanksa:creativeOnce';
+    var SOURCE_KEY = 'dps:nissanksa:onsiteSource';
     var COOLDOWN_MS = 25000;
     var lastShownAt = 0;
+
+    /* WHERE THE TEN BRAND EXPERIENCES COME FROM, and how to change it mid-call.
+
+       The demo draws them itself by default, so the whole story runs on a
+       fresh clone with nothing configured. Adding ?onsite=panel to any demo
+       URL hands the same ten to the Dengage on-site engine instead: the
+       launcher raises the nissan_demo_ data layer event, the automatic rules
+       further down stand down, and what a visitor sees is whatever the panel
+       serves. ?onsite=local puts it back. The choice is remembered for this
+       browser and this demo, so it survives a click through to a model page.
+
+       It is a switch rather than a race on purpose. Firing both and letting
+       whichever answers first win would mean nobody can say, on a call, which
+       one drew the popup on screen. */
+    function source() {
+        var query = null;
+        try {
+            query = new URLSearchParams(window.location.search).get('onsite');
+        } catch (err) { query = null; }
+        if (query === 'panel' || query === 'local') {
+            try { window.localStorage.setItem(SOURCE_KEY, query); } catch (err) { /* private mode */ }
+            return query;
+        }
+        try {
+            return window.localStorage.getItem(SOURCE_KEY) === 'panel' ? 'panel' : 'local';
+        } catch (err) { return 'local'; }
+    }
 
     function rel() {
         return document.documentElement.getAttribute('data-rel-root') || '';
@@ -493,6 +521,9 @@
     }
 
     function run(kind, context) {
+        /* In panel mode the campaigns carry their own triggers, so drawing
+           one here as well would show the visitor the same message twice. */
+        if (source() === 'panel') return false;
         for (var i = 0; i < RULES.length; i++) {
             var rule = RULES[i];
             if (rule.on !== kind) continue;
@@ -685,7 +716,11 @@
     window.NissanCreatives = {
         show: function (slug, data) { return show(slug, data, false); },
         close: close,
+        /* The booking confirmation is drawn whichever source is chosen: it is
+           the answer to a form the visitor just submitted, not a campaign, and
+           there is no panel content that draws it. */
         confirm: function (details) { return show('booking-confirmed', details, false); },
+        source: source,
         slugs: Object.keys(CREATIVES)
     };
 })(window, document);
