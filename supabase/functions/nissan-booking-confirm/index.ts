@@ -266,27 +266,31 @@ const BRANDS: Record<string, Brand> = {
     origin: 'https://dengage-presales.github.io/nissanksa/',
     form: 'book-a-test-drive/',
     stands_in: 'Nissan',
-    /* No image, deliberately. That capture carries a 300 pixel side shot per
-       model, far too small for a message, and wide banners that cannot be
-       attributed to one model. Sending the wrong car's photograph is worse
-       than sending none, so a Nissan message carries no picture until the
-       dealer supplies per model art. Every other value personalizes. */
+    /* One photograph per model, added 1 September. The first pass carried
+       none: the catalogue side shots are 300 pixels wide, far too small for a
+       notification, and the obvious large image on a model page is as often an
+       interior or a lane assist diagram as it is the car. Sending the wrong
+       car's photograph is worse than sending none, so each of these was picked
+       by eye from that model's own page and re-encoded to 1200 pixels of JPEG
+       at assets/img/msg-<model>.jpg, which every push and mail client renders.
+       The NISMO has none: no shot of it was captured, and the Patrol's would
+       be a different car. */
     vehicles: {
       /* Starting prices as the source site published them on 28 August 2026.
          The Tekton is announced without one, so it carries none rather than an
          invented figure. The NISMO has no page of its own in this build and
          routes to the Patrol, exactly as its card does. */
-      'magnite': { name: 'Magnite', category: 'SUV', price: 69999 },
-      'kicks': { name: 'Kicks', category: 'SUV', price: 89599 },
-      'x-trail': { name: 'X-Trail', category: 'SUV', price: 104999 },
-      'x-terra': { name: 'X-Terra', category: 'SUV', price: 118999 },
-      'pathfinder': { name: 'Pathfinder', category: 'SUV', price: 164999 },
-      'patrol': { name: 'Patrol', category: 'SUV', price: 270999 },
-      'patrol-pro4x': { name: 'Patrol PRO-4X', category: 'SUV', price: 380999 },
+      'magnite': { name: 'Magnite', category: 'SUV', price: 69999, image: 'assets/img/msg-magnite.jpg' },
+      'kicks': { name: 'Kicks', category: 'SUV', price: 89599, image: 'assets/img/msg-kicks.jpg' },
+      'x-trail': { name: 'X-Trail', category: 'SUV', price: 104999, image: 'assets/img/msg-x-trail.jpg' },
+      'x-terra': { name: 'X-Terra', category: 'SUV', price: 118999, image: 'assets/img/msg-x-terra.jpg' },
+      'pathfinder': { name: 'Pathfinder', category: 'SUV', price: 164999, image: 'assets/img/msg-pathfinder.jpg' },
+      'patrol': { name: 'Patrol', category: 'SUV', price: 270999, image: 'assets/img/msg-patrol.jpg' },
+      'patrol-pro4x': { name: 'Patrol PRO-4X', category: 'SUV', price: 380999, image: 'assets/img/msg-patrol-pro4x.jpg' },
       'patrol-nismo': { name: 'Patrol NISMO', category: 'SUV', price: 450999, path: 'patrol' },
-      'altima': { name: 'Altima', category: 'Sedan', price: 112700 },
-      'z': { name: 'Z', category: 'Sports', price: 261999 },
-      'tekton': { name: 'Tekton', category: 'SUV' },
+      'altima': { name: 'Altima', category: 'Sedan', price: 112700, image: 'assets/img/msg-altima.jpg' },
+      'z': { name: 'Z', category: 'Sports', price: 261999, image: 'assets/img/msg-z.jpg' },
+      'tekton': { name: 'Tekton', category: 'SUV', image: 'assets/img/msg-tekton.jpg' },
     },
   },
 };

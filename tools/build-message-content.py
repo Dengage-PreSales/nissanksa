@@ -34,7 +34,19 @@ import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
-SLATE, BRONZE, INK, MUTED, LINE, PAGE = '#324047', '#b45f1a', '#1c1f21', '#5b6770', '#ecebe8', '#f5f4f2'
+# One palette per demo, taken from that storefront's own stylesheet, because a
+# confirmation that arrives in another brand's colours is the first thing a
+# prospect notices and the last thing anyone remembers to check. dark carries
+# the footer, the heading and the button; accent carries the rule and the
+# kicker; head is the typeface the storefront sets its headings in.
+PALETTES = {
+    'lincoln': dict(dark='#324047', accent='#b45f1a', ink='#1c1f21', muted='#5b6770',
+                    line='#ecebe8', page='#f5f4f2', quiet='#9aa3a8',
+                    head="Georgia,'Times New Roman',serif", head_weight='600'),
+    'nissan': dict(dark='#111111', accent='#c3002f', ink='#111111', muted='#6e7275',
+                   line='#e3e3e3', page='#f4f4f4', quiet='#a5a5a5',
+                   head='Arial,Helvetica,sans-serif', head_weight='700'),
+}
 
 # The two destinations a message can send someone to. Both are tags the message
 # function always fills, so they carry no fallback: a fallback on a value that
@@ -43,34 +55,36 @@ SLATE, BRONZE, INK, MUTED, LINE, PAGE = '#324047', '#b45f1a', '#1c1f21', '#5b677
 RANGE_URL = '{%= $Current.model_url %}'
 FORM_URL = '{%= $Current.booking_url %}'
 
-DENGAGE_MARK = (
-    '<span style="font:700 15px/1 Arial,sans-serif;letter-spacing:.14em;color:#ffffff">DENGAGE</span>'
-    '<br><span style="font:400 9px/1.6 Arial,sans-serif;letter-spacing:.3em;color:#9aa3a8">AUTO DEMO</span>'
-)
+def mark(c):
+    return (
+        '<span style="font:700 15px/1 Arial,sans-serif;letter-spacing:.14em;color:#ffffff">DENGAGE</span>'
+        f'<br><span style="font:400 9px/1.6 Arial,sans-serif;letter-spacing:.3em;'
+        f'color:{c["quiet"]}">AUTO DEMO</span>'
+    )
 
 
-def footer(notice):
-    return f"""      <tr><td style="padding:22px 28px 26px;background:{SLATE}">
-        {DENGAGE_MARK}
-        <p style="margin:14px 0 0;font:400 11.5px/1.7 Arial,sans-serif;color:#9aa3a8">
+def footer(notice, c):
+    return f"""      <tr><td style="padding:22px 28px 26px;background:{c['dark']}">
+        {mark(c)}
+        <p style="margin:14px 0 0;font:400 11.5px/1.7 Arial,sans-serif;color:{c['quiet']}">
           {notice}
         </p>
-        <p style="margin:10px 0 0;font:400 11.5px/1.7 Arial,sans-serif;color:#9aa3a8">
-          <a href="{{{{unsubscribe-link}}}}" style="color:#9aa3a8">Unsubscribe</a>
+        <p style="margin:10px 0 0;font:400 11.5px/1.7 Arial,sans-serif;color:{c['quiet']}">
+          <a href="{{{{unsubscribe-link}}}}" style="color:{c['quiet']}">Unsubscribe</a>
         </p>
       </td></tr>"""
 
 
-def rows(pairs):
+def rows(pairs, c):
     """A detail table that prints a line only when its value was sent."""
     out = []
     for label, tag in pairs:
         out.append(
             f'        {{% if ({tag}) {{ %}}\n'
-            f'        <tr><td style="padding:9px 0;border-bottom:1px solid {LINE};'
+            f'        <tr><td style="padding:9px 0;border-bottom:1px solid {c["line"]};'
             f'font:400 12.5px/1.4 Arial,sans-serif;color:#8b9296">{label}</td>\n'
-            f'            <td style="padding:9px 0;border-bottom:1px solid {LINE};text-align:right;'
-            f'font:400 14px/1.4 Arial,sans-serif;color:{INK}">{{%= {tag} %}}</td></tr>\n'
+            f'            <td style="padding:9px 0;border-bottom:1px solid {c["line"]};text-align:right;'
+            f'font:400 14px/1.4 Arial,sans-serif;color:{c["ink"]}">{{%= {tag} %}}</td></tr>\n'
             f'        {{% }} %}}'
         )
     return '\n'.join(out)
@@ -79,7 +93,8 @@ def rows(pairs):
 def email(brand, m):
     """One message in the shared frame: image where the brand has one, kicker,
        headline, lead, details, one action, one closing line, and the notice."""
-    detail = rows([(label, tag) for label, tag in m['detail'](brand)])
+    c = PALETTES[brand['key']]
+    detail = rows([(label, tag) for label, tag in m['detail'](brand)], c)
     hero = f"""      <tr><td style="padding:0">
         <img src="{{%= $Current.model_image %}}" width="520" alt="{{%= $Current.model %}}"
              style="display:block;width:100%;max-width:520px;height:auto;border:0">
@@ -97,17 +112,17 @@ def email(brand, m):
      rest print only when the visitor gave them. Nothing here reads the contact
      record, because a transactional send cannot see it. -->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-       style="margin:0;padding:0;background:{PAGE}">
+       style="margin:0;padding:0;background:{c['page']}">
   <tr><td align="center" style="padding:26px 12px">
     <table role="presentation" width="520" cellpadding="0" cellspacing="0"
-           style="width:520px;max-width:520px;background:#ffffff;border-top:3px solid {BRONZE}">
+           style="width:520px;max-width:520px;background:#ffffff;border-top:3px solid {c['accent']}">
 {hero}      <tr><td style="padding:30px 28px 8px">
         <p style="margin:0 0 10px;font:400 11px/1 Arial,sans-serif;letter-spacing:.18em;
-                  text-transform:uppercase;color:{BRONZE}">{m['kicker']}</p>
-        <h1 style="margin:0 0 12px;font:600 23px/1.25 Georgia,'Times New Roman',serif;color:{SLATE}">
+                  text-transform:uppercase;color:{c['accent']}">{m['kicker']}</p>
+        <h1 style="margin:0 0 12px;font:{c['head_weight']} 23px/1.25 {c['head']};color:{c['dark']}">
           {m['headline']}
         </h1>
-        <p style="margin:0 0 20px;font:400 14.5px/1.65 Arial,sans-serif;color:{MUTED}">
+        <p style="margin:0 0 20px;font:400 14.5px/1.65 Arial,sans-serif;color:{c['muted']}">
           {m['lead'].format(**fill)}
         </p>
       </td></tr>
@@ -118,15 +133,15 @@ def email(brand, m):
       </td></tr>
       <tr><td style="padding:24px 28px 6px">
         <a href="{m['cta_href'](brand)}"
-           style="display:inline-block;padding:12px 26px;background:{SLATE};color:#ffffff;
+           style="display:inline-block;padding:12px 26px;background:{c['dark']};color:#ffffff;
                   font:400 14px/1 Arial,sans-serif;letter-spacing:.04em;text-decoration:none">
           {m['cta']}
         </a>
       </td></tr>
       <tr><td style="padding:18px 28px 28px">
-        <p style="margin:0;font:400 13px/1.65 Arial,sans-serif;color:{MUTED}">{m['closing']}</p>
+        <p style="margin:0;font:400 13px/1.65 Arial,sans-serif;color:{c['muted']}">{m['closing']}</p>
       </td></tr>
-{footer(brand['notice'])}
+{footer(brand['notice'], c)}
     </table>
   </td></tr>
 </table>
@@ -547,7 +562,10 @@ BRANDS = [
         at='', of='us',
         notice=('A demonstration message from a Dengage sales demo, built on the public Nissan Saudi Arabia '
                 'website. It is not sent for Nissan or any dealer, and no booking was made with them.'),
-        hero=False,
+        # One photograph per model since 1 September, picked by eye from that
+        # model's own page rather than taken from the 300 pixel catalogue side
+        # shots. So a Nissan message carries a picture, the same as a Lincoln one.
+        hero=True,
         # Nissan's site publishes starting prices and no seat counts.
         figure=('From', '$Current.model_price'),
         env=lambda name: nissan_env(name),

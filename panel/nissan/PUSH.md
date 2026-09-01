@@ -18,7 +18,7 @@ Keep a title under about 50 characters and a message under about 120, or a
 phone truncates it mid sentence. The counts under each entry are measured with
 the longest model name in place.
 
-Leave Media empty. This demo's capture has no per model artwork a message can use, and sending the wrong car's photograph is worse than sending none.
+Every message carries the model's own photograph in the Media field.
 
 **The inbox does not fill from these, and an earlier version of this page said
 it did.** Every send carries the inbox parameters the API documents, and they
@@ -37,7 +37,7 @@ Sent when the test drive form is submitted on the storefront. Its content id goe
 | Title | `Your {%= $Current.model %} drive is booked` |
 | Message | `We have your request. The showroom will call you to agree a time.` |
 | Target URL | `{%= $Current.booking_url %}` |
-| Media | leave empty, this demo sends no photograph |
+| Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 30 characters of title and 65 of message.
 
@@ -50,7 +50,7 @@ Sent when the visitor types into the booking form, then leaves without submittin
 | Title | `One step left on your {%= $Current.model %}` |
 | Message | `Your booking is nearly done. Pick it up where you left off.` |
 | Target URL | `{%= $Current.booking_url %}` |
-| Media | leave empty, this demo sends no photograph |
+| Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 31 characters of title and 59 of message.
 
@@ -63,7 +63,7 @@ Sent when the online quote form is submitted. Its content id goes in `None`.
 | Title | `Your {%= $Current.model %} quote is coming` |
 | Message | `A specialist is putting your figures together right now.` |
 | Target URL | `{%= $Current.model_url %}` |
-| Media | leave empty, this demo sends no photograph |
+| Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 30 characters of title and 56 of message.
 
@@ -76,7 +76,7 @@ Sent when a specification sheet is downloaded from a model page. Its content id 
 | Title | `The {%= $Current.model %} details` |
 | Message | `Everything you were reading, kept in one place for you.` |
 | Target URL | `{%= $Current.model_url %}` |
-| Media | leave empty, this demo sends no photograph |
+| Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 21 characters of title and 55 of message.
 
@@ -89,7 +89,7 @@ Sent when the updates card is accepted anywhere on the storefront. Its content i
 | Title | `You are on the list` |
 | Message | `New arrivals and offers reach you first.` |
 | Target URL | `{%= $Current.model_url %}` |
-| Media | leave empty, this demo sends no photograph |
+| Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 19 characters of title and 40 of message.
 
@@ -102,7 +102,7 @@ Sent when the shopping survey card is answered. Its content id goes in `None`.
 | Title | `Thank you` |
 | Message | `Your answer is with the showroom team, on your profile.` |
 | Target URL | `{%= $Current.model_url %}` |
-| Media | leave empty, this demo sends no photograph |
+| Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 9 characters of title and 55 of message.
 
@@ -115,7 +115,7 @@ Sent when reception logs the visitor on the dealer cockpit. Its content id goes 
 | Title | `Good to meet you` |
 | Message | `Thank you for visiting us today. We are here whenever you want a drive.` |
 | Target URL | `{%= $Current.booking_url %}` |
-| Media | leave empty, this demo sends no photograph |
+| Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 16 characters of title and 71 of message.
 
@@ -128,7 +128,7 @@ Sent when the cockpit records that the keys came back. Its content id goes in `N
 | Title | `How was the {%= $Current.model %}?` |
 | Message | `Tell us what you thought. There is no pressure attached.` |
 | Target URL | `https://dengage-presales.github.io/nissanksa/find-a-showroom/` |
-| Media | leave empty, this demo sends no photograph |
+| Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 22 characters of title and 56 of message.
 
@@ -141,6 +141,6 @@ Sent when the cockpit records that a booked drive was missed. Its content id goe
 | Title | `Another time?` |
 | Message | `The {%= $Current.model %} is still here whenever you are.` |
 | Target URL | `{%= $Current.booking_url %}` |
-| Media | leave empty, this demo sends no photograph |
+| Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 13 characters of title and 45 of message.

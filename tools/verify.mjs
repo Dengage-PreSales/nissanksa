@@ -49,6 +49,24 @@ for (const file of walkHtml(ROOT)) {
 }
 console.log(`${pages} published pages scanned: ${dashHits} dash hits, ${deadLinks} dead refs`);
 
+/* Every photograph the message function names exists here and is big enough to
+   be worth sending. A missing one is invisible from this repository: the send
+   still reports success and the notification simply arrives without a picture,
+   on somebody's phone, in front of the room. */
+{
+  const fn = readFileSync(join(ROOT, 'supabase/functions/nissan-booking-confirm/index.ts'), 'utf8');
+  const named = [...fn.matchAll(/image: '(assets\/img\/msg-[^']+)'/g)].map((m) => m[1]);
+  if (named.length < 10) fail(`the message function names only ${named.length} model photographs`);
+  let small = 0;
+  for (const rel of named) {
+    const p = join(ROOT, rel);
+    if (!existsSync(p)) { fail(`message image missing: ${rel}`); continue; }
+    const size = statSync(p).size;
+    if (size < 20000) { small += 1; fail(`message image too small to send: ${rel} (${size} bytes)`); }
+  }
+  if (!small) ok(`all ${named.length} model photographs the messages send are committed`);
+}
+
 /* ---- browser checks --------------------------------------------------- */
 
 const browser = await chromium.launch();
