@@ -279,6 +279,78 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   await page.close();
 }
 
+// 2d. My Showroom, Compare and Find your Nissan. These were the three most
+// linked pre purchase surfaces on the source site that this demo did not hold,
+// counted from the captured pages, and all three had been routed to the model
+// grid. What matters in a check is that each one reads real state and raises a
+// real row: a profile page that shows nothing a visitor did is worse than none.
+{
+  const page = await open('vehicles/patrol/index.html');
+  await page.evaluate(() => {
+    localStorage.setItem('dps:nissanksa:wishlist', JSON.stringify(['x-trail', 'z']));
+    localStorage.setItem('dps:nissanksa:pricewatch', JSON.stringify(['altima']));
+    localStorage.setItem('dps:nissanksa:build',
+      JSON.stringify({ model: 'altima', trim: 'SL', price: 141500, at: Date.now() }));
+  });
+  await page.close();
+
+  const sr = await open('my-showroom/index.html');
+  const shown = await sr.evaluate(() => ({
+    blocks: [...document.querySelectorAll('.sr-block .sr-h')].map((h) => h.textContent.trim()),
+    cards: document.querySelectorAll('.sr-card').length,
+    build: (document.querySelector('.sr-buildname') || {}).textContent || '',
+    price: (document.querySelector('.sr-buildprice') || {}).textContent || '',
+  }));
+  if (shown.cards < 3) fail(`My Showroom drew ${shown.cards} cards from a seeded history`);
+  else if (!/ALTIMA/.test(shown.build) || !/141,500/.test(shown.price)) {
+    fail(`My Showroom lost the build: ${shown.build} ${shown.price}`);
+  } else ok('My Showroom shows the saved cars, the watches and the build back');
+  if (sr.errors.length) fail(`My Showroom JS errors: ${sr.errors.join(' | ')}`);
+  await sr.close();
+
+  const cmp = await open('compare/index.html');
+  const cmpOut = await cmp.evaluate(async () => {
+    document.querySelector('[data-sr-pick="x-trail"]').click();
+    document.querySelector('[data-sr-pick="pathfinder"]').click();
+    await new Promise((r) => setTimeout(r, 120));
+    return {
+      cols: document.querySelectorAll('.sr-cols .sr-card').length,
+      rows: document.querySelectorAll('.sr-table tr').length,
+      text: (document.querySelector('.sr-table') || {}).textContent || '',
+    };
+  });
+  const cmpEvents = await events(cmp);
+  if (cmpOut.cols !== 2 || cmpOut.rows < 3) fail(`Compare drew ${cmpOut.cols} columns, ${cmpOut.rows} rows`);
+  else if (!/104,999/.test(cmpOut.text)) fail('Compare is not printing the published prices');
+  else if (!cmpEvents.includes('lead:compare')) fail('Compare raised no compare row');
+  else ok('Compare lines two models up on published figures and raises its row');
+  await cmp.close();
+
+  const ch = await open('find-your-nissan/index.html');
+  const chOut = await ch.evaluate(async () => {
+    document.querySelector('[data-sr-q="body"][data-sr-answer="SUV"]').click();
+    document.querySelector('[data-sr-q="budget"][data-sr-answer="130000"]').click();
+    document.querySelector('[data-sr-q="horizon"][data-sr-answer="Within 1 Month"]').click();
+    await new Promise((r) => setTimeout(r, 150));
+    return {
+      names: [...document.querySelectorAll('.sr-card .sr-name')].map((n) => n.textContent.trim()),
+      aside: (document.querySelector('.sr-aside') || {}).textContent || '',
+      horizon: (window.__payloads || []).map((p) => p.purchase_horizon).filter(Boolean)[0] || null,
+    };
+  });
+  /* Every match must actually be under the ceiling, and a car the source
+     prices at nothing must not be presented as fitting one. */
+  const over = chOut.names.filter((n) => ['PATROL', 'PATROL PRO-4X', 'PATROL NISMO', 'PATHFINDER', 'Z'].includes(n));
+  if (over.length) fail(`the chooser matched cars over the budget: ${over.join(', ')}`);
+  else if (chOut.names.includes('TEKTON')) fail('the chooser matched an unpriced car on budget');
+  else if (!/TEKTON/.test(chOut.aside)) fail('the chooser dropped the unpriced car without saying so');
+  else if (chOut.horizon !== 'Within 1 Month') {
+    fail(`the chooser did not carry the purchase horizon: ${chOut.horizon}`);
+  } else ok('the chooser narrows on published prices and carries the purchase horizon');
+  if (ch.errors.length) fail(`chooser JS errors: ${ch.errors.join(' | ')}`);
+  await ch.close();
+}
+
 // 3. The booking funnel end to end: model pick, details, submit.
 {
   const page = await open('book-a-test-drive/index.html?model=x-trail');

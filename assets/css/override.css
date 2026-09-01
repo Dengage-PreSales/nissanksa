@@ -680,3 +680,102 @@ h1.headTop span + span { margin-inline-start: 0.24em; }
     .cfg-go { width: 100%; }
     .cfg-alt { text-align: center; }
 }
+
+/* ===========================================================================
+   My Showroom, Compare, Find your Nissan. Same furniture as the configurator,
+   so the three read as one part of the site rather than three bolt ons.
+   =========================================================================== */
+
+.sr-page { max-width: 1180px; margin: 0 auto; padding: 40px 20px 80px; }
+.sr-head { max-width: 62ch; margin-bottom: 38px; }
+.sr-eyebrow {
+    margin: 0 0 10px; font: 400 11px/1 Arial, sans-serif; letter-spacing: .2em;
+    text-transform: uppercase; color: #c3002f;
+}
+.sr-title { margin: 0 0 14px; font: 700 clamp(26px, 3.6vw, 40px)/1.1 Arial, sans-serif; color: #111111; }
+.sr-lede { margin: 0; font: 400 16px/1.6 Arial, sans-serif; color: #6e7275; }
+
+.sr-step, .sr-block { margin-bottom: 36px; }
+.sr-h {
+    display: flex; align-items: center; gap: 12px; margin: 0 0 16px;
+    font: 700 15px/1 Arial, sans-serif; letter-spacing: .12em;
+    text-transform: uppercase; color: #111111;
+}
+.sr-h span {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #c3002f; color: #ffffff; font-size: 13px; letter-spacing: 0;
+}
+
+.sr-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.sr-chip {
+    padding: 11px 20px; border: 1px solid #cfcfcf; background: #ffffff;
+    font: 600 14px/1 Arial, sans-serif; letter-spacing: .04em; color: #111111;
+    cursor: pointer; transition: border-color .15s, background .15s, color .15s;
+}
+.sr-chip:hover { border-color: #111111; }
+.sr-chip.is-on { background: #111111; border-color: #111111; color: #ffffff; }
+.sr-chip:focus-visible { outline: 2px solid #c3002f; outline-offset: 2px; }
+
+.sr-grid, .sr-cols {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px;
+}
+.sr-cols { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.sr-card {
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 0 0 16px; border: 1px solid #e3e3e3; background: #ffffff;
+    text-decoration: none; transition: border-color .15s;
+}
+.sr-card:hover { border-color: #111111; }
+.sr-shot { display: block; width: 100%; height: auto; margin-bottom: 8px; background: #f4f4f4; }
+.sr-name { padding: 0 14px; font: 700 16px/1.25 Arial, sans-serif; color: #111111; }
+.sr-price { padding: 0 14px; font: 700 14px/1.3 Arial, sans-serif; color: #c3002f; }
+.sr-price.sr-quiet { color: #8b8f92; font-weight: 400; }
+.sr-cat { padding: 0 14px; font: 400 12.5px/1.4 Arial, sans-serif; color: #6e7275; }
+
+.sr-empty, .sr-count {
+    margin: 0; font: 400 15px/1.6 Arial, sans-serif; color: #6e7275; max-width: 64ch;
+}
+.sr-count { margin-bottom: 16px; color: #111111; font-weight: 700; }
+
+.sr-who { padding: 18px 20px; background: #f4f4f4; margin-bottom: 34px; }
+.sr-wholine { margin: 0 0 5px; font: 400 16px/1.5 Arial, sans-serif; color: #111111; }
+.sr-whonote { margin: 0; font: 400 13.5px/1.5 Arial, sans-serif; color: #6e7275; }
+
+.sr-build { padding: 20px; border: 1px solid #c3002f; }
+.sr-buildname { margin: 0 0 4px; font: 700 20px/1.25 Arial, sans-serif; color: #111111; }
+.sr-buildprice { margin: 0 0 16px; font: 700 22px/1.2 Arial, sans-serif; color: #c3002f; }
+
+.sr-tablewrap { overflow-x: auto; margin-top: 22px; }
+.sr-table { width: 100%; border-collapse: collapse; }
+.sr-table th, .sr-table td {
+    padding: 12px 14px; border-bottom: 1px solid #e3e3e3; text-align: left;
+    font: 400 14.5px/1.4 Arial, sans-serif; color: #111111;
+}
+.sr-table th {
+    font-weight: 700; font-size: 12px; letter-spacing: .1em;
+    text-transform: uppercase; color: #6e7275; white-space: nowrap;
+}
+
+.sr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 24px; }
+.sr-go {
+    display: inline-block; padding: 15px 30px; background: #c3002f; color: #ffffff;
+    font: 700 13px/1 Arial, sans-serif; letter-spacing: .08em;
+    text-transform: uppercase; text-decoration: none;
+}
+.sr-go:hover { background: #a30027; }
+.sr-alt {
+    font: 700 13px/1 Arial, sans-serif; letter-spacing: .08em;
+    text-transform: uppercase; color: #111111; text-underline-offset: 4px;
+}
+
+@media (max-width: 640px) {
+    .sr-page { padding: 28px 16px 64px; }
+    .sr-actions { flex-direction: column; align-items: stretch; }
+    .sr-go, .sr-alt { text-align: center; }
+}
+.sr-aside {
+    margin: 22px 0 0; padding: 14px 16px; background: #f4f4f4;
+    font: 400 14px/1.6 Arial, sans-serif; color: #6e7275; max-width: 68ch;
+}
+.sr-aside a { color: #c3002f; }

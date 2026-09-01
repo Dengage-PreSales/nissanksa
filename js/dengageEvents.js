@@ -409,7 +409,11 @@
                        /* Added with the configurator. configure says which
                           grade a visitor priced themselves into, reserve says
                           they held it. */
-                       'configure', 'reserve'];
+                       'configure', 'reserve',
+                       /* Compare says a browser became a shortlist. Chooser
+                          carries the purchase horizon, asked of someone nobody
+                          has named yet. */
+                       'compare', 'chooser'];
 
     function leadEvent(stage, fields) {
         if (LEAD_STAGES.indexOf(stage) === -1) {

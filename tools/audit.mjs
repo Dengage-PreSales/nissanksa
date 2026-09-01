@@ -20,6 +20,10 @@ const PAGES = [
   'offers/kicks-august/index.html', 'offers/magnite-august/index.html',
   'finance-calculator/index.html', 'find-a-showroom/index.html',
   'shop-at-home/index.html', 'dealer/index.html',
+  // With a model, so the census sees the grade cards. Without one every
+  // pane is hidden and the page presents five chips and nothing else.
+  'configure/index.html?model=x-trail',
+  'my-showroom/index.html', 'compare/index.html', 'find-your-nissan/index.html',
 ];
 
 const browser = await chromium.launch();

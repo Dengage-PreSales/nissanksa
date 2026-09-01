@@ -52,6 +52,13 @@ PAGES = {
     # Build and reserve. Their site's second and third most used actions after
     # the brochure, and the two this demo could not answer until now.
     "configure/index.html":           {"src": "shop-at-home.en",      "type": "other",     "authored": "configure", "title": "Build and reserve"},
+    # The three most linked pre purchase surfaces their site has that this demo
+    # did not hold. Counted from the captured pages: My Showroom 69 internal
+    # links, Find your Nissan 50, Compare 34. All three had been routed to the
+    # model grid, which answers none of them.
+    "my-showroom/index.html":         {"src": "shop-at-home.en",      "type": "other",     "authored": "showroom", "title": "My Showroom"},
+    "compare/index.html":             {"src": "shop-at-home.en",      "type": "other",     "authored": "compare",  "title": "Compare models"},
+    "find-your-nissan/index.html":    {"src": "shop-at-home.en",      "type": "other",     "authored": "chooser",  "title": "Find your Nissan"},
 }
 
 # Exact internal routes: the source site's href -> this demo's path.
@@ -101,8 +108,13 @@ MICRO = {
 # Anything matching these goes to the named page: close content this demo
 # holds, rather than a dead end.
 ALIAS = [
-    (re.compile(r"^/(compare|find-your-nissan|my-showroom)"), "index.html#models"),
-    (re.compile(r"^/vehicles/(configure|brochures|test-drive-videos|nismo-vehicles)"), "index.html#models"),
+    (re.compile(r"^/my-showroom"), "my-showroom/index.html"),
+    (re.compile(r"^/(find-your-nissan|car-chooser)"), "find-your-nissan/index.html"),
+    (re.compile(r"^/compare"), "compare/index.html"),
+    (re.compile(r"^/vehicles/new/[^/]+/compare"), "compare/index.html"),
+    (re.compile(r"^/vehicles/new/[^/]+/configurator"), "configure/index.html"),
+    (re.compile(r"^/vehicles/configure"), "configure/index.html"),
+    (re.compile(r"^/vehicles/(brochures|test-drive-videos|nismo-vehicles)"), "index.html#models"),
     (re.compile(r"^/vehicles/offers/"), "offers/index.html"),
     (re.compile(r"^/vehicles/"), "index.html#models"),
     (re.compile(r"^/(experience-nissan|news-events|formula-e|search-results)"), "index.html"),
@@ -737,6 +749,115 @@ def configurator_main(rel):
    .replace("{rel}", rel)
 
 
+# ---------------------------------------------------------------------------
+# My Showroom, Compare, Find your Nissan.
+#
+# The shell of each is written here and the content is drawn by js/showroom.js
+# from what the visitor has actually done, because none of it is knowable at
+# build time. The chooser's questions are the honest ones: body and budget are
+# answered from the catalogue, and the third is the purchase horizon, which is
+# the field the hot leads segment reads and the reason this page is worth more
+# than a filter.
+
+def catalogue_models():
+    """The comparable models, read out of js/vehicles.js rather than listed
+    here twice. A second copy of the range drifts the first time a car is added
+    and nothing tells you: the page would simply stop offering it."""
+    src = (ROOT / "js" / "vehicles.js").read_text(encoding="utf-8")
+    out = []
+    for m in re.finditer(r"id:\s*'([a-z0-9-]+)'\s*,\s*name:\s*\{\s*en:\s*'([^']+)'", src):
+        out.append({"id": m.group(1), "name": m.group(2)})
+    if not out:
+        raise SystemExit("no models found in js/vehicles.js: the catalogue shape changed")
+    return out
+
+
+COMPARE_MODELS = catalogue_models()
+
+BUDGETS = [(90000, "Up to SAR 90,000"), (130000, "Up to SAR 130,000"),
+           (200000, "Up to SAR 200,000"), (500000, "No ceiling")]
+HORIZONS = ["Within 1 Month", "1 to 3 Months", "More than 3 Months"]
+BODIES = [("any", "Show me everything"), ("SUV", "An SUV"),
+          ("Sedan", "A sedan"), ("Sports", "Something quick")]
+
+
+def profile_main(kind, rel):
+    if kind == "showroom":
+        return '''<main id="container" class="sr-page" data-dps-owned>
+  <section class="sr-head">
+    <p class="sr-eyebrow">My Showroom</p>
+    <h1 class="sr-title">Everything you have looked at, kept</h1>
+    <p class="sr-lede">Saved cars, the prices you are watching, what you have
+      viewed and the car you built. This is the customer facing half of the
+      profile: the same signals the showroom team segments on, shown back to
+      the person who made them.</p>
+  </section>
+  <div data-sr-showroom></div>
+</main>
+'''
+
+    if kind == "compare":
+        chips = "\n".join(
+            f'      <button type="button" class="sr-chip" data-sr-pick="{c["id"]}" aria-pressed="false">{escape(c["name"])}</button>'
+            for c in COMPARE_MODELS)
+        return '''<main id="container" class="sr-page" data-dps-owned>
+  <section class="sr-head">
+    <p class="sr-eyebrow">Compare</p>
+    <h1 class="sr-title">Two or three, side by side</h1>
+    <p class="sr-lede">Every figure is the one Nissan Saudi Arabia publishes.
+      Comparing is the behaviour that turns a browser into a shortlist, so the
+      comparison itself is worth knowing about.</p>
+  </section>
+  <section class="sr-step">
+    <h2 class="sr-h">Choose up to three</h2>
+    <div class="sr-chips">
+{chips}
+    </div>
+  </section>
+  <div data-sr-compare></div>
+</main>
+'''.replace("{chips}", chips)
+
+    body = "\n".join(
+        f'      <button type="button" class="sr-chip" data-sr-q="body" data-sr-answer="{k}">{escape(v)}</button>'
+        for k, v in BODIES)
+    budget = "\n".join(
+        f'      <button type="button" class="sr-chip" data-sr-q="budget" data-sr-answer="{v}">{escape(label)}</button>'
+        for v, label in BUDGETS)
+    horizon = "\n".join(
+        f'      <button type="button" class="sr-chip" data-sr-q="horizon" data-sr-answer="{escape(h)}">{escape(h)}</button>'
+        for h in HORIZONS)
+    return '''<main id="container" class="sr-page" data-dps-owned>
+  <section class="sr-head">
+    <p class="sr-eyebrow">Find your Nissan</p>
+    <h1 class="sr-title">Three questions, and the range narrows</h1>
+    <p class="sr-lede">No scoring and no recommendation engine behind this: a
+      match is a match on what you answer. The third question is the one the
+      showroom most wants the answer to.</p>
+  </section>
+  <section class="sr-step">
+    <h2 class="sr-h"><span>1</span> What kind of car</h2>
+    <div class="sr-chips">
+{body}
+    </div>
+  </section>
+  <section class="sr-step">
+    <h2 class="sr-h"><span>2</span> What you want to spend</h2>
+    <div class="sr-chips">
+{budget}
+    </div>
+  </section>
+  <section class="sr-step">
+    <h2 class="sr-h"><span>3</span> When are you buying</h2>
+    <div class="sr-chips">
+{horizon}
+    </div>
+  </section>
+  <div data-sr-chooser></div>
+</main>
+'''.replace("{body}", body).replace("{budget}", budget).replace("{horizon}", horizon)
+
+
 def author_page(soup, rel, main_html):
     """Keep a captured page's header, footer and styles; replace the middle.
 
@@ -917,7 +1038,8 @@ def mounts_block(rel):
     scripts = "\n".join(
         f'<script src="{rel}js/{f}.js?v={STAMP}"></script>'
         for f in ["config", "copy", "vehicles", "dengageEvents", "site",
-                  "creatives", "configure", "panels", "slots", "inbox", "debug"])
+                  "creatives", "grades", "configure", "showroom",
+                  "panels", "slots", "inbox", "debug"])
     return f"""
 <!-- ==================== Dengage demo layer ==================== -->
 <div class="scrim" id="scrim"></div>
@@ -1023,6 +1145,8 @@ def build(out_path: str, spec: dict):
         author_magnite(soup, rel)
     if spec.get("authored") == "configure":
         author_page(soup, rel, configurator_main(rel))
+    if spec.get("authored") in ("showroom", "compare", "chooser"):
+        author_page(soup, rel, profile_main(spec["authored"], rel))
     host = spec.get("host", "en.nissan-saudiarabia.com")
     swapped = swap_logo(soup, rel)
     css_links = collect_css(soup, rel, host)

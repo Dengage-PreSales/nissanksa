@@ -29,6 +29,7 @@
     'use strict';
 
     var PREFIX = 'DPS-nissanksa-res-';
+    var BUILD_KEY = 'dps:nissanksa:build';
     var state = { model: null, trim: null, price: null, version: null };
 
     function $(sel, root) { return (root || document).querySelector(sel); }
@@ -135,6 +136,14 @@
         /* The rescue rule reads this: someone who built a car and left without
            reserving is the one this page can win back. */
         if (window.Site && window.Site.signal) window.Site.signal('configured', true);
+        /* Kept so My Showroom can show the build back to whoever made it. A
+           configured car that vanishes when the page does is the one piece of
+           this visitor's history worth the most. */
+        try {
+            window.localStorage.setItem(BUILD_KEY, JSON.stringify({
+                model: state.model, trim: state.trim, price: state.price, at: Date.now()
+            }));
+        } catch (err) { /* private mode */ }
     }
 
     function openForm() {
@@ -223,6 +232,16 @@
 
     function init() {
         if (!$('.cfg-page') || !events()) return;
+
+        /* Say what has been wired, now that it has been. These are answered by
+           one delegated handler, so without a mark on each control the
+           everything-works census cannot tell them from dead buttons, and it
+           reported all five model chips as dead. Stamped here rather than in
+           the markup on purpose: if this module fails to load the controls
+           really are dead, and the page should admit it. */
+        $$('[data-cfg-model], [data-cfg-trim], [data-cfg-reserve]').forEach(function (el) {
+            el.setAttribute('data-dps-wired', '1');
+        });
 
         document.addEventListener('click', function (event) {
             var chip = event.target.closest && event.target.closest('[data-cfg-model]');
