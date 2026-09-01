@@ -76,6 +76,13 @@ ROUTES = {
     "/shop-at-home.html": "shop-at-home/index.html",
     "/cars-for-sale/inventory/buy.shtml": "shop-at-home/index.html",
     "/contact-us.html": "request-a-quote/index.html",
+    # Three Shop@Home actions the source site sends elsewhere. Without these
+    # they fall through to the home page, which answers none of them: a visitor
+    # who asked to be called back is the pre-purchase moment this whole demo is
+    # about, and landing them on a banner loses it.
+    "/new-car-inventory.html": "shop-at-home/index.html#start",
+    "/services/contact-us.html": "request-a-quote/index.html",
+    "/customer-service/contact-us.html": "request-a-quote/index.html",
     "/nissan-fleet.html": "request-a-quote/index.html",
     "/nissan-fleet/contact-fleet-sales.html": "request-a-quote/index.html",
 }
@@ -155,6 +162,11 @@ def map_route(href: str, rel: str):
         return None
     path = raw.split("#")[0].split("?")[0]
     frag = raw[len(path):]
+    # The source pages carry campaign tokens and internal record ids in the
+    # query and the fragment. They mean nothing here and read as debris in the
+    # address bar on a shared screen, so only a plain anchor survives.
+    if not re.fullmatch(r"#[A-Za-z][\w-]*", frag or "#a"):
+        frag = ""
     if path in ROUTES:
         return rel + ROUTES[path] + frag
     if POSTSALE.match(path):
