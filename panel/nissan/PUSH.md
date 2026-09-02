@@ -30,7 +30,7 @@ panel.
 
 ### Test drive booked
 
-Sent when the test drive form is submitted on the storefront. Its content id goes in `None`.
+Sent when the test drive form is submitted on the storefront. It sends the content the other demo already has, set in `DENGAGE_TX_PUSH_CONTENT_ID`. Create it once there and there is nothing to set here.
 
 | Field | Value |
 |---|---|
@@ -43,7 +43,7 @@ With the longest model name in place that is 30 characters of title and 65 of me
 
 ### Booking started and left
 
-Sent when the visitor types into the booking form, then leaves without submitting. Its content id goes in `None`.
+Sent when the visitor types into the booking form, then leaves without submitting. It sends the content the other demo already has, set in `DENGAGE_TX_PUSH_ABANDONED`. Create it once there and there is nothing to set here.
 
 | Field | Value |
 |---|---|
@@ -56,7 +56,7 @@ With the longest model name in place that is 31 characters of title and 59 of me
 
 ### Quote requested
 
-Sent when the online quote form is submitted. Its content id goes in `None`.
+Sent when the online quote form is submitted. It sends the content the other demo already has, set in `DENGAGE_TX_PUSH_QUOTE`. Create it once there and there is nothing to set here.
 
 | Field | Value |
 |---|---|
@@ -69,7 +69,7 @@ With the longest model name in place that is 30 characters of title and 56 of me
 
 ### Specification downloaded
 
-Sent when a specification sheet is downloaded from a model page. Its content id goes in `None`.
+Sent when a specification sheet is downloaded from a model page. It sends the content the other demo already has, set in `DENGAGE_TX_PUSH_BROCHURE`. Create it once there and there is nothing to set here.
 
 | Field | Value |
 |---|---|
@@ -95,7 +95,7 @@ With the longest model name in place that is 19 characters of title and 40 of me
 
 ### Survey answered
 
-Sent when the shopping survey card is answered. Its content id goes in `None`.
+Sent when the shopping survey card is answered. It sends the content the other demo already has, set in `DENGAGE_TX_PUSH_SURVEY`. Create it once there and there is nothing to set here.
 
 | Field | Value |
 |---|---|
@@ -108,7 +108,7 @@ With the longest model name in place that is 9 characters of title and 55 of mes
 
 ### Build reserved online
 
-Sent when a build is reserved on the configurator. Its content id goes in `None`.
+Sent when a build is reserved on the configurator. It sends the content the other demo already has, set in `DENGAGE_TX_PUSH_RESERVE`. Create it once there and there is nothing to set here.
 
 | Field | Value |
 |---|---|
@@ -121,7 +121,7 @@ With the longest model name in place that is 22 characters of title and 78 of me
 
 ### Walk in logged at the showroom
 
-Sent when reception logs the visitor on the dealer cockpit. Its content id goes in `None`.
+Sent when reception logs the visitor on the dealer cockpit. It sends the content the other demo already has, set in `DENGAGE_TX_PUSH_WALKIN`. Create it once there and there is nothing to set here.
 
 | Field | Value |
 |---|---|
@@ -134,20 +134,20 @@ With the longest model name in place that is 16 characters of title and 71 of me
 
 ### Test drive completed
 
-Sent when the cockpit records that the keys came back. Its content id goes in `None`.
+Sent when the cockpit records that the keys came back. It sends the content the other demo already has, set in `DENGAGE_TX_PUSH_TD_DONE`. Create it once there and there is nothing to set here.
 
 | Field | Value |
 |---|---|
 | Title | `How was the {%= $Current.model %}?` |
 | Message | `Tell us what you thought. There is no pressure attached.` |
-| Target URL | `https://dengage-presales.github.io/nissanksa/find-a-showroom/` |
+| Target URL | `{%= $Current.contact_url %}` |
 | Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 22 characters of title and 56 of message.
 
 ### Booked but did not arrive
 
-Sent when the cockpit records that a booked drive was missed. Its content id goes in `None`.
+Sent when the cockpit records that a booked drive was missed. It sends the content the other demo already has, set in `DENGAGE_TX_PUSH_NOSHOW`. Create it once there and there is nothing to set here.
 
 | Field | Value |
 |---|---|

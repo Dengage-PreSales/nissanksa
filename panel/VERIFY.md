@@ -116,6 +116,19 @@ you have allowed notifications. The notification arrives within seconds with
 the car's photograph in it. No photograph means the field did not save, or an
 upload is sitting in it instead of the tag.
 
+**One Target URL to correct while you are in there.** Open the push content
+**Test drive completed** and change its Target URL to:
+
+    {%= $Current.contact_url %}
+
+It currently holds the Lincoln demo's contact address, typed in when that demo
+was the only one using this content. The content is shared, so a Nissan visitor
+tapping that notification landed on the Lincoln storefront. The tag resolves to
+whichever demo sent the message: the showroom finder for Nissan, the contact
+page for Lincoln. Found and fixed on 2 September; the function already sends
+the value, so this one field is all that is left. Every other push content
+already uses tags for its Target URL and needs nothing.
+
 ### The remote data source
 
 **Only tables with a contact key can be connected at all.** A remote table has

@@ -246,12 +246,13 @@ async function dengageToken(): Promise<string> {
    email bodies do not share: they carry a dealer name and a footer, so each
    brand has its own. */
 type Vehicle = { name: string; category: string; seats?: number; price?: number; image?: string; path?: string };
-type Brand = { origin: string; form: string; stands_in: string; image?: string; vehicles: Record<string, Vehicle> };
+type Brand = { origin: string; form: string; contact: string; stands_in: string; image?: string; vehicles: Record<string, Vehicle> };
 
 const BRANDS: Record<string, Brand> = {
   lincoln: {
     origin: 'https://dengage-presales.github.io/nissanksa/lincoln/',
     form: 'forms/testdrive/',
+    contact: 'contact-us/',
     stands_in: 'Lincoln',
     /* Used when no car is in play. The brand's own concept interior, which
        belongs to no single model. */
@@ -271,6 +272,7 @@ const BRANDS: Record<string, Brand> = {
   nissan: {
     origin: 'https://dengage-presales.github.io/nissanksa/',
     form: 'book-a-test-drive/',
+    contact: 'find-a-showroom/',
     stands_in: 'Nissan',
     /* One photograph per model, added 1 September. The first pass carried
        none: the catalogue side shots are 300 pixels wide, far too small for a
@@ -315,6 +317,12 @@ function vehicleParams(brandKey: string, modelId?: string, modelName?: string): 
     model: v ? v.name : (modelName || b.stands_in),
     model_url: b.origin + (v ? 'vehicles/' + (v.path ?? id) + '/' : ''),
     booking_url: b.origin + b.form + (v ? '?model=' + encodeURIComponent(v.name) : ''),
+    /* Where a message sends someone who wants to talk rather than book. It is
+       a parameter rather than a URL typed into the content because the push
+       contents are shared between the two demos: a Lincoln address written
+       into one of them would send a Nissan visitor to the other demo, which is
+       what it did until 2 September. */
+    contact_url: b.origin + b.contact,
   };
   if (v) {
     out.model_id = id;

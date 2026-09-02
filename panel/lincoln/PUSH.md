@@ -140,7 +140,7 @@ Sent when the cockpit records that the keys came back. Its content id goes in `D
 |---|---|
 | Title | `How was the {%= $Current.model %}?` |
 | Message | `Tell us what you thought. There is no pressure attached.` |
-| Target URL | `https://dengage-presales.github.io/nissanksa/lincoln/contact-us/` |
+| Target URL | `{%= $Current.contact_url %}` |
 | Media | `{%= $Current.model_image %}` |
 
 With the longest model name in place that is 22 characters of title and 56 of message.

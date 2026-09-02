@@ -47,6 +47,7 @@ empty here and are not used.
 | `$Current.model` | the model, or the brand name when no car is in play | yes |
 | `$Current.model_url` | that model's page on the demo | yes |
 | `$Current.booking_url` | the test drive form, with the model already chosen where there is one | yes |
+| `$Current.contact_url` | where this demo sends someone who wants to talk rather than book | yes |
 | `$Current.model_image` | that model's banner, JPEG, near enough 2:1 for a rich push | yes |
 | `$Current.model_seats` | seats, the figure this brand's own site publishes | with a known model |
 | `$Current.model_category` | SUV, Sedan or Sports | with a known model |

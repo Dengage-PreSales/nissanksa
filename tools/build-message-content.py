@@ -54,6 +54,10 @@ PALETTES = {
 # failure is silent.
 RANGE_URL = '{%= $Current.model_url %}'
 FORM_URL = '{%= $Current.booking_url %}'
+# Where a message sends someone who wants to talk rather than book. It is a tag
+# rather than an address because the two demos share every push content, and an
+# address belongs to one of them.
+CONTACT_URL = '{%= $Current.contact_url %}'
 
 def mark(c):
     return (
@@ -326,7 +330,7 @@ MOMENTS = [
         closing='If it was the right car, the next conversation is a short one.',
         push_title="How was the {%= $Current.model %}?",
         push_body='Tell us what you thought. There is no pressure attached.',
-        push_url=None,
+        push_url=CONTACT_URL,
     ),
     dict(
         key='no_show', slug='no-show-reinvite', label='Booked but did not arrive',
@@ -362,6 +366,14 @@ def for_brand(brand):
 
 def push_section(brand, m):
     push_env = brand['env'](m['env'][1])
+    """Where the id goes, or that it needs no id at all. A moment whose copy
+       names nobody sends the content the other demo already has, and reading
+       that its id goes in nothing is worse than reading nothing: it looks like
+       a step that was left unwritten."""
+    shared = 'DENGAGE_TX_' + m['env'][1]
+    where = (f'Its content id goes in `{push_env}`.' if push_env else
+             f'It sends the content the other demo already has, set in `{shared}`. '
+             'Create it once there and there is nothing to set here.')
     title, body = m['push_title'], m['push_body']
     longest = lambda t: len(t.replace('{%= $Current.model %}', 'Navigator'))
     url = m['push_url'] or CONTACT(brand)
@@ -369,7 +381,7 @@ def push_section(brand, m):
              '| Media | leave empty, this demo sends no photograph |\n')
     return f"""### {m['label']}
 
-Sent {m['trigger']}. Its content id goes in `{push_env}`.
+Sent {m['trigger']}. {where}
 
 | Field | Value |
 |---|---|
@@ -435,6 +447,7 @@ empty here and are not used.
 | `$Current.model` | the model, or the brand name when no car is in play | yes |
 | `$Current.model_url` | that model's page on the demo | yes |
 | `$Current.booking_url` | the test drive form, with the model already chosen where there is one | yes |
+| `$Current.contact_url` | where this demo sends someone who wants to talk rather than book | yes |
 {image_row}| `{figure_tag}` | {figure_label.lower()}, the figure this brand's own site publishes | with a known model |
 | `$Current.model_category` | SUV, Sedan or Sports | with a known model |
 | `$Current.first_name` | what the visitor typed | when given |

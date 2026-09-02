@@ -681,18 +681,25 @@ The Lincoln names are:
 
 Sent as `current` on both channels, and as `customParameters` on the push, so
 content built either way resolves. Everything here is either typed by the
-visitor or taken from the source site; the site publishes no prices, so no
-price is offered.
+visitor or taken from the source site. This demo's source site publishes a
+starting price for every model but the Tekton, so `model_price` is offered and
+carries the figure that site published; the Tekton has none and sends none.
 
 `first_name`, `full_name`, `name`, `surname`, `email`, `gsm`, `city`,
-`branch`, `purchase_horizon`, `booking_ref`, `model`, `model_id`,
-`model_seats`, `model_category`, `model_url`, `model_image`, `booking_url`.
+`branch`, `purchase_horizon`, `booking_ref`, `note`, `model`, `model_id`,
+`model_seats`, `model_price`, `model_category`, `model_url`, `model_image`,
+`booking_url`, `contact_url`.
 
-**Four of them are sent every time**, whatever the moment and whatever the
-visitor has told us: `model`, `model_url`, `model_image` and `booking_url`.
+**Five of them are sent every time**, whatever the moment and whatever the
+visitor has told us: `model`, `model_url`, `model_image`, `booking_url` and
+`contact_url`. The last of those is the reason a shared content can send
+someone to a contact page at all: the two demos share every push, so an address
+typed into one of them belongs to whichever demo was written first, and until
+2 September the completed drive notification sent Nissan visitors to Lincoln.
+An address in a shared content is the bug; a tag is the fix.
 With no car in play the brand name stands in for the model and the links point
 at the range, so a push title, a target URL and the media field can each use
-the bare tag. Those three fields carry no condition, and an empty value there
+the bare tag. Those fields carry no condition, and an empty value there
 leaves a hole a visitor sees before anything else. Everything else is optional
 and is printed only inside `{% if (...) { %} ... {% } %}`, because a city or a
 showroom has no honest stand in.

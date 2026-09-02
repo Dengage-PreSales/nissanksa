@@ -20,16 +20,6 @@ and the values the message prints.
 | Test drive completed | `test_drive_done` | `test-drive-done.html` | `DENGAGE_TX_EMAIL_NI_TD_DONE` |
 | Booked but did not arrive | `no_show` | `no-show-reinvite.html` | `DENGAGE_TX_EMAIL_NI_NOSHOW` |
 
-All ten email bodies and both Nissan push contents were authored in the panel
-on 2 September and their ids are wired. The function's health check is the
-record of what is live, and it reads `email, push` for every moment:
-
-    curl -s https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-booking-confirm
-
-An id can still be overridden without a deploy by setting the variable named
-above; the value in the function is the default, which is what the id column
-means here.
-
 Push copy is in [PUSH.md](PUSH.md), one section each.
 
 The two demos share every push content, because that copy names no dealer and
@@ -56,6 +46,7 @@ empty here and are not used.
 | `$Current.model` | the model, or the brand name when no car is in play | yes |
 | `$Current.model_url` | that model's page on the demo | yes |
 | `$Current.booking_url` | the test drive form, with the model already chosen where there is one | yes |
+| `$Current.contact_url` | where this demo sends someone who wants to talk rather than book | yes |
 | `$Current.model_image` | that model's banner, JPEG, near enough 2:1 for a rich push | yes |
 | `$Current.model_price` | from, the figure this brand's own site publishes | with a known model |
 | `$Current.model_category` | SUV, Sedan or Sports | with a known model |
