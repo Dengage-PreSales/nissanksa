@@ -300,7 +300,8 @@ seeding and are exact unless noted.
 | `v_ni_no_show` | 12 | Booked a test drive, did not arrive, and has not been driven or sold to since. The re-invite journey reads this one |
 | `v_ni_quote_open` | 43 | Quotes that never became a sale, with `days_since_quote` so the segment picks its own quiet period. 32 of them are older than 14 days today, and that number moves with the calendar |
 | `v_ni_upgrade_candidates` | 228 | Owners three years in or more: the pre-purchase moment for their next car. This is the 500K story, made queryable. The narrower 2016 to 2020 Altima, Patrol and X-TRAIL cut is 76 |
-| `v_ni_stock_gap` | 11 | Model and branch combinations with nothing on the ground, so a campaign can send people to a showroom that can actually hand them the keys |
+| `v_ni_stock_gap` | 11 | Model and branch combinations with nothing on the ground. **Not connectable**: it is about places and cars, so it has no contact key. Read it in the panel or in SQL, and use `v_ni_contact_stock` for the segment |
+| `v_ni_contact_stock` | 214 | The stock fact, per person: their car, their branch, whether it is there, and which branch has it if not. 40 want what their branch does not have |
 | `v_ni_dealer_leads` | 216 | Every lead with its showroom attached, for the dealer-scoped segments a sub-account would own. Three of the 219 leads have no branch and are correctly absent: they came in over WhatsApp before any showroom was involved |
 
 The four base tables are readable too, and remain the right source for anything
@@ -314,12 +315,40 @@ the views do not cover:
 | `ni_dealer_stock` | 72 | per-branch availability; X-TRAIL is in stock at 6 of 8 branches |
 | `ni_web_lead` | grows | every lead the website itself captured, with its UTM source. Starts small on purpose: it fills up during the demo |
 
-**If `ni_dealer_stock` refuses to connect, this is why.** It was the one table a
-remote source would not take, and it is the only one whose primary key is three
-columns rather than one. A remote source is configured by choosing the column
-that identifies a row, so a composite key leaves nothing to choose. It now
-carries `stock_id`, a single column key added for exactly this; point the remote
-source at that. Nothing was removed to make room for it and no row changed.
+### The rule that decides what can be a remote table at all
+
+**A remote table has to relate to `master_contact` or `master_device`.**
+Established on 2 September by the demo owner, from the panel. It is the single
+most important thing on this page, because it rules out three things this
+document previously told you to connect, and it does so silently: a table with
+no contact key is simply not offered.
+
+Every row in a remote table therefore needs a contact key. That splits what
+this demo holds into two piles:
+
+| Connect these, every row has a contact key | Do not try to connect these |
+|---|---|
+| `ni_showroom_lead`, `ni_existing_customer`, `ni_web_lead` | `ni_branch`, `ni_dealer_stock` |
+| `v_ni_contact_360`, `v_ni_hot_leads`, `v_ni_no_show`, `v_ni_quote_open`, `v_ni_upgrade_candidates`, `v_ni_dealer_leads`, `v_ni_contact_stock` | `v_ni_stock_gap` |
+
+The right hand column is reference data: a branch list and a stock table are
+about places and cars, not people, so they were never going to relate to a
+contact. They are still real and still used, by the demo's own Find a Showroom
+page and by the view below.
+
+**I got this wrong first, and the wrong fix is still in the schema.** When
+`ni_dealer_stock` would not connect I read it as a key shape problem, because it
+is also the only one of the five whose primary key is three columns, and added
+`stock_id` to give it a single column key. That was a fix for a diagnosis that
+was not the fault. The column is harmless and stays; it fixes nothing.
+
+**What carries the stock story instead: `v_ni_contact_stock`.** One row per
+person who has told a showroom which car they want, saying whether that car is
+on the ground where they were dealt with, and naming the branch that has it if
+it is not. 214 contacts, of whom **40 want a car their branch does not have, and
+all 40 have a branch named**. That is a better segment than the stock table ever
+was: a campaign that says a car is unavailable is an apology, and one that says
+where it is waiting is an appointment.
 
 Named filters worth having ready, since they are the ones the story asks for:
 
@@ -332,6 +361,7 @@ Named filters worth having ready, since they are the ones the story asks for:
 | Upgrade audience | `v_ni_upgrade_candidates` | `years_owned >= 5` for the 2016 to 2020 cut | 76 |
 | Known on both sides | `v_ni_contact_360` | `known_both_sides = true` | 1 today, and rising during the demo |
 | Dealer scoped, Olaya | `v_ni_dealer_leads` | `branch_name` = the branch | per branch |
+| Wants a car their branch does not have | `v_ni_contact_stock` | `in_stock_for_them = false` | 40 |
 
 Two more audiences build on the standard ecommerce tables rather than the
 remote ones, so their size grows as the demo is used:

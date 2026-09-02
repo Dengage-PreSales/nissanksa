@@ -85,17 +85,43 @@ To see the email itself: book a test drive on the demo using a real address you
 can open. It arrives within seconds, opens with the car's photograph, and is
 Nissan red on black. If it is amber, an old copy of the body was pasted.
 
-### The push contents
+### The push contents, and what the Media field is
 
-Set the **Media** field to `{%= $Current.model_image %}` on the shared push
-contents, then book a drive with notifications allowed. The notification
-carries the car's photograph. No photograph means the field did not save.
+Both push contents are created and their ids are wired, so this is the last
+thing left on the messages.
 
-For the two that do not exist yet, `DENGAGE_TX_PUSH_NI_NEWSLETTER` and
-`DENGAGE_TX_PUSH_RESERVE`: the console shows both moments as `no push` until
-they do.
+**Where the field is.** Panel > **Content > Push**, open any one of the push
+contents you created, and it has a **Media** slot alongside Title, Message and
+Target URL. It is the picture the notification shows. Most people fill it by
+uploading an image, which is exactly what you do not want here, because the
+picture has to be a different car for each send.
+
+**What to put in it**, verbatim, instead of uploading anything:
+
+    {%= $Current.model_image %}
+
+That is a template tag, not a filename. The message function sends a
+`model_image` value with every message, resolved from the car in play, so the
+same content shows a Patrol to someone who booked a Patrol and an Altima to
+someone who booked an Altima. The tag for each moment is in
+[PUSH.md](nissan/PUSH.md) under that moment's Media row, and it is the same tag
+every time.
+
+**Do it once for both demos.** Every push content is shared between Nissan and
+Lincoln except the newsletter, and both send their own `model_image`, so
+setting the tag on the shared contents serves the Lincoln demo at the same time.
+
+**How you know it worked.** Book a test drive on the demo in a browser where
+you have allowed notifications. The notification arrives within seconds with
+the car's photograph in it. No photograph means the field did not save, or an
+upload is sitting in it instead of the tag.
 
 ### The remote data source
+
+**Only tables with a contact key can be connected at all.** A remote table has
+to relate to `master_contact` or `master_device`, so anything about places or
+cars rather than people is not offered. That rules out `ni_branch`,
+`ni_dealer_stock` and `v_ni_stock_gap`, and it is not a fault in any of them.
 
 Connect it, then build one segment on `v_ni_hot_leads` with no filter. It should
 count **72**. Any other number means something is wrong, and **zero is the one
@@ -104,8 +130,9 @@ read policy gets no error at all. It connects, authenticates, and every query
 answers nothing. The policies exist, so a zero here means the connection is
 using some other login than `dengage_reader`.
 
-The other six, for reference: no shows 12, open quotes 43, upgrade candidates
-228, stock gaps 11, dealer leads 216, and the merged contact view 508.
+The others, for reference: no shows 12, open quotes 43, upgrade candidates 228,
+dealer leads 216, the merged contact view 508, and `v_ni_contact_stock` 214, of
+whom 40 want a car their own branch does not have.
 
 ### The journeys
 
@@ -124,9 +151,12 @@ said plainly. That is the standing rule and it has never cost a meeting.
 
 ### The lead events table
 
-If `ni_lead_events` does not exist in Data Space, every custom row is accepted
-and stored nowhere, and the demo looks fine from the browser. The console's
-count for it will read **not found in Data Space**. That is the check.
+Confirmed on 2 September: `ni_lead_events` exists and is filling. Nothing to do.
+
+It is worth knowing what the check was, because it is silent when it fails: if
+the table did not exist, every custom row would be accepted and stored nowhere
+and the demo would look perfectly fine from the browser. The console's count
+reads **not found in Data Space** in that case.
 
 ---
 

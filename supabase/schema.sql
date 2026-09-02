@@ -272,16 +272,23 @@ grant select on public.v_ni_contact_360, public.v_ni_hot_leads, public.v_ni_no_s
   to dengage_reader;
 
 -- ---------------------------------------------------------------------------
--- The one table a Dengage remote source would not take
+-- The one table a Dengage remote source would not take, and why the first
+-- answer was wrong
 -- ---------------------------------------------------------------------------
 -- Four of the five ni_ tables connected first time and ni_dealer_stock did not.
--- It is also the only one whose primary key is three columns rather than one:
--- branch_id, model and model_year together. A remote source is configured by
--- choosing the column that identifies a row, so a composite key leaves nothing
--- to choose.
+-- It is also the only one whose primary key is three columns rather than one,
+-- so that looked like the fault and stock_id was added to give it a single
+-- column key.
 --
--- Additive, so no row was touched and the natural key keeps its constraint.
--- stock_id exists for the remote source to point at, and for nothing else.
+-- That was a fix for the wrong diagnosis. The real rule, from the panel on
+-- 2 September: a remote table has to relate to master_contact or
+-- master_device. ni_dealer_stock is branch by model by year and carries no
+-- contact at all, so no key shape could ever have made it connectable. The
+-- same rule rules out ni_branch and v_ni_stock_gap.
+--
+-- The column below is harmless and is left where it is rather than dropped,
+-- because removing it would change a table for no gain. What actually carries
+-- the stock story is v_ni_contact_stock, at the end of this file.
 alter table public.ni_dealer_stock
   add column if not exists stock_id bigint generated always as identity;
 
@@ -297,3 +304,57 @@ end $$;
 
 comment on column public.ni_dealer_stock.stock_id is
   'Surrogate single column key so a Dengage remote source has one column to identify a row by. The real key is still branch_id, model and model_year together.';
+
+-- ---------------------------------------------------------------------------
+-- Stock, keyed by contact
+-- ---------------------------------------------------------------------------
+-- A remote table has to relate to master_contact, so the stock table itself is
+-- unreachable from a segment. This is the same fact reshaped around the person
+-- it concerns: one row per contact who has told a showroom which car they
+-- want, whether it is on the ground where they were dealt with, and which
+-- branch has it if it is not.
+--
+-- That last column is the point. A campaign that says a car is unavailable is
+-- an apology; one that says where it is waiting is an appointment. 40 of the
+-- 214 contacts here want something their branch does not have, and every one
+-- of them has a branch named.
+create or replace view public.v_ni_contact_stock with (security_invoker = true) as
+  with latest as (
+    select distinct on (contact_key)
+           contact_key, model, branch_id, stage, stage_date
+    from public.ni_showroom_lead
+    where contact_key is not null and branch_id is not null and model is not null
+    order by contact_key, stage_date desc, lead_id desc
+  ),
+  here as (
+    select l.contact_key, l.model, l.branch_id, l.stage, l.stage_date,
+           coalesce(sum(s.stock_count), 0) as stock_at_their_branch
+    from latest l
+    left join public.ni_dealer_stock s
+      on s.branch_id = l.branch_id and s.model = l.model
+    group by l.contact_key, l.model, l.branch_id, l.stage, l.stage_date
+  ),
+  elsewhere as (
+    select h.contact_key,
+           /* The best stocked other branch. Distance is not in this data, so
+              it is not claimed: the column says what it is. */
+           (select b.name
+            from public.ni_dealer_stock s2
+            join public.ni_branch b on b.branch_id = s2.branch_id
+            where s2.model = h.model and s2.branch_id <> h.branch_id and s2.stock_count > 0
+            order by s2.stock_count desc, b.name
+            limit 1) as best_stocked_branch,
+           (select max(s3.stock_count)
+            from public.ni_dealer_stock s3
+            where s3.model = h.model and s3.branch_id <> h.branch_id) as stock_at_that_branch
+    from here h
+  )
+  select h.contact_key, h.model, h.branch_id, b.name as branch_name, b.city,
+         h.stage, h.stage_date, h.stock_at_their_branch,
+         (h.stock_at_their_branch > 0) as in_stock_for_them,
+         e.best_stocked_branch, e.stock_at_that_branch
+  from here h
+  join public.ni_branch b on b.branch_id = h.branch_id
+  left join elsewhere e on e.contact_key = h.contact_key;
+
+grant select on public.v_ni_contact_stock to dengage_reader;
