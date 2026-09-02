@@ -411,7 +411,20 @@ Typed lead details are the exception to all of this: name, email, phone and
 consent cannot be written from a page, so the lead relay upserts them onto
 `master_contact` over REST. Section 1a has the detail.
 
-## 7b. Proving a row landed, without opening the panel
+## 7b. Verifying the whole thing
+
+[VERIFY.md](VERIFY.md) is the runbook: one sitting, about twenty five minutes,
+ending with every item either proved or named as not done. It covers the
+storefront in one pass, the anonymous and known paths, and each panel item with
+a way to check it that does not involve trusting a green tick in a form.
+
+The console it runs on is at
+<https://dengage-presales.github.io/nissanksa/verify/>. It reads which moments
+can message and whether events are landing, and it writes nothing. It also
+loads no part of the demo on purpose, because a verification tool that fires
+its own page view appears in the numbers it reports.
+
+## 7c. Proving a row landed, without opening the panel
 
 An HTTP 200 from the event endpoint means accepted and nothing more. The only
 proof is the row, and this reads the counts:

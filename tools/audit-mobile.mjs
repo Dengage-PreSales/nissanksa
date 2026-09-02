@@ -26,6 +26,7 @@ const PAGES = [
   // pane is hidden and the page presents five chips and nothing else.
   'configure/index.html?model=x-trail',
   'my-showroom/index.html', 'compare/index.html', 'find-your-nissan/index.html',
+  'verify/index.html',
 ];
 const VIEWPORTS = [
   { name: 'phone', width: 412, height: 915, isMobile: true, hasTouch: true },

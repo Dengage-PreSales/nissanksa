@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verification console | Nissan KSA x Dengage demo</title>
+<meta name="description" content="Reads the demo's own state out of Dengage: which moments can message, and whether events are landing in the tables.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="../assets/brand/favicon.svg">
+<meta name="theme-color" content="#111111">
+
+<!-- THIS PAGE LOADS NOTHING FROM THE DEMO, AND THAT IS THE POINT.
+
+     No Dengage SDK, no identity, no events module. A verification tool that
+     fires a page view writes into the very tables it is measuring, so every
+     reading taken after opening it would include its own footprint. It only
+     reads: two endpoints, both of which read and never write. -->
+<style>
+  :root {
+    --ink: #111111; --red: #c3002f; --muted: #6e7275; --line: #e3e3e3;
+    --paper: #ffffff; --wash: #f4f4f4; --good: #0f6f66; --wait: #a8560a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--wash); color: var(--ink);
+    font: 400 15px/1.6 Arial, Helvetica, sans-serif;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 36px 20px 80px; }
+  h1 { margin: 0 0 10px; font: 700 30px/1.15 Arial, sans-serif; }
+  h2 {
+    margin: 0 0 14px; font: 700 13px/1 Arial, sans-serif; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink);
+  }
+  .lede { margin: 0 0 30px; color: var(--muted); max-width: 66ch; }
+  .card {
+    background: var(--paper); border: 1px solid var(--line);
+    padding: 22px; margin-bottom: 16px;
+  }
+  button {
+    padding: 12px 22px; border: 0; background: var(--red); color: #fff;
+    font: 700 12px/1 Arial, sans-serif; letter-spacing: .1em;
+    text-transform: uppercase; cursor: pointer;
+  }
+  button:hover { background: #a30027; }
+  button.quiet { background: var(--ink); }
+  button:disabled { background: #9c9c9c; cursor: default; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td {
+    text-align: left; padding: 9px 10px 9px 0; border-bottom: 1px solid var(--line);
+    font-size: 14px; vertical-align: top;
+  }
+  th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .up { color: var(--good); font-weight: 700; }
+  .flat { color: var(--muted); }
+  .ok { color: var(--good); font-weight: 700; }
+  .no { color: var(--wait); font-weight: 700; }
+  .note { margin: 14px 0 0; font-size: 13.5px; color: var(--muted); max-width: 70ch; }
+  .stamp { font-size: 12.5px; color: var(--muted); }
+  ol { margin: 0; padding-left: 22px; }
+  li { margin-bottom: 9px; }
+  a { color: var(--red); }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Verification console</h1>
+  <p class="lede">
+    Reads the demo's own state out of Dengage. Nothing here writes anything, and
+    this page deliberately loads no part of the demo: a verification tool that
+    fires its own page view would appear in the numbers it is reporting.
+  </p>
+
+  <div class="card">
+    <h2>1. What can message today</h2>
+    <div class="row">
+      <button id="health">Read the moments</button>
+      <span class="stamp" id="health-when"></span>
+    </div>
+    <div id="health-out"></div>
+    <p class="note">
+      Each moment needs an email content and a push content in the panel. A moment
+      reading <b>no email</b> reaches the drawer and the push only, which is a
+      working demo and not a broken one. This is the fastest way to confirm a
+      content id you have just set actually took.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>2. Are events landing in the tables</h2>
+    <div class="row">
+      <button id="snap">Take a baseline</button>
+      <button id="again" class="quiet">Read again</button>
+      <span class="stamp" id="snap-when"></span>
+    </div>
+    <div id="counts-out"></div>
+    <p class="note">
+      Take a baseline, go and use the demo, come back and read again. Two things
+      to know before you trust the answer. <b>Storage lags by roughly two
+      minutes</b>, so a reading taken straight after a click shows nothing and
+      means nothing. And the account is shared, so a count that moved is not
+      proof it was your event, while a count that did not move is proof it was
+      not.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>3. The walk that touches every table</h2>
+    <ol>
+      <li>Take the baseline above, then open the demo in another tab.</li>
+      <li><a href="../index.html" target="_blank">Home</a>: search for <code>patrol</code>, then press a heart on any car.
+        <span class="stamp">page_view_events, search_events, wishlist_events</span></li>
+      <li><a href="../vehicles/x-trail/index.html" target="_blank">A model page</a>: press Watch the price.
+        <span class="stamp">wishlist_events</span></li>
+      <li><a href="../configure/index.html?model=x-trail" target="_blank">Build and reserve</a>: choose a grade, choose a
+        different one, then reserve it and fill the form in.
+        <span class="stamp">shopping_cart_events add, remove, begin_checkout, then order_events</span></li>
+      <li><a href="../compare/index.html" target="_blank">Compare</a> two cars, then answer all three questions on
+        <a href="../find-your-nissan/index.html" target="_blank">Find your Nissan</a>.
+        <span class="stamp">ni_lead_events: compare, chooser with the purchase horizon</span></li>
+      <li><a href="../my-showroom/index.html" target="_blank">My Showroom</a>: press Not this one on the build.
+        <span class="stamp">shopping_cart_events delete_cart</span></li>
+      <li><a href="../dealer/index.html" target="_blank">Dealer cockpit</a>: pick DPS-1, log a walk in, then cancel the
+        test drive. <span class="stamp">ni_lead_events, and order_events reversing the booking</span></li>
+      <li>Wait two minutes, then press Read again.</li>
+    </ol>
+    <p class="note">
+      Every table should have moved. If one has not, the demo did not write it,
+      and <a href="../index.html?debug=1" target="_blank">?debug=1</a> on any page
+      shows what that page actually sent and to which table.
+    </p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var FN = 'https://raextqlludkagdntyzwn.supabase.co/functions/v1/';
+  var SNAP_KEY = 'dps:verify:baseline';
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* Say what has been wired, now that it has been. These are answered by
+     listeners rather than by a link, so without a mark on each the everything
+     works census reads all three as dead buttons. Stamped from here rather
+     than in the markup: if this script fails to run they really are dead. */
+  ['health', 'snap', 'again'].forEach(function (id) {
+    var el = $(id);
+    if (el) el.setAttribute('data-dps-wired', '1');
+  });
+
+  function stamp(el, when) {
+    el.textContent = when ? 'read at ' + new Date(when).toLocaleTimeString() : '';
+  }
+  function fail(host, err) {
+    host.innerHTML = '<p class="note no">Could not read: ' + String(err).slice(0, 160) + '</p>';
+  }
+
+  /* ---- 1. the moments ---- */
+  $('health').addEventListener('click', function () {
+    var host = $('health-out');
+    host.innerHTML = '<p class="note">Reading...</p>';
+    fetch(FN + 'nissan-booking-confirm').then(function (r) { return r.json(); }).then(function (d) {
+      var rows = Object.keys(d.moments || {}).map(function (k) {
+        var m = d.moments[k];
+        function cell(text) {
+          var good = text.indexOf('no ') === -1;
+          return '<span class="' + (good ? 'ok' : 'no') + '">' + text + '</span>';
+        }
+        return '<tr><td>' + m.label + '</td><td>' + cell(m.nissan) +
+               '</td><td>' + cell(m.lincoln) + '</td></tr>';
+      }).join('');
+      host.innerHTML =
+        '<table><thead><tr><th>Moment</th><th>Nissan</th><th>Lincoln</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table>' +
+        '<p class="note">API user configured: <b>' + (d.api_user_configured ? 'yes' : 'no') +
+        '</b>. Egress path configured: <b>' + (d.egress_proxy_configured ? 'yes' : 'no') + '</b>.</p>';
+      stamp($('health-when'), Date.now());
+    })['catch'](function (e) { fail(host, e); });
+  });
+
+  /* ---- 2. the tables ---- */
+  function readCounts() {
+    return fetch(FN + 'nissan-dengage-tables').then(function (r) { return r.json(); });
+  }
+  function baseline() {
+    try { return JSON.parse(localStorage.getItem(SNAP_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function paint(now) {
+    var base = baseline();
+    var rows = Object.keys(now.counts || {}).map(function (k) {
+      var v = now.counts[k];
+      var before = base && base.counts && base.counts[k] ? base.counts[k] : null;
+      var delta = (typeof v.rows === 'number' && typeof before === 'number') ? v.rows - before : null;
+      var cell = delta === null ? '<span class="flat">baseline not taken</span>'
+        : (delta > 0 ? '<span class="up">+' + delta + '</span>'
+                     : '<span class="flat">no change</span>');
+      return '<tr><td>' + k + '<br><span class="stamp">' + v.written_by + '</span></td>' +
+             '<td class="n">' + (before === null ? '' : before) + '</td>' +
+             '<td class="n">' + v.rows + '</td><td class="n">' + cell + '</td></tr>';
+    }).join('');
+    $('counts-out').innerHTML =
+      '<table><thead><tr><th>Table and what writes it</th><th class="n">Baseline</th>' +
+      '<th class="n">Now</th><th class="n">Moved</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    stamp($('snap-when'), Date.now());
+  }
+
+  $('snap').addEventListener('click', function () {
+    $('counts-out').innerHTML = '<p class="note">Reading...</p>';
+    readCounts().then(function (d) {
+      var flat = {};
+      Object.keys(d.counts || {}).forEach(function (k) { flat[k] = d.counts[k].rows; });
+      try { localStorage.setItem(SNAP_KEY, JSON.stringify({ counts: flat, at: Date.now() })); } catch (e) { /* noop */ }
+      paint(d);
+    })['catch'](function (e) { fail($('counts-out'), e); });
+  });
+
+  $('again').addEventListener('click', function () {
+    $('counts-out').innerHTML = '<p class="note">Reading...</p>';
+    readCounts().then(paint)['catch'](function (e) { fail($('counts-out'), e); });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+# How to verify every part of this demo
+
+One sitting, about twenty five minutes, and it ends with each item either
+proved or named as not done. Nothing here is a matter of judgement: each step
+says exactly what to press and exactly what the answer should be.
+
+**The one rule everything else rests on.** An HTTP 200 from Dengage means
+accepted and nothing more. The proof an event landed is a row in Data Space,
+and rows appear about two minutes after the click. A reading taken straight
+after pressing something shows nothing and means nothing, which is the single
+most likely way to talk yourself into believing this is broken when it is not.
+
+Start here, and keep it open in its own tab throughout:
+
+**<https://dengage-presales.github.io/nissanksa/verify/>**
+
+It reads the demo's state out of Dengage and writes nothing. It also loads no
+part of the demo, on purpose: a verification tool that fires its own page view
+would appear in the numbers it is reporting.
+
+---
+
+## Part 1. The storefront, in one pass
+
+Press **Take a baseline** on the console first. Then walk this. Roughly ten
+minutes.
+
+| # | Do this | It worked if |
+|---|---|---|
+| 1 | Open [the home page](https://dengage-presales.github.io/nissanksa/) | The Dengage mark is top left, never Nissan's |
+| 2 | Search for `patrol` in the header | Results appear in place, no page reload |
+| 3 | Press a heart on any car in the grid | It fills, and the car is saved |
+| 4 | Open [the X-TRAIL page](https://dengage-presales.github.io/nissanksa/vehicles/x-trail/) and press **Watch the price** | It confirms, and the car joins the watch list |
+| 5 | Open [Build and reserve](https://dengage-presales.github.io/nissanksa/configure/?model=x-trail) | Seven X-TRAIL grades, real prices, one saying **Price on request** |
+| 6 | Choose a grade, then a different one | The summary follows your choice and shows one car, not two |
+| 7 | Press **Reserve this build**, fill it in, confirm | The build is held, and a message arrives in the bell drawer |
+| 8 | Open [Compare](https://dengage-presales.github.io/nissanksa/compare/), pick two cars | They line up with published figures |
+| 9 | Open [Find your Nissan](https://dengage-presales.github.io/nissanksa/find-your-nissan/), answer all three | The range narrows, and TEKTON is named separately as unpriced |
+| 10 | Open [My Showroom](https://dengage-presales.github.io/nissanksa/my-showroom/) | Your saved car, your price watch, what you viewed and the car you built |
+| 11 | Press **Not this one** on the build | It disappears |
+| 12 | Open [the dealer cockpit](https://dengage-presales.github.io/nissanksa/dealer/), pick DPS-1, log a walk in, then cancel the test drive | Each reports what it wrote in the log pane |
+
+Then wait two minutes and press **Read again** on the console.
+
+**Every one of the seven tables should have moved.** If one has not, that call
+did not happen. Add `?debug=1` to any demo page and the readout at the bottom
+left names every event that page sent and the table each one writes to.
+
+---
+
+## Part 2. Anonymous and known
+
+The demo's whole argument is that it works before anyone has a name, so this is
+worth proving rather than asserting.
+
+1. Open the demo in a **private window**. Browse two models, save one, search.
+2. Open [My Showroom](https://dengage-presales.github.io/nissanksa/my-showroom/)
+   in that same private window. Everything you just did is there, and the line
+   at the top says nobody knows your name yet.
+3. Now open [the demo as DPS-1](https://dengage-presales.github.io/nissanksa/?ck=DPS-1)
+   and book a test drive. The confirmation arrives against that contact.
+
+**The one thing to confirm in the panel before claiming it on a call.** Open
+DPS-1's contact card and look for page views from *before* they were named. The
+device keeps its id across that moment and the SDK rebinds it, but the event
+rows stay keyed by the device on both sides, so the merge is Dengage's identity
+resolution doing it server side rather than anything this demo performs. If the
+earlier views are on the card, tell the merge story outright. If they are not,
+tell it as the device history the profile is built from, which is still true.
+
+---
+
+## Part 3. Your panel work, item by item
+
+Each of these has a way to check it that does not involve trusting a green tick
+in a form.
+
+### The ten email bodies
+
+Set a content id, then press **Read the moments** on the console. That moment's
+Nissan column flips from `no email, push` to `email, push`. If it does not, the
+id did not take.
+
+To see the email itself: book a test drive on the demo using a real address you
+can open. It arrives within seconds, opens with the car's photograph, and is
+Nissan red on black. If it is amber, an old copy of the body was pasted.
+
+### The push contents
+
+Set the **Media** field to `{%= $Current.model_image %}` on the shared push
+contents, then book a drive with notifications allowed. The notification
+carries the car's photograph. No photograph means the field did not save.
+
+For the two that do not exist yet, `DENGAGE_TX_PUSH_NI_NEWSLETTER` and
+`DENGAGE_TX_PUSH_RESERVE`: the console shows both moments as `no push` until
+they do.
+
+### The remote data source
+
+Connect it, then build one segment on `v_ni_hot_leads` with no filter. It should
+count **72**. Any other number means something is wrong, and **zero is the one
+to understand**: these tables have row level security on, so a role without a
+read policy gets no error at all. It connects, authenticates, and every query
+answers nothing. The policies exist, so a zero here means the connection is
+using some other login than `dengage_reader`.
+
+The other six, for reference: no shows 12, open quotes 43, upgrade candidates
+228, stock gaps 11, dealer leads 216, and the merged contact view 508.
+
+### The journeys
+
+Trigger each one from the demo rather than from a test send.
+
+| Journey | Fire it by | It worked if |
+|---|---|---|
+| Booking confirmation | booking a test drive | the push arrives within seconds |
+| Abandoned booking | starting a booking and leaving | the rescue arrives after the wait window |
+| Welcome | booking as a new contact | one welcome message, once |
+| Quote follow up | the open quotes segment | it enters on the next evaluation |
+| No show re invite | the cockpit's no show button | it enters on the next evaluation |
+
+A journey that has not fired by rehearsal is shown as its canvas on the call and
+said plainly. That is the standing rule and it has never cost a meeting.
+
+### The lead events table
+
+If `ni_lead_events` does not exist in Data Space, every custom row is accepted
+and stored nowhere, and the demo looks fine from the browser. The console's
+count for it will read **not found in Data Space**. That is the check.
+
+---
+
+## Part 4. What the repository checks by itself
+
+Before every push, and worth running if you change anything:
+
+    python3 -m http.server 8101 &
+    node tools/verify.mjs          # 44 assertions on the Nissan build
+    node tools/verify-lincoln.mjs  # 55 on Lincoln
+    node tools/audit.mjs           # every control and image, all 26 pages
+    node tools/audit-mobile.mjs    # the same at a phone viewport
+
+The browser checks refuse the Dengage hosts and assert the refusal, so a run
+never writes into the shared account. That is why they cannot prove an event
+reached Dengage, and why Part 1 exists.

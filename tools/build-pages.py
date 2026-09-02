@@ -1201,6 +1201,30 @@ def build(out_path: str, spec: dict):
     return True
 
 
+# Pages written by hand rather than generated, which still load the same
+# modules. They are not in PAGES, so nothing was keeping their cache stamps in
+# step with the generated pages: each one carried whatever stamp was current
+# the last time somebody edited it by hand. Pages caches for ten minutes, so a
+# stale stamp means a page quietly serving yesterday's module while every
+# generated page has today's, which is the kind of fault that only appears on
+# somebody else's machine.
+STANDALONE = ["dealer/index.html", "verify/index.html"]
+
+
+def restamp(path):
+    """Bring one hand written page's ?v= stamps up to this build's."""
+    file = ROOT / path
+    if not file.exists():
+        return False
+    text = file.read_text(encoding="utf-8")
+    fresh = re.sub(r"\?v=\d+", f"?v={STAMP}", text)
+    if fresh == text:
+        return False
+    file.write_text(fresh, encoding="utf-8")
+    print(f"restamped {path}")
+    return True
+
+
 def main():
     only = sys.argv[1:]
     stable_side_shots()
@@ -1211,6 +1235,9 @@ def main():
         if build(out_path, spec):
             ok += 1
     print(f"{ok} pages built")
+    for path in STANDALONE:
+        if not only or any(o in path for o in only):
+            restamp(path)
 
 
 if __name__ == "__main__":
