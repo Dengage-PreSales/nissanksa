@@ -391,6 +391,12 @@ buttons do the same.
 
 ## 6. Verifying without opening the panel
 
+Two documents sit alongside this one. [VERIFY.md](VERIFY.md) checks each item
+here is wired, in about twenty five minutes. [WALKTHROUGH.md](WALKTHROUGH.md)
+walks one buyer from a Google ad click to a car sold in fifty two steps, which
+is the one to rehearse before a call.
+
+
 Is the SDK serving, and are the ten campaigns live? The manifest the SDK
 fetches in every visitor's browser answers from a terminal:
 

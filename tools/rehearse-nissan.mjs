@@ -24,7 +24,7 @@
 
        python3 -m http.server 8101
        node tools/rehearse-nissan.mjs --email you@example.com \
-            --gsm 0555555555 --from facebook
+            --gsm 0555555555 --from google --term "nissan x-trail price"
 
    The address is required and is used for every form, because a rehearsal
    that types an invented address sends real mail to a domain that does not
@@ -43,10 +43,17 @@ const arg = (name, fallback) => {
 const EMAIL = arg('email', '');
 const GSM = arg('gsm', '0555555555');
 /* The advertisement they clicked. It is on the address of the first page only,
-   which is exactly the case worth rehearsing. */
+   which is exactly the case worth rehearsing. The medium is separate because
+   the two that matter read differently on a call: a Google click is cpc and a
+   Facebook one is paid_social, and a run that says the wrong one is telling
+   the wrong story about where the money went. */
 const CAMPAIGN = arg('from', '');
+const MEDIUM = arg('medium', CAMPAIGN === 'google' ? 'cpc' : 'paid_social');
+const TERM = arg('term', '');
 const ENTRY = CAMPAIGN
-  ? `index.html?utm_source=${CAMPAIGN}&utm_medium=paid_social&utm_campaign=patrol_launch&debug=1`
+  ? `index.html?utm_source=${CAMPAIGN}&utm_medium=${MEDIUM}`
+    + `&utm_campaign=ksa_suv_always_on${TERM ? '&utm_term=' + encodeURIComponent(TERM) : ''}`
+    + `${CAMPAIGN === 'google' ? '&gclid=REHEARSAL-' + Date.now() : ''}&debug=1`
   : 'index.html?debug=1';
 
 const steps = [];
@@ -247,6 +254,21 @@ async function submitForm(p) {
       try { return localStorage.getItem('dps:nissanksa:campaign'); } catch (e) { return null; }
     });
     note('the campaign that brought them is held', held ? 'ok' : 'break', held || 'nothing stored');
+    /* A Google click carries a gclid whether or not the utm tags survived the
+       redirect chain, so the source is read from it when they did not. */
+    const fromGclid = await p.evaluate(async () => {
+      try { localStorage.removeItem('dps:nissanksa:campaign'); } catch (e) { /* noop */ }
+      return true;
+    });
+    if (fromGclid && CAMPAIGN === 'google') {
+      await page.goto(BASE + 'index.html?gclid=REHEARSAL-BARE-' + Date.now(), { waitUntil: 'load' });
+      await page.waitForTimeout(700);
+      const bare = await page.evaluate(() => {
+        try { return localStorage.getItem('dps:nissanksa:campaign'); } catch (e) { return null; }
+      });
+      note('a bare gclid is still read as google', /"utm_source":"google"/.test(bare || '') ? 'ok' : 'break',
+           bare || 'nothing stored');
+    }
   }
 }
 

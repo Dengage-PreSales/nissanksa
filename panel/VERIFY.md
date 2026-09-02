@@ -10,6 +10,11 @@ and rows appear about two minutes after the click. A reading taken straight
 after pressing something shows nothing and means nothing, which is the single
 most likely way to talk yourself into believing this is broken when it is not.
 
+**Looking for the long version?** [WALKTHROUGH.md](WALKTHROUGH.md) walks one
+buyer from a Google ad click to a car sold in fifty two steps, in the order a
+real visitor meets them. This page is the shorter check that each item is
+wired; that one is the story.
+
 Start here, and keep it open in its own tab throughout:
 
 **<https://dengage-presales.github.io/nissanksa/verify/>**
