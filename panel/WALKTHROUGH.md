@@ -1,6 +1,6 @@
 # The full walkthrough: one buyer, start to finish
 
-Fifty two steps, about forty minutes, from a Google ad click to a car sold.
+Fifty three steps, about forty minutes, from a Google ad click to a car sold.
 It is written for someone who has never opened the demo: every step says what
 to press, what should happen, and what it proves. Nothing here is a matter of
 judgement.
@@ -88,6 +88,7 @@ answers "did that button send anything, and what was in it" in one glance.
 | 27 | Look at the readout | `addToCart`, `beginCheckout`, `order`, and the lead row | The whole funnel, in the standard ecommerce tables, exactly as a real store writes it |
 | 28 | Open the bell, marked **Nissan KSA updates** | The confirmation is in the drawer | A third channel, instant, alongside the email and the notification |
 | 29 | Allow notifications when the card offers it, then book once more | The notification arrives within seconds, **with the car's photograph** | The web push channel, working with no mobile app. The photograph needs the Media field set: see [VERIFY.md](VERIFY.md) |
+| 29a | **On an iPhone only:** Share, then Add to Home Screen, then open the demo from that icon before step 29 | The permission prompt appears, which it does not in a Safari tab | iOS delivers a web push only to a site added to the Home Screen. Android needs none of this. The card says so if you press it in a tab |
 | 30 | Check the email you used | The confirmation email, with the car's photograph and its published starting price | Two channels answering one action, in seconds |
 
 ---

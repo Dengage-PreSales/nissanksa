@@ -401,6 +401,73 @@
     }
 
     /* ------------------------------------------------------------------ */
+    /* The demo's own pages, in the menu                                    */
+
+    /* WHY THIS EXISTS. The captured menu is Nissan's, so it lists Nissan's
+       site: service booking, warranty, Formula E, the owner portal. Five of
+       this demo's own pages are not on it at all, because the source site has
+       no equivalent of them, and three of those are the ones a call actually
+       needs. On a laptop that was survivable, because the home page links most
+       of them further down. On a phone the menu IS the navigation, so My
+       Showroom and the configurator were unreachable without typing a URL.
+
+       So the demo's pages go at the top of the menu, above the captured one,
+       named the way the storefront names them. The captured entries stay
+       exactly as they are underneath: they are part of what makes the demo
+       look like the real site, and the ones with no answer here say so when
+       they are pressed rather than pretending. */
+    var SHORTCUTS = [
+        { to: 'index.html#models',            label: 'All models' },
+        { to: 'configure/index.html',         label: 'Build and reserve' },
+        { to: 'compare/index.html',           label: 'Compare models' },
+        { to: 'find-your-nissan/index.html',  label: 'Find your Nissan' },
+        { to: 'my-showroom/index.html',       label: 'My Showroom' },
+        { to: 'offers/index.html',            label: 'Offers' },
+        { to: 'book-a-test-drive/index.html', label: 'Book a test drive' },
+        { to: 'request-a-quote/index.html',   label: 'Get a quote' },
+        { to: 'finance-calculator/index.html', label: 'Finance calculator' },
+        { to: 'find-a-showroom/index.html',   label: 'Find a showroom' },
+        { to: 'shop-at-home/index.html',      label: 'Shop@Home' },
+        { to: 'vehicles/tekton/index.html',   label: 'Tekton, arriving 2026' }
+    ];
+
+    function shortcutList(withClose) {
+        var pre = sitePrefix();
+        var nav = document.createElement('nav');
+        nav.className = 'dps-shortcuts';
+        nav.setAttribute('aria-label', 'This demonstration');
+        /* The drawer covers all but a thumb's width of a phone screen, so the
+           only way out was a 31 pixel strip down one edge. The panel a laptop
+           opens has the whole page around it and needs no such control. */
+        var html = '<div class="dps-shortcuts-head"><h2>This demonstration</h2>' +
+            (withClose ? '<button type="button" class="dps-shortcuts-close" ' +
+                'aria-label="Close the menu">Close</button>' : '') + '</div><ul>';
+        SHORTCUTS.forEach(function (item) {
+            html += '<li><a href="' + pre + item.to + '">' + item.label + '</a></li>';
+        });
+        nav.innerHTML = html + '</ul>';
+        return nav;
+    }
+
+    /* One list, built once, placed in both menus: the drawer a phone opens and
+       the panel a laptop opens. They are different elements in the captured
+       markup, and a visitor only ever sees one of them. */
+    function shortcuts(header) {
+        [$('aside.sidebar-mobile', header), $('.meganav-container', header)]
+            .forEach(function (host, i) {
+                if (!host || host.querySelector('.dps-shortcuts')) return;
+                host.insertBefore(shortcutList(i === 0), host.firstChild);
+            });
+        var close = $('.dps-shortcuts-close', header);
+        if (close) {
+            close.setAttribute('data-dps-wired', '1');
+            close.addEventListener('click', function () {
+                header.classList.remove('dps-menu-open');
+            });
+        }
+    }
+
+    /* ------------------------------------------------------------------ */
     /* Header: burger, meganav, search                                      */
 
     function wireHeader() {
@@ -421,6 +488,7 @@
                 header.classList.remove('dps-menu-open');
             });
         }
+        shortcuts(header);
 
         /* The header's own top links arrive as script toggles; each one
            now answers for itself. */

@@ -6,7 +6,7 @@
      synchronously and must run before the SDK snippet initializes; both must
      run before any stylesheet, because a pending stylesheet blocks every
      script after it. -->
-<script src="../js/identity.js?v=1788169690"></script>
+<script src="../js/identity.js?v=1788374042"></script>
 <!-- DENGAGE SDK START -->
 <script>
   (function (window, document) {
@@ -25,6 +25,17 @@
 <!-- DENGAGE SDK END -->
 <link rel="icon" type="image/svg+xml" href="../assets/brand/favicon.svg">
 <meta name="robots" content="noindex">
+<!-- The same four lines the Nissan build gained on 2 September, for the same
+     reason: iOS delivers a web push only to a site added to the Home Screen,
+     and only offers that as a real app when the page declares a manifest with
+     display standalone. Without them the permission prompt on an iPhone raised
+     no dialog at all. This demo has its own manifest because it has its own
+     scope, name and start page under lincoln/. -->
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Lincoln Demo">
+<link rel="apple-touch-icon" href="../assets/brand/icon-180.png">
 
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -2085,18 +2096,18 @@ background-color: #b45f1a !important;
   </button>
 </div>
 
-<link rel="stylesheet" href="../assets/css/demo-controls.css?v=1788253454">
-<link rel="stylesheet" href="../assets/css/lincoln-overrides.css?v=1788169690">
-<script src="../js/config.js?v=1788169690"></script>
-<script src="../js/copy.js?v=1788169690"></script>
-<script src="../js/vehicles.js?v=1788169690"></script>
-<script src="../js/dengageEvents.js?v=1788253454"></script>
-<script src="../js/site.js?v=1788254797"></script>
-<script src="../js/creatives.js?v=1788169690"></script>
-<script src="../js/panels.js?v=1788169690"></script>
-<script src="../js/slots.js?v=1788169690"></script>
-<script src="../js/inbox.js?v=1788251659"></script>
-<script src="../js/debug.js?v=1788169690"></script>
+<link rel="stylesheet" href="../assets/css/demo-controls.css?v=1788374042">
+<link rel="stylesheet" href="../assets/css/lincoln-overrides.css?v=1788374042">
+<script src="../js/config.js?v=1788374042"></script>
+<script src="../js/copy.js?v=1788374042"></script>
+<script src="../js/vehicles.js?v=1788374042"></script>
+<script src="../js/dengageEvents.js?v=1788374042"></script>
+<script src="../js/site.js?v=1788374042"></script>
+<script src="../js/creatives.js?v=1788374042"></script>
+<script src="../js/panels.js?v=1788374042"></script>
+<script src="../js/slots.js?v=1788374042"></script>
+<script src="../js/inbox.js?v=1788374042"></script>
+<script src="../js/debug.js?v=1788374042"></script>
 </body>
 
 </html>

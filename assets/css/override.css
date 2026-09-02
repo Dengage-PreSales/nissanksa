@@ -66,21 +66,49 @@ header .dps-brand { color: #111111; }
 header.c_010D-is-floating .dps-brand { color: #ffffff; }
 footer .dps-brand { color: #ffffff; }
 
-/* The mobile sidebar is the burger drawer's content, never page flow. */
+/* The mobile sidebar is the burger drawer's content, never page flow.
+
+   THE TRANSFORM IS THE WHOLE FIX, and it is why the burger did nothing on a
+   phone until 2 September. The captured stylesheet parks this drawer off the
+   right edge with transform: translateX(100%) and slid it back by removing a
+   class from <html> that this build does not use. Setting display, position
+   and z-index here was not enough: the drawer opened, measured its full size,
+   reported itself visible to any check that asked, and sat one screen width to
+   the right of the viewport where nobody could see it. A check that reads
+   computed style cannot catch that; only one that compares the box against the
+   viewport can, which is what tools/mobile-check.mjs now does. */
 header.c_010D aside.sidebar-mobile { display: none; }
 header.c_010D.dps-menu-open aside.sidebar-mobile {
   display: block;
   position: fixed;
   top: 0;
   inset-inline-end: 0;
+  transform: none;
   width: min(420px, 92vw);
   height: 100vh;
   overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   background: #ffffff;
   color: #111111;
   z-index: 70;
   padding: 24px;
   box-shadow: -18px 0 48px rgba(0, 0, 0, .3);
+}
+/* The right to left mirror parks it off the other edge, so it needs the same
+   reset rather than the inherited translateX(-100%). */
+html[dir="rtl"] header.c_010D.dps-menu-open aside.sidebar-mobile { transform: none; }
+
+/* A 20 by 20 burger is a miss on a phone. The target grows to the 44 pixels a
+   thumb needs, and the negative margin gives back exactly what the padding
+   took, so the header lays out as it did. Setting a min-width instead widened
+   the header row and pushed four to nine pixels of every page off the right
+   edge, which the mobile audit caught within the hour: a fix for one phone
+   problem is not worth a scrollbar on every page. */
+header.c_010D .burger {
+  padding: 12px;
+  margin: -12px;
+  box-sizing: content-box;
 }
 
 /* The save control this build adds to each model card. */
@@ -779,3 +807,91 @@ h1.headTop span + span { margin-inline-start: 0.24em; }
     font: 400 14px/1.6 Arial, sans-serif; color: #6e7275; max-width: 68ch;
 }
 .sr-aside a { color: #c3002f; }
+
+/* The demo's own pages, at the top of whichever menu the visitor opened. The
+   captured menu is Nissan's and lists Nissan's site; five of these pages have
+   no equivalent there, and on a phone the menu is the only navigation, so
+   without this block My Showroom and the configurator could not be reached at
+   all. */
+.dps-shortcuts {
+  margin: 0 0 22px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.dps-shortcuts h2 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #6e7275;
+}
+.dps-shortcuts ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dps-shortcuts li { margin: 0; }
+.dps-shortcuts a {
+  display: block;
+  padding: 11px 14px;
+  min-height: 44px;
+  line-height: 22px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #111111;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.dps-shortcuts a:hover,
+.dps-shortcuts a:focus-visible { border-color: #111111; }
+/* Inside the laptop menu the panel is wide, so the same list reads as columns
+   rather than as a wrapped row of chips. */
+.meganav-container .dps-shortcuts { padding: 20px 24px 18px; margin-bottom: 0; }
+.dps-shortcuts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.dps-shortcuts-head h2 { margin: 0; }
+.dps-shortcuts-close {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #111111;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.dps-shortcuts-close:hover { border-color: #111111; }
+/* The captured search box carries 50px of top padding for a drawer that had
+   nothing above it. It has something above it now. */
+header.c_010D.dps-menu-open aside.sidebar-mobile form.search { padding-top: 6px; }
+
+/* AN INVISIBLE BAR THAT ATE EVERY TAP ON SIX MODEL PAGES.
+   The captured sticky nav is position fixed, full width, up to 100px tall and
+   z-index 10000, and its ns-no-display state hides only the inner element. The
+   container stayed exactly where it was: an invisible rectangle across the top
+   of the page, above the header, swallowing every press on the hamburger, the
+   logo and the search box. It never shows anything in this build, because the
+   script that would reveal it is not part of the capture, so in that state it
+   collapses and stops taking presses. Found on 2 September by the first check
+   that used a real tap rather than a scripted click; a scripted click goes
+   straight to the element and never hit tests, which is why every audit before
+   it passed. */
+.ns-sticky-nav.ns-no-display {
+  pointer-events: none;
+  max-height: 0;
+}
+.ns-sticky-nav.ns-no-display .ns-sticky-nav-inner { pointer-events: none; }

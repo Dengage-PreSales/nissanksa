@@ -127,6 +127,21 @@
     function brandPrefix() { return dcfg().brandPrefix || 'nissan_demo_'; }
     function prefixFor(spec) { return spec && spec.hy ? brandPrefix() : scenarioPrefix(); }
 
+    /* An iPhone or iPad running this in a browser tab rather than from the
+       Home Screen. Every browser on iOS is Safari underneath, so the engine
+       rather than the brand decides, and iPadOS reports itself as a Mac, which
+       the touch point count gives away. */
+    function iosSafariTab() {
+        var nav = window.navigator || {};
+        var ios = /iPad|iPhone|iPod/.test(nav.platform || '') ||
+                  (/Mac/.test(nav.platform || '') && (nav.maxTouchPoints || 0) > 1) ||
+                  /iPad|iPhone|iPod/.test(nav.userAgent || '');
+        if (!ios) return false;
+        var installed = nav.standalone === true ||
+            (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+        return !installed;
+    }
+
     function text(key) {
         return (window.Storefront && window.Storefront.t) ? window.Storefront.t(key) : key;
     }
@@ -400,6 +415,19 @@
             }
             if (act) {
                 var events = window.DengageEvents;
+                /* iOS delivers a web push only to a site the visitor added to
+                   the Home Screen and opened from there. In a Safari tab the
+                   permission call is simply not offered, so this card raised no
+                   dialog and printed nothing useful. The pages now declare a
+                   manifest so the Home Screen app exists; this says how to
+                   reach it. Android needs none of it. */
+                if (iosSafariTab()) {
+                    log('On iPhone and iPad, a notification only reaches a site you have added ' +
+                        'to the Home Screen. Press Share, then Add to Home Screen, open the demo ' +
+                        'from that icon, and press this card again. Android needs none of this ' +
+                        'and works in the browser as it is.');
+                    return;
+                }
                 if (!events.pushSupported()) {
                     log('Web push is not available in this browser. It needs a secure ' +
                         'origin and a service worker, so it will not work from a file:// page.');

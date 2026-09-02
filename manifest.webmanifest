@@ -1,0 +1,17 @@
+{
+  "name": "Nissan KSA, a Dengage demonstration",
+  "short_name": "Nissan Demo",
+  "description": "A Dengage pre purchase demonstration storefront built on the public Nissan Saudi Arabia website. Not Nissan's site.",
+  "id": "/nissanksa/",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    { "src": "assets/brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

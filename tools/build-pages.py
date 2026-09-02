@@ -1006,6 +1006,20 @@ def head_block(spec, rel, css_links):
 <link rel="icon" type="image/svg+xml" href="{rel}assets/brand/favicon.svg">
 <meta name="theme-color" content="#111111">
 
+<!-- WHAT THESE FOUR LINES ARE FOR: web push on an iPhone, and nothing else.
+     iOS delivers a web push only to a site the visitor added to the Home
+     Screen and opened from there, and Safari only offers that as a real app
+     when the page declares a manifest with display standalone, or the older
+     apple meta below. This build declared neither, so the permission prompt on
+     an iPhone did nothing at all: the button was pressed, no dialog appeared,
+     and the demo looked broken on the one device a prospect is holding.
+     Android Chrome never needed any of this and always worked. -->
+<link rel="manifest" href="{rel}manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Nissan Demo">
+<link rel="apple-touch-icon" href="{rel}assets/brand/icon-180.png">
+
 <!-- ORDER IN THE HEAD IS LOAD BEARING. identity.js resolves the contact key
      synchronously and must run before the SDK snippet initializes; both must
      run before any stylesheet, because a pending stylesheet blocks every

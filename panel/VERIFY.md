@@ -90,6 +90,27 @@ To see the email itself: book a test drive on the demo using a real address you
 can open. It arrives within seconds, opens with the car's photograph, and is
 Nissan red on black. If it is amber, an old copy of the body was pasted.
 
+### Web push on a phone, and the one thing iPhone needs
+
+**Android works in the browser as it is.** Open the demo, press the launcher,
+press **Web push**, allow the prompt. The notification arrives.
+
+**iPhone and iPad need one extra step, and it is not optional.** iOS delivers a
+web push only to a site that has been added to the Home Screen and opened from
+that icon. In an ordinary Safari tab the permission prompt is not offered at
+all, so the button appears to do nothing. Until 2 September the demo declared
+no web app manifest, which meant the Home Screen route did not exist either and
+push on an iPhone could never work. It does now:
+
+1. Open the demo in Safari on the phone.
+2. Press **Share**, then **Add to Home Screen**.
+3. Open the demo from that new icon, not from Safari.
+4. Press the launcher, press **Web push**, allow the prompt.
+
+Pressing the card in a Safari tab now prints those steps in the log rather than
+failing silently. The same is true of the Lincoln demo, which has its own icon
+and its own manifest.
+
 ### The push contents, and what the Media field is
 
 Both push contents are created and their ids are wired, so this is the last
@@ -187,6 +208,24 @@ Before every push, and worth running if you change anything:
     node tools/verify-lincoln.mjs  # 55 on Lincoln
     node tools/audit.mjs           # every control and image, all 26 pages
     node tools/audit-mobile.mjs    # the same at a phone viewport
+    node tools/mobile-check.mjs    # 16 things a thumb does, on two phones
+
+**`mobile-check.mjs` is the one that presses things**, and it exists because
+the other four did not. They measure a page; it taps the hamburger, the
+launcher, the bell, a grade card and the booking form's submit, then asks a
+question none of the others asked: is the box that opened actually inside the
+screen. Three faults hid behind that gap until 2 September, and every one of
+them was invisible to a check that reads computed style:
+
+- The menu drawer opened correctly and sat one screen width to the right of
+  the viewport, because the captured stylesheet parks it there with a
+  transform this build never reset. On a phone the hamburger did nothing.
+- An invisible sticky bar, full width and up to 100px tall at z-index 10000,
+  swallowed every press on the hamburger on six model pages. A scripted click
+  goes straight to its element and never hit tests, so no earlier check could
+  see it; a real tap fails immediately.
+- No page declared a web app manifest, so on an iPhone the notification
+  permission prompt was never offered and web push could not work at all.
 
 The browser checks refuse the Dengage hosts and assert the refusal, so a run
 never writes into the shared account. That is why they cannot prove an event
@@ -196,9 +235,9 @@ reached Dengage, and why Part 1 exists.
 published build with every call let through, and reports what the account
 actually answered for each moment:
 
-    node tools/rehearse-nissan.mjs --from facebook
+    node tools/rehearse-nissan.mjs --from google --term "nissan x-trail price"
 
-Thirty steps, about four minutes: a first anonymous page view, the campaign
+Thirty one steps, about four minutes: a first anonymous page view, the campaign
 that brought them, three model pages, a creative appearing on its own after
 dwelling, a search, a grade configured, a booking begun and abandoned with the
 rescue drawing itself, a brochure, and the three cockpit signals. Each send
@@ -214,6 +253,6 @@ you give it an address, because a rehearsal that invents one sends real mail to
 a domain that does not exist and the bounce lands on the shared sending
 reputation. To rehearse the email half, use your own:
 
-    node tools/rehearse-nissan.mjs --email you@example.com --from facebook
+    node tools/rehearse-nissan.mjs --email you@example.com --from google
 
 `tools/rehearse-lincoln.mjs` is the same thing for the other demo.

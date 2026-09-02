@@ -99,6 +99,17 @@ HEAD_INJECT = """
 <!-- DENGAGE SDK END -->
 <link rel="icon" type="image/svg+xml" href="{rel}assets/brand/favicon.svg">
 <meta name="robots" content="noindex">
+<!-- The same four lines the Nissan build gained on 2 September, for the same
+     reason: iOS delivers a web push only to a site added to the Home Screen,
+     and only offers that as a real app when the page declares a manifest with
+     display standalone. Without them the permission prompt on an iPhone raised
+     no dialog at all. This demo has its own manifest because it has its own
+     scope, name and start page under lincoln/. -->
+<link rel="manifest" href="{rel}manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Lincoln Demo">
+<link rel="apple-touch-icon" href="{rel}assets/brand/icon-180.png">
 """
 
 SCAFFOLD = """
