@@ -186,3 +186,29 @@ Before every push, and worth running if you change anything:
 The browser checks refuse the Dengage hosts and assert the refusal, so a run
 never writes into the shared account. That is why they cannot prove an event
 reached Dengage, and why Part 1 exists.
+
+**The one check that does reach Dengage** walks a whole visitor through the
+published build with every call let through, and reports what the account
+actually answered for each moment:
+
+    node tools/rehearse-nissan.mjs --from facebook
+
+Thirty steps, about four minutes: a first anonymous page view, the campaign
+that brought them, three model pages, a creative appearing on its own after
+dwelling, a search, a grade configured, a booking begun and abandoned with the
+rescue drawing itself, a brochure, and the three cockpit signals. Each send
+prints what Dengage said on each channel and whether every message value
+resolved. Run it before a call.
+
+Two things about it worth knowing before you read the output. A push cannot
+land in a headless browser, because push needs a service worker and a
+permission grant and it has neither, so **"this contact has no device bound" is
+the correct answer there** rather than a fault: it is what a real anonymous
+visitor gets before they say yes to notifications. And it sends no email unless
+you give it an address, because a rehearsal that invents one sends real mail to
+a domain that does not exist and the bounce lands on the shared sending
+reputation. To rehearse the email half, use your own:
+
+    node tools/rehearse-nissan.mjs --email you@example.com --from facebook
+
+`tools/rehearse-lincoln.mjs` is the same thing for the other demo.

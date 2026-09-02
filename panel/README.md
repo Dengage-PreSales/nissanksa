@@ -275,7 +275,7 @@ host `aws-0-ap-northeast-1.pooler.supabase.com`, port `6543`, user
 `ap-northeast-1`.
 
 `dengage_reader` was created for this and can do nothing else: select on the
-five `ni_` tables and the seven views below, no insert, no update, no delete,
+five `ni_` tables and the eight views below, no insert, no update, no delete,
 no `ni_inbox`. That was verified as the role rather than assumed. It is defined
 in `supabase/schema.sql`, without the password.
 
@@ -287,7 +287,7 @@ this way tests green and every segment built on it is empty. The policies now
 exist, one read-only policy per table, so this is fixed; it is written down
 because the next table added here will have the same trap and the same silence.
 
-### 4b. Seven views, so a segment is one filter rather than a join
+### 4b. Eight views, so a segment is one filter rather than a join
 
 The panel builds segments over a single remote table at a time, so the joins
 live in the database and the panel sees flat tables. Counts are as of the
@@ -304,7 +304,7 @@ seeding and are exact unless noted.
 | `v_ni_contact_stock` | 214 | The stock fact, per person: their car, their branch, whether it is there, and which branch has it if not. 40 want what their branch does not have |
 | `v_ni_dealer_leads` | 216 | Every lead with its showroom attached, for the dealer-scoped segments a sub-account would own. Three of the 219 leads have no branch and are correctly absent: they came in over WhatsApp before any showroom was involved |
 
-The four base tables are readable too, and remain the right source for anything
+The five base tables are readable too, and remain the right source for anything
 the views do not cover:
 
 | Table | Rows | Holds |
