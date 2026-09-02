@@ -158,11 +158,24 @@
   function fail(host, err) {
     host.innerHTML = '<p class="note no">Could not read: ' + String(err).slice(0, 160) + '</p>';
   }
+  /* The counts call signs in and reads seven tables, so it is never instant.
+     A button that looks stuck gets pressed again, and the second press is
+     what makes a tool feel broken. */
+  function busy(ids, on, label) {
+    ids.forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      el.disabled = on;
+      if (on) { el.dataset.was = el.textContent; el.textContent = label; }
+      else if (el.dataset.was) { el.textContent = el.dataset.was; }
+    });
+  }
 
   /* ---- 1. the moments ---- */
   $('health').addEventListener('click', function () {
     var host = $('health-out');
     host.innerHTML = '<p class="note">Reading...</p>';
+    busy(['health'], true, 'Reading');
     fetch(FN + 'nissan-booking-confirm').then(function (r) { return r.json(); }).then(function (d) {
       var rows = Object.keys(d.moments || {}).map(function (k) {
         var m = d.moments[k];
@@ -179,7 +192,8 @@
         '<p class="note">API user configured: <b>' + (d.api_user_configured ? 'yes' : 'no') +
         '</b>. Egress path configured: <b>' + (d.egress_proxy_configured ? 'yes' : 'no') + '</b>.</p>';
       stamp($('health-when'), Date.now());
-    })['catch'](function (e) { fail(host, e); });
+    })['catch'](function (e) { fail(host, e); })
+      .then(function () { busy(['health'], false); });
   });
 
   /* ---- 2. the tables ---- */
@@ -209,18 +223,22 @@
   }
 
   $('snap').addEventListener('click', function () {
-    $('counts-out').innerHTML = '<p class="note">Reading...</p>';
+    $('counts-out').innerHTML = '<p class="note">Reading seven tables, a few seconds...</p>';
+    busy(['snap', 'again'], true, 'Reading');
     readCounts().then(function (d) {
       var flat = {};
       Object.keys(d.counts || {}).forEach(function (k) { flat[k] = d.counts[k].rows; });
       try { localStorage.setItem(SNAP_KEY, JSON.stringify({ counts: flat, at: Date.now() })); } catch (e) { /* noop */ }
       paint(d);
-    })['catch'](function (e) { fail($('counts-out'), e); });
+    })['catch'](function (e) { fail($('counts-out'), e); })
+      .then(function () { busy(['snap', 'again'], false); });
   });
 
   $('again').addEventListener('click', function () {
-    $('counts-out').innerHTML = '<p class="note">Reading...</p>';
-    readCounts().then(paint)['catch'](function (e) { fail($('counts-out'), e); });
+    $('counts-out').innerHTML = '<p class="note">Reading seven tables, a few seconds...</p>';
+    busy(['snap', 'again'], true, 'Reading');
+    readCounts().then(paint)['catch'](function (e) { fail($('counts-out'), e); })
+      .then(function () { busy(['snap', 'again'], false); });
   });
 })();
 </script>

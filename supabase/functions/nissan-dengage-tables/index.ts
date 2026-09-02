@@ -97,13 +97,22 @@ async function login(): Promise<string> {
   return body.access_token;
 }
 
-async function get(path: string, token: string) {
+/* Reading the seven tables at once is twice as fast as one after another and
+   trips Dengage's rate limit: the seventh came back 429 every time. Backing off
+   and trying again keeps the speed for the six that succeed and costs only the
+   one that did not, which is a better trade than making all seven wait. */
+async function get(path: string, token: string, attempt = 0): Promise<{ ok: boolean; status: number; text: string }> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(15000),
     // deno-lint-ignore no-explicit-any
     client: egress() as any,
   } as RequestInit);
+  if (res.status === 429 && attempt < 3) {
+    await res.body?.cancel();
+    await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+    return get(path, token, attempt + 1);
+  }
   return { ok: res.ok, status: res.status, text: await res.text() };
 }
 
@@ -131,25 +140,24 @@ Deno.serve(async (req: Request) => {
       if (offset + 1000 >= (data?.totalRowCount ?? 0)) break;
     }
 
-    const counts: Record<string, unknown> = {};
-    for (const table of TABLES) {
+    /* All seven at once. Read one after another this took ten seconds, which
+       is a long time to stare at a button on a call, and they do not depend on
+       each other. */
+    const read = await Promise.all(TABLES.map(async (table) => {
       const id = ids.get(table.name);
-      if (!id) {
-        counts[table.name] = { rows: 'not found in Data Space', written_by: table.written_by };
-        continue;
-      }
+      if (!id) return [table.name, { rows: 'not found in Data Space', written_by: table.written_by }] as const;
       const detail = await get(`/dataspace/tables/${id}`, token);
       if (!detail.ok) {
-        counts[table.name] = { rows: `could not read: HTTP ${detail.status}`, written_by: table.written_by };
-        continue;
+        return [table.name, { rows: `could not read: HTTP ${detail.status}`, written_by: table.written_by }] as const;
       }
       // deno-lint-ignore no-explicit-any
       const total = (JSON.parse(detail.text) as any)?.data?.totalRowCount;
-      counts[table.name] = {
+      return [table.name, {
         rows: typeof total === 'number' ? total : 'unknown',
         written_by: table.written_by,
-      };
-    }
+      }] as const;
+    }));
+    const counts: Record<string, unknown> = Object.fromEntries(read);
 
     return reply({
       read_at: new Date().toISOString(),
