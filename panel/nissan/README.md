@@ -20,6 +20,16 @@ and the values the message prints.
 | Test drive completed | `test_drive_done` | `test-drive-done.html` | `DENGAGE_TX_EMAIL_NI_TD_DONE` |
 | Booked but did not arrive | `no_show` | `no-show-reinvite.html` | `DENGAGE_TX_EMAIL_NI_NOSHOW` |
 
+All ten email bodies and both Nissan push contents were authored in the panel
+on 2 September and their ids are wired. The function's health check is the
+record of what is live, and it reads `email, push` for every moment:
+
+    curl -s https://raextqlludkagdntyzwn.supabase.co/functions/v1/nissan-booking-confirm
+
+An id can still be overridden without a deploy by setting the variable named
+above; the value in the function is the default, which is what the id column
+means here.
+
 Push copy is in [PUSH.md](PUSH.md), one section each.
 
 The two demos share every push content, because that copy names no dealer and

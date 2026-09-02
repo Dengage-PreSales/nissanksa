@@ -91,7 +91,7 @@ const MOMENTS: Record<string, Moment> = {
   reserve: {
     label: 'build reserved online',
     email: Deno.env.get('DENGAGE_TX_EMAIL_RESERVE') ?? '',
-    push: Deno.env.get('DENGAGE_TX_PUSH_RESERVE') ?? '',
+    push: Deno.env.get('DENGAGE_TX_PUSH_RESERVE') ?? '89cd42ba-f865-45c6-9199-ede892c20de5',
   },
   showroom_visit: {
     label: 'walk in logged at the showroom',
@@ -121,21 +121,21 @@ const MOMENTS: Record<string, Moment> = {
    Nissan visitor about Mohamed Yousuf Naghi Motors would be worse than sending
    nothing. A moment with no id here reports that it needs content. */
 const NISSAN_EMAIL: Record<string, string> = {
-  booking: Deno.env.get('DENGAGE_TX_EMAIL_NI_BOOKING') ?? '',
-  quote: Deno.env.get('DENGAGE_TX_EMAIL_NI_QUOTE') ?? '',
-  brochure: Deno.env.get('DENGAGE_TX_EMAIL_NI_BROCHURE') ?? '',
-  newsletter: Deno.env.get('DENGAGE_TX_EMAIL_NI_NEWSLETTER') ?? '',
-  survey: Deno.env.get('DENGAGE_TX_EMAIL_NI_SURVEY') ?? '',
-  showroom_visit: Deno.env.get('DENGAGE_TX_EMAIL_NI_WALKIN') ?? '',
-  test_drive_done: Deno.env.get('DENGAGE_TX_EMAIL_NI_TD_DONE') ?? '',
-  no_show: Deno.env.get('DENGAGE_TX_EMAIL_NI_NOSHOW') ?? '',
-  abandoned_booking: Deno.env.get('DENGAGE_TX_EMAIL_NI_ABANDONED') ?? '',
-  reserve: Deno.env.get('DENGAGE_TX_EMAIL_NI_RESERVE') ?? '',
+  booking: Deno.env.get('DENGAGE_TX_EMAIL_NI_BOOKING') ?? 'dec3ece6-27d2-4af3-8e30-a55467a2f062',
+  quote: Deno.env.get('DENGAGE_TX_EMAIL_NI_QUOTE') ?? 'dcaeee6f-b081-45e1-b8e5-820bf2a22dc3',
+  brochure: Deno.env.get('DENGAGE_TX_EMAIL_NI_BROCHURE') ?? '37e8f7d3-fba3-4ddb-943a-4562f1cacbd3',
+  newsletter: Deno.env.get('DENGAGE_TX_EMAIL_NI_NEWSLETTER') ?? 'cdcc5c30-d3a2-4888-bf29-c3e95eea2326',
+  survey: Deno.env.get('DENGAGE_TX_EMAIL_NI_SURVEY') ?? '3b8dfca0-3eab-421b-8638-83e4c2130f6f',
+  showroom_visit: Deno.env.get('DENGAGE_TX_EMAIL_NI_WALKIN') ?? '5cdb125c-c6ef-46d1-a6a6-4eca5ee98b1b',
+  test_drive_done: Deno.env.get('DENGAGE_TX_EMAIL_NI_TD_DONE') ?? '0cb0cca5-6075-4597-a0a2-57ad294e9c87',
+  no_show: Deno.env.get('DENGAGE_TX_EMAIL_NI_NOSHOW') ?? 'ef795652-635f-4d75-bf04-fef0f4012637',
+  abandoned_booking: Deno.env.get('DENGAGE_TX_EMAIL_NI_ABANDONED') ?? '04176817-3ef1-438a-a80c-c7819850734b',
+  reserve: Deno.env.get('DENGAGE_TX_EMAIL_NI_RESERVE') ?? 'd8d3f627-f970-4067-abf7-63362d428825',
 };
 /* Push content Nissan needs of its own. Everything absent here falls back to
    the shared content, because that copy names no dealer. */
 const NISSAN_PUSH: Record<string, string> = {
-  newsletter: Deno.env.get('DENGAGE_TX_PUSH_NI_NEWSLETTER') ?? '',
+  newsletter: Deno.env.get('DENGAGE_TX_PUSH_NI_NEWSLETTER') ?? '50fdb66e-d894-4f6a-b4ce-da9a4a850e91',
 };
 const PUSH_NAMES_A_DEALER = new Set(['newsletter']);
 

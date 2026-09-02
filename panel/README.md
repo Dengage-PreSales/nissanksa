@@ -314,6 +314,13 @@ the views do not cover:
 | `ni_dealer_stock` | 72 | per-branch availability; X-TRAIL is in stock at 6 of 8 branches |
 | `ni_web_lead` | grows | every lead the website itself captured, with its UTM source. Starts small on purpose: it fills up during the demo |
 
+**If `ni_dealer_stock` refuses to connect, this is why.** It was the one table a
+remote source would not take, and it is the only one whose primary key is three
+columns rather than one. A remote source is configured by choosing the column
+that identifies a row, so a composite key leaves nothing to choose. It now
+carries `stock_id`, a single column key added for exactly this; point the remote
+source at that. Nothing was removed to make room for it and no row changed.
+
 Named filters worth having ready, since they are the ones the story asks for:
 
 | Segment | Source | Filter | Size |

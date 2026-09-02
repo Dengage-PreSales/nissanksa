@@ -270,3 +270,30 @@ grant select on public.v_ni_contact_360, public.v_ni_hot_leads, public.v_ni_no_s
                  public.v_ni_quote_open, public.v_ni_upgrade_candidates,
                  public.v_ni_stock_gap, public.v_ni_dealer_leads
   to dengage_reader;
+
+-- ---------------------------------------------------------------------------
+-- The one table a Dengage remote source would not take
+-- ---------------------------------------------------------------------------
+-- Four of the five ni_ tables connected first time and ni_dealer_stock did not.
+-- It is also the only one whose primary key is three columns rather than one:
+-- branch_id, model and model_year together. A remote source is configured by
+-- choosing the column that identifies a row, so a composite key leaves nothing
+-- to choose.
+--
+-- Additive, so no row was touched and the natural key keeps its constraint.
+-- stock_id exists for the remote source to point at, and for nothing else.
+alter table public.ni_dealer_stock
+  add column if not exists stock_id bigint generated always as identity;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conrelid = 'public.ni_dealer_stock'::regclass and conname = 'ni_dealer_stock_stock_id_key'
+  ) then
+    alter table public.ni_dealer_stock add constraint ni_dealer_stock_stock_id_key unique (stock_id);
+  end if;
+end $$;
+
+comment on column public.ni_dealer_stock.stock_id is
+  'Surrogate single column key so a Dengage remote source has one column to identify a row by. The real key is still branch_id, model and model_year together.';
