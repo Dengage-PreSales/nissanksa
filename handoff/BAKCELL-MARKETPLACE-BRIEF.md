@@ -1,55 +1,55 @@
-# Brief for the next session: a Bakcell branded telecom marketplace on Dengage
+# Brief for the next session: D·TELCO, a Bakcell branded telecom marketplace on Dengage
 
-Written 3 September 2026, revised the same day after the second and third rounds of answers.
-This is the one document to load into the new session. It has two parts:
+Written 3 September 2026 and revised the same day through three rounds of decisions and a final
+currency confirmation. This is the one document to load into the new session. It has two parts:
 
-- **Part A** is the brief for the new build: the decisions taken, the rules, the source site
-  inventories, the page map, the moments, the catalogue and recommendation design, the journey
-  catalogue, the data model, the personas, the setup order, and the few items still open.
+- **Part A** is the build: the decisions, the rules, the source site inventories, the page map,
+  the moments, the catalogue and the upload format, the recommendation engine, the journey
+  catalogue, the data model, the personas, the Android app, the setup order, the acceptance
+  criteria, the risk register, and the inputs still to arrive.
 - **Part B** is the complete Dengage capability handoff distilled from the Nissan and Lincoln
   demos: every SDK call, REST body, panel contract, account fact and gotcha, industry neutral.
-  Nothing in Part B depends on the old repository being available.
+  Nothing in Part B depends on the old repository being available. **Where Part A and Part B
+  differ, Part A wins**; the differences are listed at the top of Part B.
 
-Everything in Part A marked **PROPOSAL** is a starting point to confirm or change. Everything
-marked **PENDING** waits on an input named in A12.
+Status words used in Part A: **decided** means the demo owner said so; **PROPOSAL** means a
+starting point the build follows unless the demo owner changes it; **PENDING** means an input
+named in A12 has not arrived yet; **verify in panel** means a Dengage behaviour Part B does not
+prove and the build checks in the account before relying on it.
 
 ---
 
 # Part A. The build
 
-## A1. Decisions taken on 3 September 2026
+## A1. Decisions
 
-Recorded in substance from the demo owner's answers, two rounds.
+Recorded in substance from the demo owner's answers over three rounds on 3 September 2026.
 
 | # | Topic | Decision |
 |---|---|---|
-| 1 | Dengage account | A **new Dengage account** (not only a new application). Nothing is shared with the Nissan account: contacts, standard tables, API users and IP allowlist are all fresh objects |
+| 1 | Dengage account | A **new Dengage account**, shown as `demo_es` in the panel. Nothing is shared with the Nissan account: contacts, standard tables, API users and IP allowlist are all fresh objects |
 | 2 | Event prefix | Data layer events for brand campaigns carry the prefix **`es_`** |
 | 3 | Supabase | **Same Supabase project** (`raextqlludkagdntyzwn`), **new tables prefixed `es_`**, no overlap on existing objects. **Same VPS egress proxy.** **Same read-only database role** (`dengage_reader`) with grants on the new objects |
 | 4 | Hosting | **GitHub Pages under a new origin**, on a **new GitHub account and repository**, with a **new service worker file** placed by the demo owner |
-| 5 | Language and currency | **Standard English.** **USD** (third round, replacing the earlier AZN reading). Read as: Bakcell's tariff names stay as published (GO 11.99, Klass 19) and the displayed price is the same numeral in dollars (`$11.99 / 28 days`), so the cards look like Bakcell's; every figure the site does not publish is a plausible demo figure in USD. If a conversion from manat is wanted instead, say so |
+| 5 | Language and currency | **Standard English.** **USD, confirmed**: Bakcell's tariff names stay as published (GO 11.99, Klass 19) and the displayed price is the same numeral in dollars (`$11.99 / 28 days`), so the cards look like Bakcell's; every figure the site does not publish is a plausible demo figure in USD |
 | 6 | Scope | **All** of the du.ae personal structure, authored **fresh** in **Bakcell's** style. Magento is a **look and feel** reference only |
-| 7 | Brand mark | **D·TELCO** replaces the Bakcell logo on the site, the way "DENGAGE Auto Demo" replaced Nissan's mark. Bakcell's products, colours and layout stay |
+| 7 | Brand mark | **D·TELCO** replaces the Bakcell logo on the site and in the app, the way "DENGAGE Auto Demo" replaced Nissan's mark. Bakcell's products, colours and layout stay |
 | 8 | Marketplace mechanics | The ones worth showcasing Dengage, not repetitive ones |
-| 9 | On-site messaging | **Site-drawn creatives only**, plus **two or three `es_` campaigns served by Dengage** so the engine is seen serving. The shared library is not recreated |
+| 9 | On-site messaging | **Site-drawn creatives only**, plus **three `es_` campaigns served by Dengage** so the engine is seen serving: the plan finder nudge, the roaming bar, the newsletter capture. The shared library is not recreated |
 | 10 | Channels | **Everything live.** SMS: a **sender id exists** on the new account. WhatsApp: **native Dengage channel, already enabled**. Email: the demo owner **configures the sending domain and from-name in the Dengage UI** |
 | 11 | Product feed | The demo owner supplied **Dengage's `product` upload template** (CSV with one sample row) and the **`product_variant` table schema** (panel screenshot); both tables exist empty in the new account. The build produces the catalogue in **exactly that format** (A6.1): **200 or more products** across categories, **linked**, with **cross-sell and upsell** use cases visible. The demo owner uploads the two files |
-| 12 | Recommendations | **No Dengage recommendation widget.** Recommendations are **driven intelligently by the site itself** from the catalogue and the profile, and reported to Dengage |
-| 13 | Dynamic content creatives | **In scope** |
-| 14 | Mobile app | **A native Android app, Android only** (third round; the PWA proposal is withdrawn). It uses Dengage's Android SDK, shares the contact key and the catalogue with the web, and is described in A15. The web demo **declares the app** with a smart banner and Android app links |
-| 15 | Journeys | **All journeys possible for a telecom marketplace**, built in the panel and rehearsed |
-| 16 | Contact model | **Custom contact columns allowed without limit.** The relational split from Nissan does not carry over |
-| 17 | Simulator | The operator simulator **writes usage and balance changes into Postgres as well as into Dengage**, so remote segments move during a call |
-| 18 | Telecom dataset | A **synthetic subscriber dataset in Postgres as a Remote Data Source** is the essence of the story |
-| 19 | Personas | **Fresh set, `DPS-ES-1` to `DPS-ES-8`**, confirmed |
-| 20 | Demo factory | Exists in **another repository**; the new repository carries a **CLAUDE.md derived from it** |
-| 21 | Timeline | **Ten days**, not a constraint on scope |
-| 22 | Where things run | **Everything realtime is done by the site itself.** Dengage is used wherever it is needed. **Nothing on the website that is not possible for Dengage.** Ask when in doubt |
-| 23 | Product upload details | Proceed with the proposals (comma separated `tags`, `Bakcell Shop` for devices and `Bakcell` for the rest, every column filled); **the first test upload settles them** |
-| 24 | Recommendations as data | **Yes**: every recommendation shown and clicked is written to Dengage, and the recommendations are **reused across every channel**, in emails, push, SMS, WhatsApp and inbox, not only on the site (A7) |
-| 25 | Custom contact columns | The list in A9.4 is **confirmed** |
-| 26 | Served `es_` campaigns | The three in A12's former question 6 are **confirmed**: plan finder nudge, roaming bar, newsletter capture |
-| 27 | Journeys | The **24 in A8 are confirmed** as the set to build |
+| 12 | Product upload details | Proceed with the proposals (comma separated `tags`, `Bakcell Shop` for devices and `Bakcell` for the rest, every column filled); **the first test upload settles them** |
+| 13 | Recommendations | **No Dengage recommendation widget.** Recommendations are **driven by the site and the app themselves** from the catalogue and the profile, **written to Dengage as events and as contact columns, and reused in every channel**: email, push, SMS, WhatsApp, inbox (A7) |
+| 14 | Dynamic content creatives | **In scope** |
+| 15 | Mobile app | **A native Android app, Android only**, on Dengage's Android SDK, sharing the contact key and the catalogue with the web (A15). The web demo **declares the app** with a smart banner and Android app links |
+| 16 | Journeys | **All journeys possible for a telecom marketplace**, built in the panel and rehearsed. The **24 in A8 are the confirmed set** |
+| 17 | Contact model | **Custom contact columns allowed without limit.** The list in A9.4 is **confirmed**. The relational split from Nissan does not carry over |
+| 18 | Simulator | The operator simulator **writes usage and balance changes into Postgres as well as into Dengage**, so remote segments move during a call |
+| 19 | Telecom dataset | A **synthetic subscriber dataset in Postgres as a Remote Data Source** is the essence of the story |
+| 20 | Personas | **Fresh set, `DPS-ES-1` to `DPS-ES-8`** |
+| 21 | Demo factory | Exists in **another repository**; the new repository carries a **CLAUDE.md derived from it** |
+| 22 | Timeline | **Ten days**, not a constraint on scope |
+| 23 | Where things run | **Everything realtime is done by the site and the app themselves.** Dengage is used wherever it is needed. **Nothing on the website or in the app that is not possible for Dengage.** Ask when in doubt |
 
 ## A2. Rules for this build
 
@@ -57,47 +57,49 @@ Carried from the Nissan work and still binding:
 
 1. Nothing ever deletes, truncates or edits what already exists in Dengage or in the shared
    Supabase project. Every step creates something new. New `es_` tables only.
-2. Contact keys stay in the `DPS-` namespace and every server endpoint validates the shape.
+2. Contact keys stay in the `DPS-` namespace and every server endpoint validates the shape
+   `^DPS-[A-Za-z0-9_-]{1,44}$`.
 3. Every browser storage key is namespaced by the demo slug.
-4. Every page fires `pageView` first, so its rows are findable by `page_url`.
-5. Omit unknown numbers; never send a zero or an invented figure as if published. Demo data is
-   marked as demo data.
-6. One module talks to the SDK. Everything else goes through it.
+4. Every page and every app screen fires its page view first, so its rows are findable.
+5. Omit unknown numbers; never send a zero or an invented figure as if it were published. Demo
+   data is marked as demo data in the footer notice.
+6. One module talks to the SDK on each surface. Everything else goes through it.
 7. An HTTP 200 means accepted. Storage lags about two minutes. Read outcome codes in bodies.
 8. A journey unverified by rehearsal is shown as its canvas and said so plainly.
 
 New for this build:
 
-9. **The possibility rule.** Nothing appears on the website that Dengage cannot do. Every
-   experience, message, recommendation and segment on the site maps to a mechanism named in
-   Part B or confirmed by the demo owner. Anything else is a question first.
-10. **Realtime by the site, Dengage where needed.** Instant reactions (confirmation cards,
-    drawer messages, on-site experiences, recommendations) are drawn by the site, and by the
-    Android app inside the app. Dengage carries
-    the profile, the events, the product tables, the segments, the journeys, push, inbox, email,
-    SMS, WhatsApp, and the two or three served campaigns. No Dengage call for decoration.
-11. **Everything is shown.** Custom contact columns are used. Inbox delete is reported. Journeys
-    are built and rehearsed. Dynamic content creatives are built.
+9. **The possibility rule.** Nothing appears on the website or in the app that Dengage cannot do.
+   Every experience, message, recommendation and segment maps to a mechanism named in Part B, or
+   marked "verify in panel" and checked in the account before the call. Anything else is a
+   question to the demo owner first.
+10. **Realtime by the site and the app, Dengage where needed.** Instant reactions (confirmation
+    cards, drawer messages, on-site experiences, recommendations) are drawn by the site and by the
+    app. Dengage carries the profile, the events, the product tables, the segments, the journeys,
+    push, inbox, email, SMS, WhatsApp, and the three served campaigns. No Dengage call for
+    decoration.
+11. **Everything is shown.** Custom contact columns are used. Inbox delete is reported to Dengage.
+    Journeys are built and rehearsed. Dynamic content creatives are built.
 
 ## A3. Names and identifiers
 
 | Thing | Value | Status |
 |---|---|---|
-| Brand on the pages | Bakcell products, colours and layout; **D·TELCO** mark in place of the logo | decided |
+| Brand on the pages and in the app | Bakcell products, colours and layout; **D·TELCO** mark in place of the logo | decided |
+| Currency | USD, `$` sign, two decimals; `locale.currency = 'USD'` in the config the events module reads | decided |
 | Data layer event prefix | `es_` | decided |
-| Demo slug on `<html data-demo-slug>` and in storage keys | `bakcell` (storage `dps:bakcell:*`, page event `dps:bakcell:event`) | PROPOSAL |
+| Demo slug on `<html data-demo-slug>` and in storage keys | `bakcell` (storage `dps:bakcell:*`, page event `dps:bakcell:event`, confirmation event `dps:bakcell:confirmation`) | PROPOSAL |
 | Supabase table prefix | `es_` | decided |
-| Edge functions | `es-lead-relay`, `es-message`, `es-dengage-tables`, `es-persona-seed`, `es-contact-peek`, `es-profile` (read one persona's plan, usage and balance for the site), `es-operator` (the simulator's writes into Postgres), `es-product-feed` (serves the two Dengage CSVs) | PROPOSAL |
+| Edge functions | `es-lead-relay`, `es-message`, `es-dengage-tables`, `es-persona-seed`, `es-contact-peek`, `es-profile` (read one persona's plan, usage, balance and recommendations), `es-operator` (the simulator's writes into Postgres), `es-product-feed` (serves the catalogue as the two Dengage CSVs and as JSON) | PROPOSAL |
 | Custom Data Space event table | `es_events` | PROPOSAL |
 | Persona keys | `DPS-ES-1` to `DPS-ES-8` | decided |
-| Order id convention | `DPS-bakcell-<kind>-<timestamp>`; kinds `order`, `topup`, `esim`, `roam`, `addon`, `panel`, `sim` | PROPOSAL |
-| Mobile app | A **native Android app** with Dengage's Android SDK, its own Android application in the Dengage account, Firebase Cloud Messaging for push, the same `DPS-ES-` contact key on sign-in, the same product ids and the same `es_events` table. Package name PROPOSAL `com.dtelco.bakcell`. Details and the inputs it needs in A15 | decided; inputs PENDING |
-| Currency | USD, `$` sign, two decimals, `locale.currency = 'USD'` in the config the events module reads | decided |
-| Dengage account | exists; shown as `demo_es` in the panel, with empty `product` and `product_variant` tables already created | decided |
-| Dengage web application id (appGuid), account id, API user | to be created by the demo owner; the head snippet takes the first two | PENDING |
+| Order id convention | `DPS-bakcell-<kind>-<timestamp>`; kinds `order`, `topup`, `esim`, `roam`, `addon`, `panel`, `sim` (simulator) | PROPOSAL |
+| Android app | Native, Dengage Android SDK, its own Android application in the Dengage account, Firebase Cloud Messaging for push, the same `DPS-ES-` contact key on sign-in, the same product ids, the same `es_events` table. Package name `com.dtelco.bakcell` | decided; package name PROPOSAL; inputs PENDING |
+| Dengage account | exists, `demo_es`, with empty `product` and `product_variant` tables | decided |
+| Dengage web application (accountId, appGuid), Android application identifiers, API user | to be created by the demo owner | PENDING |
 | Published origin | `https://<new-account>.github.io/<repo>/` | PENDING |
 | Service worker | at the new origin root, placed by the demo owner | PENDING |
-| Egress | the existing VPS proxy address allowlisted on the new account; the same `DENGAGE_EGRESS_PROXY` secret value under the new functions | decided |
+| Egress | the existing VPS proxy address allowlisted on the new account; the same `DENGAGE_EGRESS_PROXY` value under the new functions' secrets | decided |
 
 ## A4. Source site inventories
 
@@ -157,7 +159,8 @@ contract term, and a primary Buy or Join button plus a secondary Details link.
 Read from `https://www.bakcell.com/sitemap.xml`, `/en`, `/en/go-11-99`, `/en/services`,
 `/en/esim`, `/en/top-up`, `/en/iphone-devices` on 3 September 2026, plus the screenshot of the
 home page supplied by the demo owner. Tariff listing pages load their cards dynamically and were
-not readable; the individual tariff pages render fully.
+not readable; the individual tariff pages render fully. Figures below are Bakcell's, in manat;
+the build shows the same numerals in USD (decision 5).
 
 **Navigation**: black utility bar with Individual, Business, About us, then Balance, Support,
 language (AZ, EN, RU) and a light or dark mode toggle. White main bar: red Bakcell logo, Tariffs
@@ -183,12 +186,12 @@ carousel with an **Archive** link, "Subscribe to our news", footer.
 | Field | Value |
 |---|---|
 | Name | GO 11.99 |
-| Price and period | 11.99 ₼ per 28 days; minimum balance to activate 11.99 ₼ |
+| Price and period | 11.99 per 28 days; minimum balance to activate 11.99 |
 | Internet | 5 GB (social media allowance per the card); an internet package is mandatory on this plan; 5 MB billing interval |
 | Free AI | Free, 1 GB fair use, text image and video generation on ChatGPT, Claude, Perplexity, DeepSeek |
 | Free messaging | WhatsApp text, 1 GB |
-| Minutes | 300 min countrywide; without package 0.30 ₼/min; to 555 0.08 ₼/min; 60 second billing |
-| SMS | 150 SMS; domestic 0.19 ₼, international 0.32 ₼ |
+| Minutes | 300 min countrywide; without package 0.30 per min; to 555 0.08 per min; 60 second billing |
+| SMS | 150 SMS; domestic 0.19, international 0.32 |
 | Activation | USSD `*905#` on the card, `*905*2#` renewal; app activation with QR; buttons **More** and **Join now** |
 | Rules | emergency numbers free; one-way blocking on expiry without payment; unused balances expire on migration |
 
@@ -207,19 +210,19 @@ to `-175`); `fiber`, `fiber-check`; `5g`, `volte`, `vowifi`.
 `before-trip`, `for-foreign-guests`, `travelsim`, `azal` (airline partnership).
 
 **Services** (from `/en/services`): Popular: VoLTE, eSIM, Bakcell app. Balance: Balance top-up
-(1 to 250 ₼), Balance notification, CINKredit, KlassKredit (up to 20 ₼), Money transfer.
-Messaging: SMS bundles (50, 150, 250, 500, 1000), SMS Radar, Bulk SMS, AI Talk, Goal+, two
-donation services. Call management: Owner of my number, The dialing rule, Conference call, Lovely
-numbers, Be My Guest, I Am Back, I Called You, Call Divert, Hidden Number, Call Waiting, Voice
-Mail, Call and SMS barring. Additional: Internet activation, Security of your number, Asan İmza,
-MNP, Zəngim+, Call signature, NaviMax, AzParking, Security+, Bakcell Fiber, Singit.
+(1 to 250), Balance notification, CINKredit, KlassKredit (up to 20), Money transfer. Messaging:
+SMS bundles (50, 150, 250, 500, 1000), SMS Radar, Bulk SMS, AI Talk, Goal+, two donation
+services. Call management: Owner of my number, The dialing rule, Conference call, Lovely numbers,
+Be My Guest, I Am Back, I Called You, Call Divert, Hidden Number, Call Waiting, Voice Mail, Call
+and SMS barring. Additional: Internet activation, Security of your number, Asan İmza, MNP,
+Zəngim+, Call signature, NaviMax, AzParking, Security+, Bakcell Fiber, Singit.
 
 **eSIM**: two flows, "Get a new eSIM" (Buy now, `/en/number-sale?tab=esim`) and "Switch your
 number to eSIM" (Get started, `/en/esim-checkout?tab=swap`); `esim-addresses`, `esim-result`.
 **Numbers**: `number-sale`, `lovely-numbers`, `offers-for-mobile-numbers`, `099_prefix`.
 
-**Top-up**: `/en/top-up` form with phone number, amount 1 to 250 ₼ with 1, 5, 10 ₼ quick picks,
-Continue; USSD `*101*<card>#`; balance check `*100#` (0.09 ₼); `automatic-top-up`,
+**Top-up**: `/en/top-up` form with phone number, amount 1 to 250 with 1, 5, 10 quick picks,
+Continue; USSD `*101*<card>#`; balance check `*100#` (0.09); `automatic-top-up`,
 `online-payment`, `bakcell-card`, Birbank partnership (`birbank-app`).
 
 **Devices**: `bakcell-shop` redirects (301) to `https://shop.bakcell.com/az`, which answered 403
@@ -245,7 +248,7 @@ English, USD.
 
 | Section | Pages | Product types on them |
 |---|---|---|
-| Home | hero offers, plan carousel (GO, GO Pro, Star, Klass), device carousel, internet packs, app promo with smart banner | plans, devices, packs |
+| Home | hero offers, plan carousel (GO, GO Pro, Star, Klass), device carousel, internet packs, app promo with the smart banner and the Android app link | plans, devices, packs |
 | Mobile > Plans | prepaid plans (GO, Star), postpaid plans (Klass postpaid), plan detail pages, plan compare, plan finder (a usage quiz) | plans |
 | Mobile > Internet and add-ons | internet packages (daily, weekly, monthly, unlimited, social media, 5 GB, 500 MB), SMS bundles, minute packs, Free AI, VoLTE, VoWiFi, 5G | add-ons |
 | Mobile > Roaming | roaming internet, all-in-one, call and SMS packs, prices and countries selector, before-trip checklist, TravelSIM | roaming packs |
@@ -264,7 +267,7 @@ English, USD.
 **PROPOSAL.** Chosen for range, not repetition: each row exercises a different Dengage
 mechanism or a different table, column or channel.
 
-### A5.1 Realtime on the site (drawn by the site, recorded in Dengage)
+### A5.1 Realtime on the site and in the app (drawn locally, recorded in Dengage)
 
 | Moment | Dengage mechanism | Status |
 |---|---|---|
@@ -276,32 +279,34 @@ mechanism or a different table, column or channel.
 | Place the order with a promo code | `ec:order` with `coupon_code`, `payment_method` from the vocabulary (`online_payment`, `mobile_payment`, `bank_transfer`, `prepaid_card`); `order_events_detail` carries the lines | proven |
 | Cancel an order | `ec:cancelOrder` naming the order | proven |
 | Save a device, wait for stock, watch a price, keep a shopping list | `wishlist_events` with all four list names | proven |
-| Top up a balance | `ec:order` plus custom row `topup` with amount and method; the simulator's Postgres write moves the balance | proven pattern |
+| Top up a balance | `ec:order` plus custom row `topup` with amount and method; `es-operator` moves the balance in Postgres | proven pattern |
 | Buy a roaming pack with a travel date | `ec:order` plus custom row `roaming_pack` with destination and dates | proven pattern |
 | Activate an add-on or a service | `ec:order` for paid ones, custom row `service_activated` for free ones | proven pattern |
-| Sign in to the account | `setContactKey` with the customer's key, `pageView('login')`; the account page reads plan, usage and balance from `es-profile` | proven |
-| See recommendations | the site's own engine (A7) draws them; `reco_shown` and `reco_clicked` rows carry the recommended product ids | proven pattern |
-| Newsletter, stock alert, price alert capture | the engine's subscription form contract in one of the served `es_` campaigns, or the site's own card posting to the relay | proven |
+| Sign in to the account | `setContactKey` with the customer's key, `pageView('login')`; the account page reads plan, usage, balance and recommendations from `es-profile` | proven |
+| See recommendations | the local engine (A7) draws them; `reco_shown` and `reco_clicked` rows carry the recommended product ids and the rule | proven pattern |
+| Newsletter, stock alert, price alert capture | the engine's subscription form contract in the served newsletter campaign, or the site's own card posting to the relay | proven |
 | A one-question survey or NPS after support | the engine's question form contract writing a contact tag | proven |
-| Confirmations on the spot | site-drawn confirmation card, own inbox row, transactional email, push, SMS and WhatsApp through the message sender | proven for email and push; SMS and WhatsApp are new sends through the same API family, confirmed available |
-| Abandoned cart and abandoned checkout | site-drawn rescue on exit intent, `abandoned_checkout` message, a real panel journey | proven for the message; journey to build |
+| Confirmations on the spot | site-drawn confirmation card, own inbox row, transactional email and push through `es-message`; SMS and WhatsApp through the same message function | email and push proven; SMS and WhatsApp transactional sends are new calls in the same REST family, **verify in panel** that the API user has both channels |
+| Abandoned cart and abandoned checkout | site-drawn rescue on exit intent, `abandoned_checkout` message, journeys 2 and 3 | message proven; journeys to build |
 
 ### A5.2 Operator-side events (simulated source, real Dengage, real Postgres)
 
 A presenter page standing in for the BSS, the care desk, the store and the chatbot. Each button
-writes a custom row into Dengage, updates the persona's row in Postgres through `es-operator`,
-and, where the customer should hear about it, calls the message sender.
+writes a custom row into Dengage, updates the persona's rows in Postgres through `es-operator`,
+updates the contact columns through the relay path, and, where the customer should hear about it,
+calls `es-message`.
 
 | Signal | What it demonstrates |
 |---|---|
-| Data usage crossed 80 percent, then 100 percent | usage-triggered upsell: push, SMS and WhatsApp offering the next tier or a pack; the remote segment moves; on-site bar next visit |
+| Data usage crossed 80 percent, then 100 percent | usage-triggered upsell: push, SMS and WhatsApp offering the next tier or a pack; the remote segment moves; on-site bar and in-app message on next visit |
 | Balance low, plan expiry approaching | top-up reminder journey |
 | Renewal succeeded, renewal failed | payment recovery |
 | Postpaid bill issued, due, paid | billing communications with the amount as `$Current` |
 | Number activated, eSIM installed | onboarding welcome series |
 | Port-in completed, port-out requested | win and save moments, churn signal |
 | Roaming detected abroad | arrival push with the pack that fits |
-| Store visit, care call outcome, chatbot intent | offline signals on the same profile as web behaviour |
+| Price dropped on a product, device back in stock | the wishlist alert stories; the simulator also updates the product table and the feed |
+| Store visit, care call outcome, chatbot intent | offline signals on the same profile as web and app behaviour |
 | Device contract ending, upgrade eligible | upgrade audience |
 | Complaint opened and resolved | care follow-up and NPS |
 
@@ -309,14 +314,14 @@ and, where the customer should hear about it, calls the message sender.
 
 | Capability | Where it comes from | Status |
 |---|---|---|
-| Contact 360 with web, app, order, wishlist and operator history, plus custom columns | standard tables, custom table, `master_contact` with the columns in A9 | proven, columns new |
+| Contact 360 with web, app, order, wishlist and operator history, plus custom columns | standard tables, custom table, `master_contact` with the columns in A9.4 | proven, columns new |
 | Segments over remote Postgres views | Remote Data Source, one flat view per segment, every row contact-keyed | proven pattern |
 | Segments over standard tables (device wishers, stock waiters, price watchers, cart abandoners) | `wishlist_events.list_name`, `shopping_cart_events` | proven |
-| Journeys, the full catalogue in A8 | Marketing tab | to build and rehearse |
-| Two or three on-site campaigns served by the engine, fired by `es_` events | Custom HTML campaigns with display rules on the new path | proven contract |
-| Dynamic content creatives reading the product tables | template tag creatives over `product` and `product_variant` | decided in scope; build against the panel's dynamic content playbook |
+| Journeys, the 24 in A8 | Marketing tab | to build and rehearse |
+| Three on-site campaigns served by the engine, fired by `es_` events or native triggers | Custom HTML campaigns with display rules on the new path | proven contract |
+| Dynamic content creatives reading the product tables and the contact's recommendation columns | template tag creatives over `product`, `product_variant` and `$Contact` | decided in scope; **verify in panel** the dynamic content playbook on the new account |
 | Web push with rich image, app inbox, transactional email | proven | proven |
-| SMS | Content > SMS with the account's sender id; transactional SMS beside email and push | decided live |
+| SMS | Content > SMS with the account's sender id; transactional SMS | decided live |
 | WhatsApp | native Dengage channel on the new account | decided live |
 | A/B test | a served campaign with two variants | to build |
 | Android app: push, in-app messages, app inbox, events, deep links | Dengage Android SDK, a second application in the account | new territory, A15 |
@@ -327,11 +332,11 @@ and, where the customer should hear about it, calls the message sender.
 ### A6.1 The two Dengage tables and the exact upload format
 
 Dengage's ecommerce model keeps a **`product`** table and a **`product_variant`** table in Data
-Space. Both already exist, empty, in the new account (panel name `demo_es`, Data Space > Tables,
-Private Access, a ZEKI SYNC toggle, `product_variant_id` showing 4 relations to the event tables).
-Every event the site sends carries `product_id` and `product_variant_id`, so the catalogue is
-uploaded in exactly these two shapes for dynamic content, journeys and the contact card to
-resolve a product by id.
+Space. Both already exist, empty, in the new account (Data Space > Tables, Private Access, a ZEKI
+SYNC toggle, `product_variant_id` showing 4 relations to the event tables). Every event the site
+and the app send carries `product_id` and `product_variant_id`, so the catalogue is uploaded in
+exactly these two shapes for dynamic content, journeys and the contact card to resolve a product
+by id.
 
 **The `product` upload CSV**, header exactly as the demo owner's template
 (`handoff/dengage-product-template.csv`, one sample row, a Magento export):
@@ -381,13 +386,13 @@ data anyway, so nullability never bites.
 | `is_active` | `TRUE`; archived tariffs `FALSE` and kept, so the archive page has data |
 | `publish_date` | `DD-MM-YYYY HH:MM`, the seed date |
 | `link`, `mobile_web_link` | the product's page on the published origin; identical unless a mobile route differs |
-| `android_deep_link` | the Android app link for the product (`https://<origin>/<path>` verified as an Android App Link for the package, or the scheme `dtelco://product/<product_id>` if verification is not set up in time); the app opens the product screen from a push, an email or a web banner |
+| `android_deep_link` | the Android link for the product: the https page URL verified as an Android App Link for the package, or the scheme `dtelco://product/<product_id>` if verification is not set up in time; the app opens the product screen from a push, an email or a web banner |
 | `ios_deep_link` | no iOS app; carries the web `link` so the column is never empty |
 | `image_link` (non-null), `small_image_link`, `large_image_link` | absolute URLs to committed imagery on the published origin; three sizes rendered at build time (1200, 400, 1600 wide) |
-| `store_name` | `Bakcell Shop` for devices and accessories, `Bakcell` for everything else (A12 question 3 asks whether one value is preferred) |
+| `store_name` | `Bakcell Shop` for devices and accessories, `Bakcell` for everything else (decision 12; the first test upload settles it) |
 | `parent_id` | empty for every top-level product; the bundle relation lives in `tags` and in the Supabase relation table, because a product can belong to several bundles |
 | `trans_title` | equals `title` (English only) |
-| `tags` | comma separated inside the quoted field: product type (`plan`, `internet`, `addon`, `roaming`, `device`, `accessory`, `sim`, `esim`, `number`, `fixed`, `service`, `bundle`), family (`GO`, `Klass`, `iPhone`), flags (`prepaid`, `postpaid`, `5g`, `esim-capable`, `instalment-18m`, `bundle-member:<bundle_id>`). A12 question 3 asks which separator the importer expects |
+| `tags` | comma separated inside the quoted field: product type (`plan`, `internet`, `addon`, `roaming`, `device`, `accessory`, `sim`, `esim`, `number`, `fixed`, `service`, `bundle`), family (`GO`, `Klass`, `iPhone`), flags (`prepaid`, `postpaid`, `5g`, `esim-capable`, `instalment-18m`, `bundle-member:<bundle_id>`); decision 12, the first test upload settles the separator |
 | `size` | storage for devices (`128 GB`), allowance and period for packs (`5 GB / 28 days`), contract term for postpaid (`24 months`), zone and days for roaming (`Europe / 7 days`); empty for plans with one configuration |
 | `color` | device and accessory colour; empty otherwise |
 | `gender` | `unisex` for devices and accessories; empty otherwise |
@@ -398,13 +403,14 @@ data anyway, so nullability never bites.
 above in order. `es-product-feed` serves each as CSV (`?table=product` and
 `?table=product_variant`), UTF-8 with the byte order mark, dates formatted `DD-MM-YYYY HH:MM`,
 booleans in capitals, so the demo owner downloads and uploads without editing, and a catalogue
-change is a re-download rather than a hand edit.
+change is a re-download rather than a hand edit. The same function serves the catalogue as JSON
+for the site and the app.
 
-### A6.2 Catalogue design: 240 products across the marketplace
+### A6.2 Catalogue design: 241 products across the marketplace
 
 **PROPOSAL.** Bakcell's published names where the site publishes them, prices as the same
-numerals in USD (decision 5), plausible USD demo figures marked as demo data where the site
-publishes nothing. Counts are products; variants multiply devices and packs.
+numerals in USD (decision 5), plausible USD demo figures where the site publishes nothing.
+Counts are products; variants multiply devices and packs.
 
 | Category path | Products | Examples and variant shape |
 |---|---|---|
@@ -423,7 +429,7 @@ publishes nothing. Counts are products; variants multiply devices and packs.
 | Mobile>Add-ons>Minutes | 8 | national 100, 300, 600, unlimited; international 30, 60, 120, 300 |
 | Mobile>Add-ons>Network | 4 | VoLTE, VoWiFi, 5G access, Balance notification (free, order value 0 as a genuine zero) |
 | Mobile>Services>Calls | 12 | the call management services from A4.2 |
-| Mobile>Roaming>Internet | 12 | three zones (Türkiye and CIS, Europe, World) times 500 MB, 1, 3, 5 GB, 7 or 14 day variants |
+| Mobile>Roaming>Internet | 12 | three zones (Türkiye and CIS, Europe, World) times 500 MB, 1, 3, 5 GB, with 7 or 14 day variants |
 | Mobile>Roaming>All-in-one | 6 | three zones times 7 and 14 days |
 | Mobile>Roaming>Calls and SMS | 7 | call packs 30, 60, 120, 300 min; SMS 20, 50, 100 |
 | Mobile>Roaming>TravelSIM | 1 | one product, destination variants |
@@ -475,81 +481,88 @@ these relation types, each the basis of a visible use case:
 7. **Stock**: a wished device coming back into stock pulls its own bundle and accessories.
 8. **Save**: a port-out request pulls the `downsell` and a retention offer.
 
-## A7. The site-side recommendation engine
+## A7. The recommendation engine, and how every channel prints the same recommendations
 
-**PROPOSAL.** Decision 12: no Dengage widget; the site drives recommendations and Dengage
-receives them.
+**PROPOSAL** implementing decision 13.
 
-- **Inputs**: the current product, the cart lines, the wishlist, the models viewed this session,
-  the campaign that brought the visitor, and, for a signed-in persona, the plan, usage, balance,
-  device and lifecycle read from `es-profile` (a read-only, rate-capped GET by `DPS-` key over
-  the Postgres dataset, the same shape as the Nissan message sender's GET).
+- **Inputs**: the current product, the cart lines, the wishlist, the products viewed this
+  session, the campaign that brought the visitor, and, for a signed-in persona, the plan, usage,
+  balance, device and lifecycle read from `es-profile` (a read-only, rate-capped GET by `DPS-`
+  key over the Postgres dataset, the same shape as the Nissan message sender's inbox GET).
 - **Rules, in priority**: requirement first (`requires`), then the usage-80 upsell, then the
   cart-based bundle, then cross-sell for the current product, then the travel and family
   triggers, then `alternative`, with `compatible_with` and stock as filters. Only in-stock items
   are recommended. Every rule names itself so the readout shows why a card appeared.
 - **Where they draw**: a "Recommended for you" rail on product pages and in the cart, the account
-  page, the drawer, and the two inline slots (`dn_inline_target_in_grid`,
-  `dn_inline_target_pdp_below_price`) when nothing from Dengage occupies them.
-- **What Dengage gets**: `reco_shown` and `reco_clicked` rows in `es_events` with the product
-  ids and the rule name; the resulting `addToCart` and `order` events; and the same catalogue in
-  its own `product` and `product_variant` tables, so dynamic content creatives and journeys
-  personalize with the same product attributes the site used.
-- **Recommendations across every channel** (decision 24). The site's engine also writes its
-  current top three recommendations onto the contact through the relay, as the custom columns
-  `reco_product_id_1`, `reco_product_id_2`, `reco_product_id_3`, `reco_rule` and `reco_at`
-  (A9.4), each time they change. An email, a push, an SMS, a WhatsApp message or an inbox card can
-  then print them: dynamic content resolves each id against the `product` and `product_variant`
-  tables for title, price and image, and the transactional sender passes the same three ids in
-  `current` so a transactional message resolves them too. One engine, one set of ids, seen on
-  the site, in the app and in every message, and every impression and click of a recommended
-  product reported back as an event a journey can react to.
+  page, the drawer, the two inline slots (`dn_inline_target_in_grid`,
+  `dn_inline_target_pdp_below_price`) when nothing from Dengage occupies them, and the app's home
+  and product screens. The web and the app run the same rules: the engine is one JavaScript
+  module on the web and is exposed as a read-only endpoint (`es-profile?reco=1`) so the app
+  receives the same three ids for the same persona.
+- **What Dengage gets, as events**: `reco_shown` and `reco_clicked` rows in `es_events` with the
+  product ids and the rule name; the resulting `addToCart` and `order` events; and the same
+  catalogue in its own `product` and `product_variant` tables.
+- **What Dengage gets, on the contact**: the current top three recommendations, written through
+  the relay to the custom columns `reco_product_id_1`, `reco_product_id_2`, `reco_product_id_3`,
+  `reco_rule` and `reco_at` (A9.4) each time they change.
+- **How every channel prints them**: a campaign or journey message uses dynamic content to
+  resolve `$Contact.reco_product_id_1` and the other two against the `product` and
+  `product_variant` tables for title, price and image (**verify in panel** that dynamic content
+  on the new account can look up a product table row by an id held on the contact; if it cannot,
+  the relay also writes `reco_title_1`, `reco_price_1`, `reco_image_1` and their siblings so the
+  message prints from the contact alone). A transactional message from `es-message` receives the
+  same three ids and their title, price and image in `current`, so it prints them without any
+  lookup. One engine, one set of ids, seen on the site, in the app and in every message, and
+  every impression and click of a recommended product reported back as an event a journey can
+  react to.
 
 ## A8. The journey catalogue for a telecom marketplace
 
-**PROPOSAL** for decision 15: all of these are built in the panel and rehearsed. Realtime
-reactions on the page stay with the site; a journey carries what happens after the visitor has
-left. Channels named are the ones each journey uses; every one of email, push, SMS, WhatsApp,
-inbox and on-site is exercised somewhere.
+Decision 16: these 24 are the confirmed set, built in the panel and rehearsed. Realtime
+reactions on the page and in the app stay local; a journey carries what happens after the visitor
+has left. Every one of email, push, SMS, WhatsApp, inbox and on-site is exercised somewhere.
+A trigger named as a custom event is a row in `es_events`; a trigger named as a view is segment
+entry from the Remote Data Source.
 
-| # | Journey | Trigger | Steps and channels |
-|---|---|---|---|
-| 1 | Welcome and onboarding | `number_activated` or first `order` for a SIM or eSIM | day 0 push and SMS with the app and eSIM setup; day 2 email with the plan explained; day 5 WhatsApp checking the first top-up; inbox card |
-| 2 | Abandoned cart | `addToCart` without `order` in 2 hours | push with the cart, email with product images from the product table, on-site bar next visit |
-| 3 | Abandoned checkout | `beginCheckout` without `order` in 30 minutes | push, then SMS with a code, then WhatsApp |
-| 4 | Browse abandonment | two plan page views, no cart, 24 hours | email comparing the plans viewed, dynamic content |
-| 5 | Price drop | `wishlist_events` `price_drop_alert` and a price change in the product table | push and email with the new price |
-| 6 | Back in stock | `back_in_stock_alert` and stock above zero | push, SMS, on-site on next visit |
-| 7 | Order confirmation and delivery | `order` for a device | email receipt, push at each simulated delivery status, inbox |
-| 8 | eSIM activation help | `esim_selected` order without `esim_installed` in 24 hours | WhatsApp with the QR steps, SMS fallback |
-| 9 | Usage upsell | `usage_80` | push with the next tier; `usage_100` SMS with a pack; segment entry from `v_es_heavy_on_small_plan` for the monthly nudge |
-| 10 | Low balance and top-up | `balance_low`, `plan_expiring` | SMS first, push, WhatsApp with a one-tap top-up link |
-| 11 | Renewal recovery | `renewal_failed` | SMS immediately, push after 2 hours, WhatsApp after a day, care call task on day 3 |
-| 12 | Postpaid billing | `bill_issued`, due in 3 days, overdue | email with the amount, SMS reminder, push overdue |
-| 13 | Roaming pre-trip | `roaming_pack` bought with a future date, or a flight partner signal | email checklist 2 days before, push on the travel date |
-| 14 | Roaming arrival | `roaming_detected` without a pack | push and SMS with the zone pack, WhatsApp on day 2 if unused |
-| 15 | Device upgrade | `v_es_upgrade_eligible` entry | email with the `upgrade_of` device and instalment, push, on-site banner |
-| 16 | Accessory cross-sell | `order` for a phone, 3 days later | email with `cross_sell` items, push |
-| 17 | Family bundle | `v_es_family_candidates` entry | email and WhatsApp with the bundle saving |
-| 18 | Convergence | fiber availability check without order | email, push with the convergence bundle |
-| 19 | Dormant win-back | `v_es_dormant_30d` entry | email, then SMS, then a WhatsApp offer |
-| 20 | Churn save | `port_out_requested` | immediate SMS, care call task, WhatsApp with the `downsell` or a retention pack, on-site save banner |
-| 21 | Care follow-up and NPS | `complaint_resolved` | WhatsApp thank-you, on-site NPS question form on next visit, tag drives a segment |
-| 22 | Newsletter and consent welcome | subscription form or newsletter card | email welcome, push welcome |
-| 23 | Seasonal campaign | segment plus date (Novruz, 8 March, F1) | email, push, on-site, A/B tested creative |
-| 24 | Referral and loyalty | `order` count threshold, or a referral code used | email with the code, push, inbox card |
+| # | Journey | Trigger | Steps and channels | Note |
+|---|---|---|---|---|
+| 1 | Welcome and onboarding | `number_activated`, or first `order` for a SIM or eSIM | day 0 push and SMS with the app and eSIM setup; day 2 email with the plan explained; day 5 WhatsApp checking the first top-up; inbox card | |
+| 2 | Abandoned cart | `addToCart` without `order` in 2 hours | push with the cart, email with product images from the product table, on-site bar next visit | |
+| 3 | Abandoned checkout | `beginCheckout` without `order` in 30 minutes | push, then SMS with a code, then WhatsApp | |
+| 4 | Browse abandonment | two plan page views, no cart, 24 hours | email comparing the plans viewed, dynamic content | |
+| 5 | Price drop | `price_dropped` custom event for a product, raised by the simulator, which also updates the product table | push and email with the new price to the contacts holding a `price_drop_alert` wishlist row for that product | **verify in panel** how the journey narrows to wishers of that product id; if it cannot, the simulator raises the event per affected contact |
+| 6 | Back in stock | `back_in_stock` custom event for a product, raised by the simulator | push, SMS, on-site on next visit, to `back_in_stock_alert` wishers | same check as 5 |
+| 7 | Order confirmation and delivery | `order` for a device | email receipt, push at each simulated delivery status, inbox | |
+| 8 | eSIM activation help | `esim_selected` order without `esim_installed` in 24 hours | WhatsApp with the QR steps, SMS fallback | |
+| 9 | Usage upsell | `usage_80` | push with the next tier; `usage_100` SMS with a pack; `v_es_heavy_on_small_plan` entry for the monthly nudge | |
+| 10 | Low balance and top-up | `balance_low`, `plan_expiring` | SMS first, push, WhatsApp with a one-tap top-up link | |
+| 11 | Renewal recovery | `renewal_failed` | SMS immediately, push after 2 hours, WhatsApp after a day, email on day 3 with the payment link | |
+| 12 | Postpaid billing | `bill_issued`, due in 3 days, overdue | email with the amount, SMS reminder, push overdue | |
+| 13 | Roaming pre-trip | `roaming_pack` bought with a future date | email checklist 2 days before, push on the travel date | |
+| 14 | Roaming arrival | `roaming_detected` without a pack | push and SMS with the zone pack, WhatsApp on day 2 if unused | |
+| 15 | Device upgrade | `v_es_upgrade_eligible` entry | email with the `upgrade_of` device and instalment, push, on-site banner | |
+| 16 | Accessory cross-sell | `order` for a phone, 3 days later | email with `cross_sell` items, push | |
+| 17 | Family bundle | `v_es_family_candidates` entry | email and WhatsApp with the bundle saving | |
+| 18 | Convergence | `fiber_checked` without order | email, push with the convergence bundle | |
+| 19 | Dormant win-back | `v_es_dormant_30d` entry | email, then SMS, then a WhatsApp offer | |
+| 20 | Churn save | `port_out_requested` | immediate SMS, WhatsApp with the `downsell` or a retention pack, email from the retention team, on-site save banner | |
+| 21 | Care follow-up and NPS | `complaint_resolved` | WhatsApp thank-you, on-site NPS question form on next visit, the tag drives a segment | |
+| 22 | Newsletter and consent welcome | subscription form or newsletter card | email welcome, push welcome | |
+| 23 | Seasonal campaign | segment plus date (Novruz, 8 March, F1) | email, push, on-site, A/B tested creative | |
+| 24 | Referral and loyalty | `order` count threshold, or a referral code used | email with the code, push, inbox card | |
 
 ## A9. Data model in Supabase
 
 **PROPOSAL.** All names `es_`. Every table Dengage reads as a remote source carries
-`contact_key`. Reference tables without a contact key (products, stores) are read by the site
-and by views, never connected directly.
+`contact_key`. Reference tables without a contact key (products, stores) are read by the site,
+the app and the views, never connected directly.
 
 ### A9.1 Catalogue
 
 `es_product`, `es_product_variant`, `es_product_relation`, `es_bundle_item`, plus the two
-Dengage-shaped views and the feed function (A6). Site-only fields the Dengage tables may not
-carry (USSD code, free apps, instalment terms, tags) stay on the Supabase tables.
+Dengage-shaped views and the feed function (A6). Site-only fields the Dengage tables do not carry
+(USSD code, free apps, instalment terms, allowances as numbers) stay on the Supabase tables and
+reach the site and the app through the JSON feed.
 
 ### A9.2 Subscribers (the essence of the story)
 
@@ -559,7 +572,7 @@ carry (USSD code, free apps, instalment terms, tags) stay on the Supabase tables
 `esim` (bool), `family_lines` (int), `address_id`.
 `es_usage`: `contact_key`, `period_start`, `data_cap_gb`, `data_used_gb`, `minutes_used`,
 `sms_used`, `roaming_days`, `balance`, `last_topup_at`, `last_topup_amount`. **The simulator
-updates this table** (decision 17) through `es-operator`, so segments move during a call.
+updates this table** (decision 18) through `es-operator`, so segments move during a call.
 `es_billing`: `contact_key`, `invoice_id`, `issued_at`, `due_at`, `amount`, `status`.
 `es_ticket`: `contact_key`, `opened_at`, `channel`, `topic`, `status`, `nps`.
 `es_offline_event`: `contact_key`, `event_type`, `product_id`, `store_id`, `source`, `note`,
@@ -574,35 +587,42 @@ Views, one per segment, all `security_invoker = true`, granted to `dengage_reade
 `v_es_dormant_30d`, `v_es_churn_risk`, `v_es_upgrade_eligible`, `v_es_family_candidates`,
 `v_es_switchers_1m`, `v_es_stock_waiters_with_stock`, `v_es_fiber_checked_no_order`.
 
+Seeding is deterministic (`setseed`); every value announces itself as invented; the eight
+persona rows match the simulator line for line; the segment counts are recorded in the runbook
+so the quoted numbers are exact.
+
 ### A9.3 The custom Data Space event table
 
 `es_events`: `event_id`, `event_type`, `product_id`, `product_type`, `plan_id`, `amount`,
 `destination`, `travel_from`, `travel_to`, `store`, `source`, `note`, `horizon`, `rule`,
 `is_used`.
 
-`event_type` list, validated in the events module: `compare`, `plan_finder`, `number_selected`,
-`esim_selected`, `mnp_requested`, `topup`, `roaming_pack`, `service_activated`, `usage_80`,
-`usage_100`, `balance_low`, `plan_expiring`, `renewal_ok`, `renewal_failed`, `bill_issued`,
-`bill_paid`, `number_activated`, `esim_installed`, `port_in_done`, `port_out_requested`,
-`roaming_detected`, `store_visit`, `care_call`, `chatbot_intent`, `complaint_opened`,
-`complaint_resolved`, `upgrade_eligible`, `fiber_checked`, `survey_response`,
-`register_interest`, `reco_shown`, `reco_clicked`, `creative_shown`, `creative_action`.
+`event_type` list, validated in the events module on both surfaces: `compare`, `plan_finder`,
+`number_selected`, `esim_selected`, `mnp_requested`, `topup`, `roaming_pack`,
+`service_activated`, `usage_80`, `usage_100`, `balance_low`, `plan_expiring`, `renewal_ok`,
+`renewal_failed`, `bill_issued`, `bill_paid`, `number_activated`, `esim_installed`,
+`port_in_done`, `port_out_requested`, `roaming_detected`, `price_dropped`, `back_in_stock`,
+`store_visit`, `care_call`, `chatbot_intent`, `complaint_opened`, `complaint_resolved`,
+`upgrade_eligible`, `fiber_checked`, `survey_response`, `register_interest`, `reco_shown`,
+`reco_clicked`, `creative_shown`, `creative_action`.
 
 ### A9.4 Custom columns on `master_contact`
 
-Decision 16 allows them and decision 25 confirms this list: `msisdn`, `plan_id`, `plan_name`,
-`plan_type`, `lifecycle`, `arpu_band`, `esim`, `device_model`, `contract_end`, `family_lines`,
-`preferred_store`, `preferred_channel`, plus the recommendation columns from decision 24:
-`reco_product_id_1`, `reco_product_id_2`, `reco_product_id_3`, `reco_rule`, `reco_at`. The relay
-and `es-operator` keep them current through `/bulk/contacts`, so journeys and dynamic content can
-read `$Contact.plan_name` or `$Contact.reco_product_id_1` directly and segments on the contact
-table need no remote join for the common cases. Behavioural detail stays on the related rows as
-before.
+Decision 17 confirms this list: `msisdn`, `plan_id`, `plan_name`, `plan_type`, `lifecycle`,
+`arpu_band`, `esim`, `device_model`, `contract_end`, `family_lines`, `preferred_store`,
+`preferred_channel`, plus the recommendation columns from decision 13: `reco_product_id_1`,
+`reco_product_id_2`, `reco_product_id_3`, `reco_rule`, `reco_at`, and, only if the dynamic
+content check in A7 fails, `reco_title_1`, `reco_price_1`, `reco_image_1` and their siblings for
+2 and 3. The relay and `es-operator` keep them current through `/bulk/contacts`, so journeys and
+dynamic content read `$Contact.plan_name` or `$Contact.reco_product_id_1` directly and segments
+on the contact table need no remote join for the common cases. Behavioural detail stays on the
+related rows as before.
 
 ## A10. Personas
 
 **PROPOSAL**, eight telecom stories, `DPS-ES-1` to `DPS-ES-8`, seeded in `es_subscriber`,
-`es_usage`, `es_offline_event` and the simulator alike:
+`es_usage`, `es_offline_event` and the simulator alike, and upserted into `master_contact` with
+their custom columns by `es-persona-seed`:
 
 | Key | Story |
 |---|---|
@@ -620,54 +640,48 @@ before.
 1. **Repository** on the new account. Add the demo factory repository and derive `CLAUDE.md`.
    Clone the public Nissan repository for code lifting (A13) and copy the neutral kit.
 2. **Dengage account and web application** (demo owner): `accountId` and `appGuid` into the head
-   snippet and config; API user with the transactional permission; the existing VPS egress IP
-   allowlisted; SMS sender id, WhatsApp channel and email domain configured in the UI.
-3. **Service worker** at the new origin root (demo owner). Enable GitHub Pages. Keep the manifest,
-   apple meta and icons so web push still works on an iPhone through the installed web app.
-3a. **Android application** in the Dengage account (demo owner creates it and shares its
+   snippet and config; API user with the transactional permission and SMS and WhatsApp
+   permissions; the existing VPS egress IP allowlisted; SMS sender id, WhatsApp channel and email
+   domain configured in the UI.
+3. **Service worker** at the new origin root (demo owner). Enable GitHub Pages. Keep the
+   manifest, apple meta and icons so web push still works on an iPhone through the installed web
+   app.
+4. **Android application** in the Dengage account (demo owner creates it and shares its
    identifiers), a Firebase project with Cloud Messaging and its `google-services.json`, the
-   package name, and the signing key for the demo APK. The build integrates the Dengage Android
-   SDK per dev.dengage.com and ships an APK for sideloading or an internal test track (A15).
-4. **Supabase**: `es_` tables, relations, views, policies and grants to `dengage_reader`; seed
+   package name, and the signing key or agreement to use a debug build (A15).
+5. **Supabase**: `es_` tables, relations, views, policies and grants to `dengage_reader`; seed
    the catalogue and the subscribers; deploy the `es-*` functions with new secrets; check every
    health GET.
-5. **Product upload**: once the two CSV headers are known, emit the two Dengage-shaped CSVs from
-   the views and hand them to the demo owner to upload; confirm a product resolves by id in the
-   panel.
-6. **Remote Data Source** in the new account, connect the contact-keyed views, build one segment
+6. **Product upload**: emit the two Dengage-shaped CSVs from the views, test one row of each,
+   settle the `tags` separator and `store_name`, then hand the full files to the demo owner to
+   upload; confirm a product resolves by id in the panel.
+7. **Remote Data Source** in the new account, connect the contact-keyed views, build one segment
    and check its count against the seeded number.
-7. **Custom event table** `es_events` and the **custom contact columns** in the panel before any
-   page sends to them.
-8. **Storefront**: pages authored fresh with the head order, the module set, the slots, the
+8. **Custom event table** `es_events` and the **custom contact columns** in the panel before any
+   page or screen sends to them; run `es-persona-seed`.
+9. **Storefront**: pages authored fresh with the head order, the module set, the slots, the
    launcher, the drawer, the readout, the recommendation engine, the simulator and the console.
-9. **Panel content**: two or three `es_` campaigns, push, email, SMS, WhatsApp and inbox contents
-   per moment, dynamic content creatives, the 24 journeys.
-10. **Verification**: the SDK-refusing suite, the audits, the phone check, then the live
-    rehearsal against the new account, then the walkthrough runbook.
+10. **Android app**: integrate the SDK per dev.dengage.com, sign in as a persona, verify a push
+    lands on a physical phone, in-app message and inbox render, events land in the same tables.
+11. **Panel content**: the three `es_` campaigns, push, email, SMS, WhatsApp and inbox contents
+    per moment, dynamic content creatives, the 24 journeys, one A/B test.
+12. **Verification** per A16, then the live rehearsal against the new account, then the
+    walkthrough runbook.
 
-## A12. What is still open
+## A12. Inputs still to arrive
 
-Every design question has been answered. What remains are inputs and one reading to confirm:
+Every design question has been answered. The build proceeds on the proposals above and needs
+only these inputs, none of which blocks authoring the pages, the data model or the catalogue:
 
-1. **The currency reading** in decision 5: Bakcell's tariff names kept, the same numerals shown
-   as USD, everything unpublished in plausible USD. Say so if a manat-to-dollar conversion was
-   meant instead.
-2. **Inputs for the Android app** (A15): the Dengage Android application's identifiers once the
-   demo owner creates it, the Firebase project's `google-services.json`, the package name if
-   `com.dtelco.bakcell` is not wanted, and how the APK is to be distributed to the phones in the
-   room.
-3. **Inputs for the web application**: `accountId` and `appGuid` of the new web application, the
-   new origin, and confirmation that the service worker is in place.
-4. **Inputs for the backend**: the new API user's key and password set as Supabase secrets, and
-   the VPS egress IP allowlisted on the new account.
-5. **The first test upload** of one product row and one variant row settles the `tags`
-   separator, the `store_name` choice and the nullability of the product table's own columns
-   (decision 23).
-
-The three served `es_` campaigns confirmed in decision 26 are: **the plan finder nudge** (popup
-with dynamic content showing the recommended tier), **the roaming bar** (sticky bar on travel
-intent), and **the newsletter capture** (native subscription form). The 24 journeys in A8 are
-the confirmed set.
+1. **Web application**: `accountId` and `appGuid` of the new web application, the new origin,
+   and confirmation that the service worker is in place.
+2. **Android application**: its identifiers once created in the Dengage account, the Firebase
+   project's `google-services.json`, the package name if `com.dtelco.bakcell` is not wanted, and
+   how the APK reaches the phones in the room.
+3. **Backend**: the new API user's key and password set as Supabase secrets, and the VPS egress IP
+   allowlisted on the new account.
+4. **The first test upload** of one product row and one variant row, which settles the `tags`
+   separator, the `store_name` choice and the nullability of the product table's own columns.
 
 ## A13. Access to the old work
 
@@ -684,26 +698,29 @@ git archive --format=tar HEAD js/identity.js js/dengageEvents.js js/debug.js js/
 Part B section 15 says which files copy verbatim, which adapt, and which are rewritten. The demo
 factory (CLAUDE.md, checks, panel scripts) is a separate repository the demo owner will add.
 
-## A14. What the site must not pretend
+## A14. What the site and the app must not pretend
 
 Under the possibility rule, these are the lines the Nissan work found and this build respects:
 
 - The App Inbox fills from campaigns and journeys, not from transactional sends. Instant drawer
-  messages come from the site's own message centre, shown beside Dengage's.
+  messages come from the demo's own message centre, shown beside Dengage's, on both surfaces.
 - A transactional message sees only the values passed in the call, never the contact record.
   Journey and campaign messages see the contact record, custom columns included.
 - A page cannot write contact fields; a backend does, over REST, from an allowlisted IP.
-- A push reaches a device only after the browser granted permission on the published origin; iOS
-  needs the Home Screen install; macOS shows no image.
+- A web push reaches a device only after the browser granted permission on the published origin;
+  iPhone needs the Home Screen install; macOS shows no image. An Android app push needs the
+  Firebase token registered through the SDK.
 - A device token is bound to the key that subscribed; a later key needs the token fallback.
 - Custom Data Space tables and custom contact columns must exist before rows are stored.
 - Remote tables must relate to `master_contact` or `master_device`.
-- Recommendations are the site's, reported to Dengage and reused by Dengage in every channel;
+- Recommendations are the demo's, reported to Dengage and reused by Dengage in every channel;
   nothing on the page is labelled as a Dengage recommendation.
+- Anything marked "verify in panel" is checked in the account before it is shown, and shown as
+  a canvas if the check fails.
 
 ## A15. The Android app
 
-Decision 14: a native Android app, Android only. Part B covers the Web SDK and the REST API and
+Decision 15: a native Android app, Android only. Part B covers the Web SDK and the REST API and
 says nothing about the mobile SDK, so this section states what the app is for, what must stay
 identical to the web, and what has to be read from Dengage's own documentation before a line is
 written. Under the possibility rule, nothing goes into the app that dev.dengage.com's Android SDK
@@ -719,20 +736,21 @@ guide does not document.
   contents and journeys the web push uses, rich image included, and a tap opening the product
   screen through the `android_deep_link`.
 - **In-app messages** served by Dengage's mobile in-app messaging, the app's equivalent of the
-  on-site campaigns, fired by the same `es_` trigger names where the SDK supports event triggers.
+  on-site campaigns, fired by the same `es_` trigger names where the SDK supports event triggers
+  (**verify in panel** and in the SDK guide).
 - **App inbox** rendered natively from Dengage's inbox for the device, merged with the demo's own
   message centre exactly as the web drawer does.
-- **Events**: page and screen views, cart, order, wishlist, search and the `es_events` custom
-  rows, written with the mobile SDK's equivalents of the web calls so the same six tables and the
-  same custom table fill from both surfaces.
+- **Events**: screen views, cart, order, wishlist, search and the `es_events` custom rows, written
+  with the mobile SDK's equivalents of the web calls so the same six tables and the same custom
+  table fill from both surfaces.
 - The operator simulator stays on the web; the app is the customer's device and receives what
   the simulator triggers, which is the strongest moment of the demo: a usage signal on one screen,
   a notification on the phone in the room.
 
 **What must stay identical to the web**: product ids and variant ids, category paths, the
 contact key scheme, the `es_events` event types, the order id convention, the message sender and
-its moments, the recommendation engine's rules (ported, or called as a small read-only endpoint
-so both surfaces recommend the same thing), and the demo notice.
+its moments, the recommendation results (served by `es-profile?reco=1` so both surfaces recommend
+the same thing), and the demo notice.
 
 **What has to be read from dev.dengage.com before building** (not asserted here): the Android
 SDK's integration steps and dependency, how the application is created in the panel and which
@@ -748,18 +766,147 @@ project and its `google-services.json`, the package name (PROPOSAL `com.dtelco.b
 signing key or agreement to use a debug build, and the distribution route (APK sideload or an
 internal test track).
 
-**Stack**: Kotlin with Jetpack Compose, one module, minimum SDK the Dengage SDK requires,
-catalogue read from `es-product-feed` as JSON at start and cached, profile from `es-profile`,
-messages from `es-message`, all through the same public, validated, rate-capped functions the web
-uses. Built and verified in the new session with an emulator run and one physical Android phone
-receiving a push.
+**Stack** (PROPOSAL): Kotlin with Jetpack Compose, one module, minimum SDK the Dengage SDK
+requires, catalogue read from `es-product-feed` as JSON at start and cached, profile and
+recommendations from `es-profile`, messages from `es-message`, all through the same public,
+validated, rate-capped functions the web uses. Built and verified in the new session with an
+emulator run and one physical Android phone receiving a push.
+
+## A16. Acceptance criteria and verification protocol, end to end
+
+The build is done when every line below is checked, in this order. Each check names how it is
+proved; none is proved by a green send or a 200.
+
+**Layer 1: catalogue and data**
+
+- The two Dengage CSVs open with the exact headers in A6.1; one row of each uploads cleanly;
+  the full files upload; a product opened in the panel shows title, price, image and category.
+- 241 products, every one with a variant, every device with storage and colour variants, every
+  `product_variant_id` unique, every image URL resolving on the published origin, every price
+  numeric, no product without a category path.
+- Every relation in `es_product_relation` points at existing ids; every bundle has members; every
+  `requires` is satisfied by at least one in-stock product.
+- Postgres: every `es_` table exists, RLS on, one read policy per table for `dengage_reader`,
+  every view `security_invoker = true`, and `select count(*)` as `dengage_reader` returns the
+  seeded counts, never zero.
+- The Remote Data Source connects; one segment on `v_es_heavy_on_small_plan` counts exactly the
+  seeded number; every connectable view is offered and no reference table is.
+
+**Layer 2: identity and events (web and app)**
+
+- Every page and screen fires its page view first; `?debug=1` shows it with the table name.
+- A first anonymous visit, a search, a wishlist save on each of the four lists, a multi-line cart
+  with a swap, a checkout, an order with a coupon, a cancel, a top-up, a roaming pack, a plan
+  finder run and a compare each produce exactly the rows in A5.1; the counts endpoint shows every
+  standard table and `es_events` moved after the two minute lag.
+- Signing in sets the contact key on both surfaces; the contact card in the panel shows the web
+  and the app history on one profile; the custom columns are populated.
+- The relay stores every lead first, then upserts the contact, and the row's `dengage_status`
+  reads `contact inserted` or `contact updated`, never `pending`.
+
+**Layer 3: messaging**
+
+- Every moment in A5.1 and A5.2 answers with `sent` for email, push, SMS and WhatsApp on a
+  persona that has all four reachabilities, and the own inbox row lands; a refused channel reads
+  as refused with Dengage's code, never as sent.
+- A rich push image renders on an Android phone and on Windows Chrome; the Android app receives
+  a push from the simulator and opens the product screen from it.
+- The inbox drawer and the app inbox show Dengage's messages and the demo's own in one list; only
+  Dengage's are reported back.
+- Every email body renders with all values and with only the always-sent values; no unresolved
+  tag in either render.
+
+**Layer 4: on-site and in-app**
+
+- Every self-drawn creative appears on its rule and from the launcher twice in a row; the three
+  served `es_` campaigns appear from the engine with `?onsite=panel` and never twice; the
+  subscription form creates a `DPS-` contact, never an `sf_` one; the question form writes a tag
+  that a segment can read.
+- Recommendations appear on product, cart, account and app screens with the rule named in the
+  readout; the contact's `reco_*` columns update within a minute; an email and a push print the
+  same three products.
+
+**Layer 5: journeys and segments**
+
+- Each of the 24 journeys is triggered from the demo, not from a test send, and its first step
+  arrives; any journey that does not fire in rehearsal is shown as its canvas and listed as such.
+- Every named segment counts the seeded number, and the simulator moving one persona's usage
+  moves the heavy-user segment by one at the next evaluation.
+
+**Layer 6: the repository's own checks, run before every push**
+
+- The SDK-refusing browser suite passes with every assertion, and asserts the refusal, so no run
+  writes into the account.
+- The everything-works census finds no dead control and no broken image on any page.
+- The phone check passes on two emulated phones, including "the opened box is inside the
+  viewport".
+- No em or en dash in any published HTML; no dead internal reference; every message image over
+  20 KB.
+- The live rehearsal against the new account reports every step `ok` or a named, understood
+  `note`, and "every send answered".
+
+**Layer 7: presentation**
+
+- The verification console loads no part of the demo and reads every moment as configured and
+  every table as moved.
+- The walkthrough runbook is rehearsed once end to end on the published origin, with the Android
+  phone in hand, before the call.
+
+## A17. Risk register
+
+Known failure modes from the Nissan work, mapped to this build, each with the check that catches
+it. Every item here is already covered by a rule or a check above; this is the list to read when
+something looks wrong.
+
+| Risk | Where it bites here | Mitigation and check |
+|---|---|---|
+| Custom table or custom columns missing in the panel | rows accepted and dropped silently, columns refused silently | create them first (A11 step 8); the counts endpoint reads `not found in Data Space`; the relay records a refused column on the lead row |
+| RLS with no policy on a new `es_` table | remote segment tests green and counts zero | one policy per table in the schema file; the acceptance count as `dengage_reader` |
+| Reference table offered as a remote source | not offered, no error | only contact-keyed views are connected; products and stores never are |
+| Multi-line cart mis-stated | Dengage rebuilds the cart from the stream | remove before add on every swap; the suite asserts add and remove counts |
+| `beginCheckout` with an empty cart | an abandoned checkout that names nothing | fire only when the cart names an item; asserted |
+| Push token bound to no contact | code 11 on the first push to a new persona | mint the key at subscription; token fallback in `es-message`; the outcome code read, never `res.ok` |
+| Stale device token | a send reported as sent that reaches nobody | token refreshed every 30 seconds |
+| iPhone web push | no prompt in a Safari tab | manifest kept; the card prints the Home Screen steps; the Android app is the phone story |
+| Android push not arriving | FCM misconfigured or the app not registered | acceptance requires a physical phone receiving a simulator push before the call |
+| Transactional refusal read as success | 200 with a non-zero code | every send reads `code`; refusals are excluded from `channels` |
+| API user lacking a channel permission | 403 with an empty body | the message function's health GET lists channel readiness; SMS and WhatsApp verified in panel |
+| Egress IP not allowlisted | every REST call refused before credentials | the relay's health GET reports `egress_ip`; the same VPS proxy, allowlisted on the new account |
+| Shared push content with a typed URL | a message sending to the wrong place | only tags in content Target URLs and Media; asserted in the content review |
+| Dynamic content unable to resolve a product from a contact id | recommendation emails print nothing | verify in panel first; fallback columns `reco_title_1` and siblings |
+| Journey unable to narrow wishers to a product id | price drop and back in stock go to everyone | verify in panel; fallback is per-contact events from the simulator |
+| Inline creative CSS leaking | site styles broken by a served campaign | every selector namespaced under the creative root id |
+| Top sticky bar covering the header | logo and navigation hidden | banner clearance measured and published; the bar reports its own height |
+| Hand-written pages serving a stale module | Pages cache for ten minutes | one cache stamp for every script tag, restamped on every build |
+| Storage lag read as failure | a count taken straight after a click | the two minute rule in every runbook and console note |
+| An invented figure reaching a message | a price or allowance nobody published | omit rather than fabricate; demo data marked as demo data; the possibility rule |
 
 ---
 
 # Part B. The Dengage capability handoff from the Nissan and Lincoln demos
 
-The full document follows, unchanged in substance. Section numbers inside it are its own.
-Every reference to a file path in it points at the public Nissan repository (A13).
+The full document follows, unchanged in substance. Section numbers inside it are its own. Every
+reference to a file path in it points at the public Nissan repository (A13).
+
+**Where Part A overrides Part B.** Part B describes the Nissan account and the decisions taken
+there; the following no longer apply to this build:
+
+- Part B section 1 identifiers (account `28`, appGuid `99d9b8fb-…`, the `nissanksa` origin, the
+  `/nissanksa/` display rules, the shared `dengage_demo_` library) belong to the Nissan account.
+  This build has its own account, application, origin, `es_` prefix and three served campaigns.
+- Part B section 4.5 content ids and the `DPS-1` to `DPS-8` personas are Nissan's. This build
+  authors its own contents and uses `DPS-ES-1` to `DPS-ES-8`.
+- Part B section 5.2 "no custom columns on `master_contact`" and the relational split are
+  superseded by decision 17: custom columns are used without limit.
+- Part B section 3.7 "inbox delete is local by default" is superseded by rule 11: deletes are
+  reported to Dengage.
+- Part B's table names (`ni_lead_events`, `ni_inbox`, the `v_ni_` views) become `es_events`,
+  `es_inbox`, `v_es_` here.
+- Part B section 7.1 connection fields still apply (same Postgres, same `dengage_reader`); only
+  the grants extend to the new `es_` objects.
+
+Everything else in Part B, every SDK call, REST body, panel contract, measurement and gotcha,
+applies unchanged.
 
 ## Dengage capability handoff: everything the Nissan and Lincoln demos proved about the platform
 
