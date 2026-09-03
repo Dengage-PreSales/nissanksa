@@ -1,7 +1,7 @@
 # Brief for the next session: a Bakcell branded telecom marketplace on Dengage
 
-Written 3 September 2026, revised the same day after the second round of answers. This is the one
-document to load into the new session. It has two parts:
+Written 3 September 2026, revised the same day after the second and third rounds of answers.
+This is the one document to load into the new session. It has two parts:
 
 - **Part A** is the brief for the new build: the decisions taken, the rules, the source site
   inventories, the page map, the moments, the catalogue and recommendation design, the journey
@@ -27,7 +27,7 @@ Recorded in substance from the demo owner's answers, two rounds.
 | 2 | Event prefix | Data layer events for brand campaigns carry the prefix **`es_`** |
 | 3 | Supabase | **Same Supabase project** (`raextqlludkagdntyzwn`), **new tables prefixed `es_`**, no overlap on existing objects. **Same VPS egress proxy.** **Same read-only database role** (`dengage_reader`) with grants on the new objects |
 | 4 | Hosting | **GitHub Pages under a new origin**, on a **new GitHub account and repository**, with a **new service worker file** placed by the demo owner |
-| 5 | Language and currency | **Standard English.** **AZN (₼)**, confirmed |
+| 5 | Language and currency | **Standard English.** **USD** (third round, replacing the earlier AZN reading). Read as: Bakcell's tariff names stay as published (GO 11.99, Klass 19) and the displayed price is the same numeral in dollars (`$11.99 / 28 days`), so the cards look like Bakcell's; every figure the site does not publish is a plausible demo figure in USD. If a conversion from manat is wanted instead, say so |
 | 6 | Scope | **All** of the du.ae personal structure, authored **fresh** in **Bakcell's** style. Magento is a **look and feel** reference only |
 | 7 | Brand mark | **D·TELCO** replaces the Bakcell logo on the site, the way "DENGAGE Auto Demo" replaced Nissan's mark. Bakcell's products, colours and layout stay |
 | 8 | Marketplace mechanics | The ones worth showcasing Dengage, not repetitive ones |
@@ -36,7 +36,7 @@ Recorded in substance from the demo owner's answers, two rounds.
 | 11 | Product feed | The demo owner supplied **Dengage's `product` upload template** (CSV with one sample row) and the **`product_variant` table schema** (panel screenshot); both tables exist empty in the new account. The build produces the catalogue in **exactly that format** (A6.1): **200 or more products** across categories, **linked**, with **cross-sell and upsell** use cases visible. The demo owner uploads the two files |
 | 12 | Recommendations | **No Dengage recommendation widget.** Recommendations are **driven intelligently by the site itself** from the catalogue and the profile, and reported to Dengage |
 | 13 | Dynamic content creatives | **In scope** |
-| 14 | Mobile app | **Whatever is most controllable from the build.** PROPOSAL in A3: an installable PWA. The web demo **declares the app** with a smart banner and deep links |
+| 14 | Mobile app | **A native Android app, Android only** (third round; the PWA proposal is withdrawn). It uses Dengage's Android SDK, shares the contact key and the catalogue with the web, and is described in A15. The web demo **declares the app** with a smart banner and Android app links |
 | 15 | Journeys | **All journeys possible for a telecom marketplace**, built in the panel and rehearsed |
 | 16 | Contact model | **Custom contact columns allowed without limit.** The relational split from Nissan does not carry over |
 | 17 | Simulator | The operator simulator **writes usage and balance changes into Postgres as well as into Dengage**, so remote segments move during a call |
@@ -45,6 +45,11 @@ Recorded in substance from the demo owner's answers, two rounds.
 | 20 | Demo factory | Exists in **another repository**; the new repository carries a **CLAUDE.md derived from it** |
 | 21 | Timeline | **Ten days**, not a constraint on scope |
 | 22 | Where things run | **Everything realtime is done by the site itself.** Dengage is used wherever it is needed. **Nothing on the website that is not possible for Dengage.** Ask when in doubt |
+| 23 | Product upload details | Proceed with the proposals (comma separated `tags`, `Bakcell Shop` for devices and `Bakcell` for the rest, every column filled); **the first test upload settles them** |
+| 24 | Recommendations as data | **Yes**: every recommendation shown and clicked is written to Dengage, and the recommendations are **reused across every channel**, in emails, push, SMS, WhatsApp and inbox, not only on the site (A7) |
+| 25 | Custom contact columns | The list in A9.4 is **confirmed** |
+| 26 | Served `es_` campaigns | The three in A12's former question 6 are **confirmed**: plan finder nudge, roaming bar, newsletter capture |
+| 27 | Journeys | The **24 in A8 are confirmed** as the set to build |
 
 ## A2. Rules for this build
 
@@ -67,7 +72,8 @@ New for this build:
    experience, message, recommendation and segment on the site maps to a mechanism named in
    Part B or confirmed by the demo owner. Anything else is a question first.
 10. **Realtime by the site, Dengage where needed.** Instant reactions (confirmation cards,
-    drawer messages, on-site experiences, recommendations) are drawn by the site. Dengage carries
+    drawer messages, on-site experiences, recommendations) are drawn by the site, and by the
+    Android app inside the app. Dengage carries
     the profile, the events, the product tables, the segments, the journeys, push, inbox, email,
     SMS, WhatsApp, and the two or three served campaigns. No Dengage call for decoration.
 11. **Everything is shown.** Custom contact columns are used. Inbox delete is reported. Journeys
@@ -85,7 +91,8 @@ New for this build:
 | Custom Data Space event table | `es_events` | PROPOSAL |
 | Persona keys | `DPS-ES-1` to `DPS-ES-8` | decided |
 | Order id convention | `DPS-bakcell-<kind>-<timestamp>`; kinds `order`, `topup`, `esim`, `roam`, `addon`, `panel`, `sim` | PROPOSAL |
-| Mobile app | An **installable PWA** of the same storefront: manifest with `display: standalone`, the origin's service worker, home screen icon, smart banner and deep links on the web pages. Trade-off stated plainly: this proves web push on installed iOS and Android and the whole engagement layer in an app shell, and it does not exercise Dengage's native mobile SDK | PROPOSAL, awaiting yes or no (A12) |
+| Mobile app | A **native Android app** with Dengage's Android SDK, its own Android application in the Dengage account, Firebase Cloud Messaging for push, the same `DPS-ES-` contact key on sign-in, the same product ids and the same `es_events` table. Package name PROPOSAL `com.dtelco.bakcell`. Details and the inputs it needs in A15 | decided; inputs PENDING |
+| Currency | USD, `$` sign, two decimals, `locale.currency = 'USD'` in the config the events module reads | decided |
 | Dengage account | exists; shown as `demo_es` in the panel, with empty `product` and `product_variant` tables already created | decided |
 | Dengage web application id (appGuid), account id, API user | to be created by the demo owner; the head snippet takes the first two | PENDING |
 | Published origin | `https://<new-account>.github.io/<repo>/` | PENDING |
@@ -234,7 +241,7 @@ headline face; light and dark modes.
 ### A4.3 The page map for the marketplace
 
 **PROPOSAL.** du.ae's structure with Bakcell's products in it, Bakcell's look, the D·TELCO mark,
-English, AZN.
+English, USD.
 
 | Section | Pages | Product types on them |
 |---|---|---|
@@ -312,7 +319,8 @@ and, where the customer should hear about it, calls the message sender.
 | SMS | Content > SMS with the account's sender id; transactional SMS beside email and push | decided live |
 | WhatsApp | native Dengage channel on the new account | decided live |
 | A/B test | a served campaign with two variants | to build |
-| PWA install and push on phones | manifest, service worker, home screen | proven |
+| Android app: push, in-app messages, app inbox, events, deep links | Dengage Android SDK, a second application in the account | new territory, A15 |
+| Web push on phones | Android Chrome in the tab; iPhone only via the installed web app, which the site still declares with a manifest | proven |
 
 ## A6. The product catalogue, and the Dengage upload
 
@@ -368,12 +376,13 @@ data anyway, so nullability never bites.
 | `description` | one or two sentences; for plans the allowance line (`5 GB, 300 min, 150 SMS, free WhatsApp, free AI, 28 days`) |
 | `category_path` | `>` separated, matching the `category_path` the `pageView` events send (`Mobile>Plans>Prepaid GO`, `Shop>Phones`, `Bundles>Device plus plan`) |
 | `brand` | `Bakcell` for plans, packs, SIM and services; the maker for devices and accessories (`Apple`, `Samsung`, `Xiaomi`, `Honor`, `Redmi`) |
-| `price`, `discounted_price` | AZN decimals; `discounted_price` equals `price` when there is no offer; a genuinely free service carries `0` in both, which is a fact rather than a gap |
+| `price`, `discounted_price` | USD decimals with no sign; `discounted_price` equals `price` when there is no offer; a genuinely free service carries `0` in both, which is a fact rather than a gap |
 | `stock_count` | devices and accessories carry a real integer including some zeros for the back-in-stock story; plans, packs and services carry a large constant (`9999`) so they never read as out of stock |
 | `is_active` | `TRUE`; archived tariffs `FALSE` and kept, so the archive page has data |
 | `publish_date` | `DD-MM-YYYY HH:MM`, the seed date |
 | `link`, `mobile_web_link` | the product's page on the published origin; identical unless a mobile route differs |
-| `android_deep_link`, `ios_deep_link` | the same https URL while the app is the installable PWA (a PWA opens its own https links); swapped for app scheme links if a native app follows |
+| `android_deep_link` | the Android app link for the product (`https://<origin>/<path>` verified as an Android App Link for the package, or the scheme `dtelco://product/<product_id>` if verification is not set up in time); the app opens the product screen from a push, an email or a web banner |
+| `ios_deep_link` | no iOS app; carries the web `link` so the column is never empty |
 | `image_link` (non-null), `small_image_link`, `large_image_link` | absolute URLs to committed imagery on the published origin; three sizes rendered at build time (1200, 400, 1600 wide) |
 | `store_name` | `Bakcell Shop` for devices and accessories, `Bakcell` for everything else (A12 question 3 asks whether one value is preferred) |
 | `parent_id` | empty for every top-level product; the bundle relation lives in `tags` and in the Supabase relation table, because a product can belong to several bundles |
@@ -393,9 +402,9 @@ change is a re-download rather than a hand edit.
 
 ### A6.2 Catalogue design: 240 products across the marketplace
 
-**PROPOSAL.** Bakcell's published names and figures where the site publishes them, plausible
-demo figures marked as demo data where it does not (see A12 question 3). Counts are products;
-variants multiply devices and packs.
+**PROPOSAL.** Bakcell's published names where the site publishes them, prices as the same
+numerals in USD (decision 5), plausible USD demo figures marked as demo data where the site
+publishes nothing. Counts are products; variants multiply devices and packs.
 
 | Category path | Products | Examples and variant shape |
 |---|---|---|
@@ -486,6 +495,15 @@ receives them.
   ids and the rule name; the resulting `addToCart` and `order` events; and the same catalogue in
   its own `product` and `product_variant` tables, so dynamic content creatives and journeys
   personalize with the same product attributes the site used.
+- **Recommendations across every channel** (decision 24). The site's engine also writes its
+  current top three recommendations onto the contact through the relay, as the custom columns
+  `reco_product_id_1`, `reco_product_id_2`, `reco_product_id_3`, `reco_rule` and `reco_at`
+  (A9.4), each time they change. An email, a push, an SMS, a WhatsApp message or an inbox card can
+  then print them: dynamic content resolves each id against the `product` and `product_variant`
+  tables for title, price and image, and the transactional sender passes the same three ids in
+  `current` so a transactional message resolves them too. One engine, one set of ids, seen on
+  the site, in the app and in every message, and every impression and click of a recommended
+  product reported back as an event a journey can react to.
 
 ## A8. The journey catalogue for a telecom marketplace
 
@@ -572,12 +590,14 @@ Views, one per segment, all `security_invoker = true`, granted to `dengage_reade
 
 ### A9.4 Custom columns on `master_contact`
 
-Decision 16 allows them. **PROPOSAL** (A12 question 5): `msisdn`, `plan_id`, `plan_name`,
+Decision 16 allows them and decision 25 confirms this list: `msisdn`, `plan_id`, `plan_name`,
 `plan_type`, `lifecycle`, `arpu_band`, `esim`, `device_model`, `contract_end`, `family_lines`,
-`preferred_store`, `preferred_channel`. The relay and `es-operator` keep them current through
-`/bulk/contacts`, so journeys and dynamic content can read `$Contact.plan_name` directly and
-segments on the contact table need no remote join for the common cases. Behavioural detail stays
-on the related rows as before.
+`preferred_store`, `preferred_channel`, plus the recommendation columns from decision 24:
+`reco_product_id_1`, `reco_product_id_2`, `reco_product_id_3`, `reco_rule`, `reco_at`. The relay
+and `es-operator` keep them current through `/bulk/contacts`, so journeys and dynamic content can
+read `$Contact.plan_name` or `$Contact.reco_product_id_1` directly and segments on the contact
+table need no remote join for the common cases. Behavioural detail stays on the related rows as
+before.
 
 ## A10. Personas
 
@@ -589,7 +609,7 @@ on the related rows as before.
 | DPS-ES-1 | Prepaid GO 11.99, hits 80 percent of data every period, browsed GO 29.99 twice. The upsell character |
 | DPS-ES-2 | Postpaid Klass, iPhone contract ending in 45 days, saved a new iPhone, waiting on stock |
 | DPS-ES-3 | Frequent traveller, roaming detected in Türkiye three times this year, never bought a pack |
-| DPS-ES-4 | Balance below 1 ₼ twice this month, plan expired once, tops up by card each time |
+| DPS-ES-4 | Balance below $1 twice this month, plan expired once, tops up by card each time |
 | DPS-ES-5 | Requested port-out yesterday after a complaint about coverage. The save character |
 | DPS-ES-6 | New number activated this week, eSIM, no add-ons yet. The onboarding character |
 | DPS-ES-7 | Three lines at one address on separate plans. The family bundle character |
@@ -602,8 +622,12 @@ on the related rows as before.
 2. **Dengage account and web application** (demo owner): `accountId` and `appGuid` into the head
    snippet and config; API user with the transactional permission; the existing VPS egress IP
    allowlisted; SMS sender id, WhatsApp channel and email domain configured in the UI.
-3. **Service worker** at the new origin root (demo owner). Enable GitHub Pages. Add the manifest,
-   apple meta and icons for the PWA.
+3. **Service worker** at the new origin root (demo owner). Enable GitHub Pages. Keep the manifest,
+   apple meta and icons so web push still works on an iPhone through the installed web app.
+3a. **Android application** in the Dengage account (demo owner creates it and shares its
+   identifiers), a Firebase project with Cloud Messaging and its `google-services.json`, the
+   package name, and the signing key for the demo APK. The build integrates the Dengage Android
+   SDK per dev.dengage.com and ships an APK for sideloading or an internal test track (A15).
 4. **Supabase**: `es_` tables, relations, views, policies and grants to `dengage_reader`; seed
    the catalogue and the subscribers; deploy the `es-*` functions with new secrets; check every
    health GET.
@@ -623,24 +647,27 @@ on the related rows as before.
 
 ## A12. What is still open
 
-1. **Mobile app as an installable PWA** of the same storefront: yes or no? If no, name the stack
-   and whether it lives in the same repository.
-2. **Figures**: use Bakcell's published names and prices where the site publishes them, and
-   author plausible AZN figures marked as demo data for devices, accessories, bundles and
-   anything unpublished: yes or no?
-3. **Three details of the product upload**, each a one-word answer: the separator the importer
-   expects inside `tags` (comma, pipe or semicolon); whether `store_name` should be one value for
-   the whole catalogue or `Bakcell Shop` for devices and `Bakcell` for the rest; and whether the
-   `product` table's own columns (`description`, `brand`, `parent_id`, the deep links, `tags`)
-   are nullable, read from its Columns tab. Nothing blocks on these; the first test upload
-   answers them if you prefer.
-4. **Recommendations as events**: write `reco_shown` and `reco_clicked` into Dengage so a journey
-   can react to a recommendation ignored: yes or no?
-5. **Custom contact columns**: confirm or trim the list in A9.4.
-6. **The two or three served `es_` campaigns**: PROPOSAL is the plan finder nudge (popup,
-   dynamic content with the recommended tier), the roaming bar (sticky bar on travel intent), and
-   the newsletter capture (native subscription form). Confirm or swap.
-7. **Journeys**: confirm the 24 in A8 as the set, or add and remove.
+Every design question has been answered. What remains are inputs and one reading to confirm:
+
+1. **The currency reading** in decision 5: Bakcell's tariff names kept, the same numerals shown
+   as USD, everything unpublished in plausible USD. Say so if a manat-to-dollar conversion was
+   meant instead.
+2. **Inputs for the Android app** (A15): the Dengage Android application's identifiers once the
+   demo owner creates it, the Firebase project's `google-services.json`, the package name if
+   `com.dtelco.bakcell` is not wanted, and how the APK is to be distributed to the phones in the
+   room.
+3. **Inputs for the web application**: `accountId` and `appGuid` of the new web application, the
+   new origin, and confirmation that the service worker is in place.
+4. **Inputs for the backend**: the new API user's key and password set as Supabase secrets, and
+   the VPS egress IP allowlisted on the new account.
+5. **The first test upload** of one product row and one variant row settles the `tags`
+   separator, the `store_name` choice and the nullability of the product table's own columns
+   (decision 23).
+
+The three served `es_` campaigns confirmed in decision 26 are: **the plan finder nudge** (popup
+with dynamic content showing the recommended tier), **the roaming bar** (sticky bar on travel
+intent), and **the newsletter capture** (native subscription form). The 24 journeys in A8 are
+the confirmed set.
 
 ## A13. Access to the old work
 
@@ -671,8 +698,61 @@ Under the possibility rule, these are the lines the Nissan work found and this b
 - A device token is bound to the key that subscribed; a later key needs the token fallback.
 - Custom Data Space tables and custom contact columns must exist before rows are stored.
 - Remote tables must relate to `master_contact` or `master_device`.
-- Recommendations are the site's, reported to Dengage; nothing on the page is labelled as a
-  Dengage recommendation.
+- Recommendations are the site's, reported to Dengage and reused by Dengage in every channel;
+  nothing on the page is labelled as a Dengage recommendation.
+
+## A15. The Android app
+
+Decision 14: a native Android app, Android only. Part B covers the Web SDK and the REST API and
+says nothing about the mobile SDK, so this section states what the app is for, what must stay
+identical to the web, and what has to be read from Dengage's own documentation before a line is
+written. Under the possibility rule, nothing goes into the app that dev.dengage.com's Android SDK
+guide does not document.
+
+**What the app shows**
+
+- The same marketplace: catalogue, plan and device pages, cart, checkout, top-up, roaming,
+  account with plan, usage and balance, inbox, recommendations. Bakcell look, D·TELCO mark.
+- Sign-in with a demo persona, which sets the **same `DPS-ES-` contact key** the web uses, so the
+  web session and the app session land on one profile.
+- **Push notifications** delivered to the app through Firebase Cloud Messaging, with the same
+  contents and journeys the web push uses, rich image included, and a tap opening the product
+  screen through the `android_deep_link`.
+- **In-app messages** served by Dengage's mobile in-app messaging, the app's equivalent of the
+  on-site campaigns, fired by the same `es_` trigger names where the SDK supports event triggers.
+- **App inbox** rendered natively from Dengage's inbox for the device, merged with the demo's own
+  message centre exactly as the web drawer does.
+- **Events**: page and screen views, cart, order, wishlist, search and the `es_events` custom
+  rows, written with the mobile SDK's equivalents of the web calls so the same six tables and the
+  same custom table fill from both surfaces.
+- The operator simulator stays on the web; the app is the customer's device and receives what
+  the simulator triggers, which is the strongest moment of the demo: a usage signal on one screen,
+  a notification on the phone in the room.
+
+**What must stay identical to the web**: product ids and variant ids, category paths, the
+contact key scheme, the `es_events` event types, the order id convention, the message sender and
+its moments, the recommendation engine's rules (ported, or called as a small read-only endpoint
+so both surfaces recommend the same thing), and the demo notice.
+
+**What has to be read from dev.dengage.com before building** (not asserted here): the Android
+SDK's integration steps and dependency, how the application is created in the panel and which
+identifiers the SDK takes, how FCM is wired and which manifest entries are needed, the exact
+method names for setting the contact key, sending page views and ecommerce events, sending a
+custom event to a Data Space table, subscribing to push, showing in-app messages, reading the
+inbox and reporting inbox actions, and how deep links from a push are received. Each of these
+maps one to one onto a Part B web capability; the mapping table in the runbook is written once
+the method names are known.
+
+**Inputs from the demo owner**: the Dengage Android application's identifiers, the Firebase
+project and its `google-services.json`, the package name (PROPOSAL `com.dtelco.bakcell`), a
+signing key or agreement to use a debug build, and the distribution route (APK sideload or an
+internal test track).
+
+**Stack**: Kotlin with Jetpack Compose, one module, minimum SDK the Dengage SDK requires,
+catalogue read from `es-product-feed` as JSON at start and cached, profile from `es-profile`,
+messages from `es-message`, all through the same public, validated, rate-capped functions the web
+uses. Built and verified in the new session with an emulator run and one physical Android phone
+receiving a push.
 
 ---
 
