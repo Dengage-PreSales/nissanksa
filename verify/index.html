@@ -92,8 +92,8 @@
   <div class="card">
     <h2>2. Are events landing in the tables</h2>
     <div class="row">
-      <button id="snap">Take a baseline</button>
-      <button id="again" class="quiet">Read again</button>
+      <button id="snap" class="quiet">Take a baseline</button>
+      <button id="again">Read again</button>
       <span class="stamp" id="snap-when"></span>
     </div>
     <div id="counts-out"></div>
@@ -155,6 +155,18 @@
   function stamp(el, when) {
     el.textContent = when ? 'read at ' + new Date(when).toLocaleTimeString() : '';
   }
+  var clock = function (at) { return new Date(at).toLocaleTimeString(); };
+  /* WHY THIS SAYS TWO TIMES RATHER THAN ONE. Both buttons used to write the
+     same stamp, so a reading that showed no change gave no way to tell whether
+     the baseline was an hour old or had just been replaced by a mis-click on
+     the button beside it. That mis-click is the one failure this tool can
+     cause by itself, and it looks exactly like a demo that wrote nothing. */
+  function stamps(when) {
+    var base = baseline();
+    $('snap-when').textContent =
+      (base && base.at ? 'baseline taken at ' + clock(base.at) + ', ' : 'no baseline yet, ') +
+      'read at ' + clock(when);
+  }
   function fail(host, err) {
     host.innerHTML = '<p class="note no">Could not read: ' + String(err).slice(0, 160) + '</p>';
   }
@@ -207,7 +219,8 @@
     var base = baseline();
     var rows = Object.keys(now.counts || {}).map(function (k) {
       var v = now.counts[k];
-      var before = base && base.counts && base.counts[k] ? base.counts[k] : null;
+      var before = base && base.counts && typeof base.counts[k] === 'number'
+        ? base.counts[k] : null;
       var delta = (typeof v.rows === 'number' && typeof before === 'number') ? v.rows - before : null;
       var cell = delta === null ? '<span class="flat">baseline not taken</span>'
         : (delta > 0 ? '<span class="up">+' + delta + '</span>'
@@ -216,13 +229,44 @@
              '<td class="n">' + (before === null ? '' : before) + '</td>' +
              '<td class="n">' + v.rows + '</td><td class="n">' + cell + '</td></tr>';
     }).join('');
+    var base2 = baseline();
+    var moved = Object.keys(now.counts || {}).some(function (k) {
+      var b = base2 && base2.counts ? base2.counts[k] : null;
+      return typeof b === 'number' && typeof now.counts[k].rows === 'number' && now.counts[k].rows > b;
+    });
+    /* Seven rows all reading no change has three causes and they need
+       different answers, so the tool names the one that fits rather than
+       leaving the reader to guess the wrong one. */
+    var why = '';
+    if (base2 && !moved) {
+      var age = Date.now() - (base2.at || 0);
+      if (age < 150000) {
+        why = '<p class="note no">This baseline is ' + Math.round(age / 1000) +
+              ' seconds old. Storage lags by roughly two minutes, so nothing could have ' +
+              'appeared yet. Use the demo, wait, then press Read again.</p>';
+      } else {
+        why = '<p class="note no">Nothing moved since the baseline taken at ' + clock(base2.at) +
+              '. If you have just walked the demo, check you pressed <b>Read again</b> rather ' +
+              'than Take a baseline: taking a second baseline replaces the first, and every ' +
+              'row then reads no change. Otherwise the demo really did not write, and ' +
+              '<a href="../index.html?debug=1" target="_blank">?debug=1</a> shows what each page sent.</p>';
+      }
+    }
     $('counts-out').innerHTML =
       '<table><thead><tr><th>Table and what writes it</th><th class="n">Baseline</th>' +
-      '<th class="n">Now</th><th class="n">Moved</th></tr></thead><tbody>' + rows + '</tbody></table>';
-    stamp($('snap-when'), Date.now());
+      '<th class="n">Now</th><th class="n">Moved</th></tr></thead><tbody>' + rows + '</tbody></table>' + why;
+    stamps(Date.now());
   }
 
   $('snap').addEventListener('click', function () {
+    var had = baseline();
+    if (had && had.at && !window.confirm(
+        'You already have a baseline from ' + clock(had.at) + '.\n\n' +
+        'Taking a new one replaces it, and every table will then read no change. ' +
+        'To see what your walk wrote, press Read again instead.\n\n' +
+        'Replace the baseline?')) {
+      return;
+    }
     $('counts-out').innerHTML = '<p class="note">Reading seven tables, a few seconds...</p>';
     busy(['snap', 'again'], true, 'Reading');
     readCounts().then(function (d) {
