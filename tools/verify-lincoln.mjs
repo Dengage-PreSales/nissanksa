@@ -13,7 +13,13 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', 'lincoln');
-const BASE = 'http://localhost:8101/lincoln/';
+/* Where the site is being served from. Overridable so the same check can run
+   against the repository root and against the built site in dist/, which is
+   what actually ships:  --base http://localhost:8102/  */
+const baseArg = process.argv.indexOf('--base');
+const SERVER = (baseArg === -1 ? 'http://localhost:8101' : process.argv[baseArg + 1])
+  .replace(/\/?$/, '/');
+const BASE = SERVER + 'lincoln/';
 let failures = 0;
 const fail = (msg) => { failures += 1; console.log('FAIL ' + msg); };
 const ok = (msg) => console.log('  ok ' + msg);
@@ -75,7 +81,7 @@ await ctx.route('**/*', (route) => {
                              body: JSON.stringify({ messages: inboxFixture }) });
     }
   }
-  if (!url.startsWith('http://localhost:8101/')) return route.abort();
+  if (!url.startsWith(SERVER)) return route.abort();
   return route.continue();
 });
 
@@ -117,9 +123,27 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
 {
   const page = await open('index.html');
   await page.click('.dps-launch');
+  /* The launcher offers only what can act. Cards that fire a dengage_demo_
+     event need the shared platform campaign library to answer them, and in an
+     account without it they do nothing, so DEMO_CONFIG.platformCards hides
+     them. A fixed number here would go stale the moment that flag moved, so
+     the check asks the page what it should be showing. */
+  const expected = await page.evaluate(() => ({
+    offered: window.Panels.offered().length,
+    total: window.Panels.SCENARIOS.length,
+    shared: !!(window.DEMO_CONFIG || {}).platformCards,
+  }));
   const cards = await page.locator('#launcher-grid .scenario').count();
-  if (cards < 28) fail(`launcher shows ${cards} cards, expected 28+`);
-  else ok(`launcher renders ${cards} cards`);
+  if (cards !== expected.offered) {
+    fail(`launcher rendered ${cards} cards, but ${expected.offered} are offered`);
+  } else if (expected.shared && expected.offered !== expected.total) {
+    fail(`platformCards is on, so all ${expected.total} cards should be offered, not ${expected.offered}`);
+  } else if (!expected.shared && expected.offered >= expected.total) {
+    fail(`platformCards is off, so fewer than ${expected.total} cards should be offered`);
+  } else {
+    ok(`launcher renders ${cards} of ${expected.total} cards`
+       + (expected.shared ? '' : `, the ${expected.total - expected.offered} needing panel campaigns hidden`));
+  }
   const absent = await page.evaluate(() =>
     ['tekton-launch-bar', 'arrival-alert'].filter((s) => document.querySelector(`[data-scenario="${s}"]`)));
   if (absent.length) fail(`Nissan-only cards present: ${absent.join(', ')}`);
@@ -797,7 +821,32 @@ for (const p of ['submit-a-complaint/index.html', 'offers/navigator-june-26/inde
   answerSends = false;
 }
 
-console.log(dengageAttempts + ' SDK attempts refused by this harness, as intended');
+/* This printed a count and called it intended whatever the count was, which
+   made it a sentence rather than a check. Whether a page should reach for the
+   SDK depends on whether the account is set: while it is the 0000 placeholder
+   js/config.js deliberately does not load it, because a loader URL built on a
+   placeholder would 404 and a network fault reads nothing like a value nobody
+   has filled in yet. Both directions are asserted, so neither a build that has
+   quietly lost its account nor one that has quietly lost its SDK passes. */
+{
+  const page = await open('index.html');
+  const state = await page.evaluate(() => ({
+    configured: !!(window.DEMO_CONFIG || {}).dengage.configured,
+    account: (window.DEMO_CONFIG || {}).dengage.accountId,
+    stub: typeof window.dengage,
+  }));
+  await page.close();
+  if (state.stub !== 'function') {
+    fail('window.dengage is missing, so any event call would throw');
+  } else if (state.configured) {
+    if (dengageAttempts === 0) fail(`account ${state.account} is set but no page reached for the SDK`);
+    else ok(`${dengageAttempts} SDK attempts refused by this harness, as intended`);
+  } else if (dengageAttempts > 0) {
+    fail(`the account is the ${state.account} placeholder, yet ${dengageAttempts} pages asked the CDN for an SDK that cannot exist`);
+  } else {
+    ok(`account ${state.account} is a placeholder, so no SDK was requested and the event queue still exists`);
+  }
+}
 await browser.close();
 if (failures) { console.log(failures + ' failure(s)'); process.exit(1); }
 console.log('all checks passed');

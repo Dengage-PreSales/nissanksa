@@ -9,7 +9,13 @@
 import { createRequire } from 'module';
 const { chromium } = createRequire('/opt/node22/lib/node_modules/')('playwright');
 
-const BASE = 'http://localhost:8101/';
+/* Where the site is being served from. Overridable so the same check can run
+   against the repository root and against the built site in dist/, which is
+   what actually ships:  --base http://localhost:8102/  */
+const baseArg = process.argv.indexOf('--base');
+const SERVER = (baseArg === -1 ? 'http://localhost:8101' : process.argv[baseArg + 1])
+  .replace(/\/?$/, '/');
+const BASE = SERVER + '';
 const PAGES = [
   'lincoln/index.html',
   'lincoln/vehicles/navigator/index.html', 'lincoln/vehicles/aviator/index.html',

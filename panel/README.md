@@ -161,7 +161,7 @@ The two supporting mechanisms are unchanged:
 
 ## 2. Ten campaigns. Optional since 1 September, and here is why
 
-**Read this before spending an hour on it.** The Nissan storefront now draws
+**Read this before spending an hour on it.** The storefront at the origin root now draws
 these ten experiences itself, from `js/creatives.js`, exactly as the Lincoln
 storefront has since 31 August. Every launcher card works, twice in a row, with
 nothing configured in the panel, and each creative also appears on its own from
@@ -545,7 +545,7 @@ sections 1 to 8 already covers it:
   Lincoln launcher: `tekton-launch-bar` and `arrival-alert` carry Nissan model
   copy. Everything else in the launcher is shared.
 - **Known trade-offs, stated on the call if asked:** the web push and campaign
-  click targets configured in the panel point at Nissan demo URLs, and the
+  click targets configured in the panel point at the root storefront URLs, and the
   campaign creatives carry the shared automotive styling rather than Lincoln's
   palette. Both are panel content choices, not platform limits; a production
   account per brand would carry its own.
@@ -579,7 +579,7 @@ Added 31 August, and this section is the one to read before a Lincoln call.
 
 The `dauto_demo_` campaigns carry Nissan model copy, so a Lincoln audience
 cannot be shown them, and rewriting them in the panel would change what the
-Nissan demo shows. The Lincoln launcher's eight cards therefore render from
+the root storefront shows. The Lincoln launcher's eight cards therefore render from
 `lincoln/js/creatives.js` in the site's own palette, and none of them raises a
 `dauto_demo_` data layer event. A Nissan campaign can never answer one of
 these cards, whether those campaigns are paused or live.

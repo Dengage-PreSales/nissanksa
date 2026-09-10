@@ -201,14 +201,41 @@ reads **not found in Data Space** in that case.
 
 ## Part 4. What the repository checks by itself
 
-Before every push, and worth running if you change anything:
+Before every push, and worth running if you change anything.
 
-    python3 -m http.server 8101 &
-    node tools/verify.mjs          # 44 assertions on the Nissan build
-    node tools/verify-lincoln.mjs  # 55 on Lincoln
-    node tools/audit.mjs           # every control and image, all 26 pages
-    node tools/audit-mobile.mjs    # the same at a phone viewport
-    node tools/mobile-check.mjs    # 16 things a thumb does, on two phones
+**Run them against the built site, not the repository root.** `dist/` is what
+actually ships, and it is assembled by a script that could stop copying
+something. Every check takes `--base` for that reason:
+
+    python3 tools/build-dist.py
+    (cd dist && python3 -m http.server 8102 &)
+
+    node tools/verify.mjs          --base http://localhost:8102   # 44 assertions on the root storefront
+    node tools/verify-lincoln.mjs  --base http://localhost:8102   # 56 on Lincoln
+    node tools/audit.mjs           --base http://localhost:8102   # every control and image
+    node tools/audit-mobile.mjs    --base http://localhost:8102   # the same at a phone viewport
+    node tools/mobile-check.mjs    --base http://localhost:8102   # 16 things a thumb does, on two phones
+    node tools/asset-sweep.mjs     --base http://localhost:8102   # every request, and what 404s
+
+Two of these need no browser at all and take a second each:
+
+    python3 tools/test-rebrand.py     # the brand pass rewrites the owner, never the product
+    python3 tools/test-build-dist.py  # the publish guard refuses every bad account state
+
+Both exist because a pass that rewrites copy, and a guard that decides whether
+a publish may happen, are invisible when they go wrong. The brand test caught
+two real defects before they shipped: a regex escape that made the pattern
+match nothing, so every page silently kept the old brand, and a matcher that
+repeated the trailing word, so `Nissan Patrol` came out as `Nissan Patrol
+Patrol`.
+
+**Two assertions read the configuration rather than a fixed number**, so they
+cannot go stale the way their predecessors did. The launcher check asks the
+page how many cards it should be offering and compares that against what
+rendered, instead of expecting a count that changed the moment
+`platformCards` was turned off. The SDK check asserts both directions: with the
+account set, some page must reach for the SDK; with the account still the
+`0000` placeholder, no page may, and the event queue must exist anyway.
 
 **`mobile-check.mjs` is the one that presses things**, and it exists because
 the other four did not. They measure a page; it taps the hamburger, the

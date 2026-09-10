@@ -25,7 +25,13 @@ import { createRequire } from 'node:module';
 const require = createRequire('/opt/node22/lib/node_modules/');
 const { chromium, devices } = require('playwright');
 
-const BASE = 'http://localhost:8101/';
+/* Where the site is being served from. Overridable so the same check can run
+   against the repository root and against the built site in dist/, which is
+   what actually ships:  --base http://localhost:8102/  */
+const baseArg = process.argv.indexOf('--base');
+const SERVER = (baseArg === -1 ? 'http://localhost:8101' : process.argv[baseArg + 1])
+  .replace(/\/?$/, '/');
+const BASE = SERVER + '';
 /* Both phones a room actually holds. The iPhone is the one that matters most:
    it is the narrower of the two and the only one where web push has an extra
    condition attached. */
@@ -290,9 +296,31 @@ for (const phoneName of PHONES) {
   } else if (!creative.inside) fail(`${phoneName}: the experience drew off screen`);
   else ok(`${phoneName}: an experience fits the phone it is drawn on`);
 
-  /* 9. Nothing above reached Dengage, so this run wrote nothing. */
-  if (reachedSdk === 0) fail(`${phoneName}: the SDK hosts were never even attempted, so the refusal proves nothing`);
-  else ok(`${phoneName}: ${reachedSdk} SDK attempts refused by this harness, as intended`);
+  /* 9. Nothing above reached Dengage, so this run wrote nothing.
+
+     Whether a page should reach for the SDK at all depends on the account.
+     js/config.js starts it, and while the account is the 0000 placeholder it
+     deliberately does not, because a loader URL built on a placeholder would
+     404 and a network fault reads nothing like a value nobody has filled in
+     yet. This asserted only the configured case, so it failed on a build that
+     was behaving correctly. Both cases are checked now: with the account set
+     the refusal has to have something to refuse, and with it unset nothing may
+     be requested, while the event queue exists either way. */
+  const dengageState = await page.evaluate(() => ({
+    configured: !!(window.DEMO_CONFIG || {}).dengage.configured,
+    account: (window.DEMO_CONFIG || {}).dengage.accountId,
+    stub: typeof window.dengage,
+  }));
+  if (dengageState.stub !== 'function') {
+    fail(`${phoneName}: window.dengage is missing, so any event call would throw`);
+  } else if (dengageState.configured) {
+    if (reachedSdk === 0) fail(`${phoneName}: account ${dengageState.account} is set but no page reached for the SDK`);
+    else ok(`${phoneName}: ${reachedSdk} SDK attempts refused by this harness, as intended`);
+  } else if (reachedSdk > 0) {
+    fail(`${phoneName}: the account is the ${dengageState.account} placeholder, yet ${reachedSdk} requests went to the CDN`);
+  } else {
+    ok(`${phoneName}: account ${dengageState.account} is a placeholder, so no SDK was requested and the event queue still exists`);
+  }
 
   await browser.close();
 }

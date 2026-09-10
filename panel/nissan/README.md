@@ -1,4 +1,4 @@
-# The Nissan demo's messages
+# The root storefront's messages
 
 Everything here is content to create in the Dengage panel. Nothing in this
 folder is served by the site, and nothing here is read at runtime: the panel
