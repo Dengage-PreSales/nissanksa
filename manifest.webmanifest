@@ -2,7 +2,7 @@
   "name": "Nissan KSA, a Dengage demonstration",
   "short_name": "Nissan Demo",
   "description": "A Dengage pre purchase demonstration storefront built on the public Nissan Saudi Arabia website. Not Nissan's site.",
-  "id": "/nissanksa/",
+  "id": "/",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

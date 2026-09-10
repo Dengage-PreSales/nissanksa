@@ -9,9 +9,11 @@
 # this server's one fixed address. The proxy relays encrypted bytes it cannot
 # read, TLS stays end to end, and tunnels are limited to port 443.
 #
-# Run on the server, as root:
+# Run on the server, as root. Copy this file across first, because the
+# repository it lives in is private and a raw fetch would need a token:
 #
-#   curl -fsSL https://raw.githubusercontent.com/dengage-presales/nissanksa/main/tools/vps-egress-setup.sh | sudo bash
+#   scp tools/vps-egress-setup.sh root@<server>:/root/
+#   ssh root@<server> 'sudo bash /root/vps-egress-setup.sh'
 #
 # Optional arguments: a proxy username and password. Without them a username
 # is set and a strong random password is generated. The script ends by

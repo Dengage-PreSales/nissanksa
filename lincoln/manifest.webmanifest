@@ -2,7 +2,7 @@
   "name": "Lincoln Saudi Arabia, a Dengage demonstration",
   "short_name": "Lincoln Demo",
   "description": "A Dengage pre purchase demonstration storefront built on the public Lincoln Saudi Arabia website of Mohamed Yousuf Naghi Motors. Not their site.",
-  "id": "/nissanksa/lincoln/",
+  "id": "/lincoln/",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

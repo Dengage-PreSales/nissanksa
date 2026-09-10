@@ -130,8 +130,19 @@
     function bookingStarted() { return !!readJson('sessionStorage', 'dps:nissanksa:started', false); }
     function signalled(name) { return !!readJson('sessionStorage', 'dps:nissanksa:' + name, false); }
 
+    /* Which page this is, independent of where the site is published.
+
+       This read window.location.pathname and tested it against the publication
+       subpath. That worked while the site lived under one, and matched nothing
+       the moment it moved to an origin root: the home page silently became
+       'other' and every creative aimed at it stopped appearing, with no error.
+       data-site-path is stamped on every page by the build and is the path
+       within the site, so it reads the same at a root, under a subpath and on
+       a local server. The leading slash is added so the fragment tests below
+       keep matching a directory boundary. */
     function page() {
-        var path = window.location.pathname;
+        var stamped = document.documentElement.getAttribute('data-site-path');
+        var path = stamped ? '/' + stamped : window.location.pathname;
         if (/book-a-test-drive/.test(path)) return 'booking';
         if (/request-a-quote/.test(path)) return 'quote';
         if (/\/configure\//.test(path)) return 'configure';
@@ -141,7 +152,7 @@
         if (/vehicles\/tekton/.test(path)) return 'tekton';
         if (/\/vehicles\//.test(path)) return 'vehicle';
         if (/\/dealer\//.test(path)) return 'cockpit';
-        if (/nissanksa\/(index\.html)?$/.test(path)) return 'home';
+        if (/^\/(index\.html)?$/.test(path)) return 'home';
         return 'other';
     }
 
@@ -760,6 +771,11 @@
            there is no panel content that draws it. */
         confirm: function (details) { return show('booking-confirmed', details, false); },
         source: source,
+        /* Exposed so a check can assert it rather than trust it. The
+           page kind decides which creatives a page may draw, and when it
+           was derived from the publication path a wrong answer was
+           invisible until a demo went quiet. */
+        pageKind: page,
         slugs: Object.keys(CREATIVES)
     };
 })(window, document);

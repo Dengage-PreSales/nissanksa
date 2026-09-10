@@ -193,7 +193,7 @@ live, and they are where the on-site engine itself is demonstrated.
 
 Every campaign: content type **Custom HTML**, trigger **Data Layer Event**
 with the exact event name below (native trigger noted where it should be used
-instead), **Where to display** = `/nissanksa/`, status **Active**. The display
+instead), **Where to display** = `d-auto.pages.dev`, status **Active**. The display
 rule is what keeps these off every other demo sharing the application. Paste
 the matching file from `panel/creatives/`.
 
@@ -374,7 +374,7 @@ remote ones, so their size grows as the demo is used:
 ## 5. The eight personas
 
 Seeded in both `ni_showroom_lead` and the dealer cockpit
-(`/nissanksa/dealer/`), matched line for line. Open the demo with
+(`/dealer/`), matched line for line. Open the demo with
 `?ck=DPS-1` and the browser becomes that customer; the cockpit's persona
 buttons do the same.
 
@@ -462,7 +462,7 @@ storefront in one pass, the anonymous and known paths, and each panel item with
 a way to check it that does not involve trusting a green tick in a form.
 
 The console it runs on is at
-<https://dengage-presales.github.io/nissanksa/verify/>. It reads which moments
+<https://d-auto.pages.dev/verify/>. It reads which moments
 can message and whether events are landing, and it writes nothing. It also
 loads no part of the demo on purpose, because a verification tool that fires
 its own page view appears in the numbers it reports.
@@ -510,13 +510,13 @@ Monday scope.
 ## 9. The Lincoln demo rides on all of the above unchanged
 
 Added 30 August. A second storefront lives in this repository at
-`https://dengage-presales.github.io/nissanksa/lincoln/`, a replica of the
+`https://d-auto.pages.dev/lincoln/`, a replica of the
 Lincoln Saudi Arabia distributor site (Mohamed Yousuf Naghi Motors), built for
 its own meeting. It needs nothing from the panel, because everything in
 sections 1 to 8 already covers it:
 
 - **Same application, same display rules.** Lincoln pages sit under
-  `/nissanksa/`, so every campaign whose display rule matches that path serves
+  `d-auto.pages.dev`, so every campaign whose display rule matches that host serves
   there too. Verified live on 30 August: firing `nissan_demo_test-drive-invite`
   on a Lincoln page fetched and drew the campaign with zero panel edits.
 - **Same tables, same journeys.** The Lincoln booking funnel writes the same
@@ -541,7 +541,7 @@ sections 1 to 8 already covers it:
 ## 10. Before a call: check the browser's notification permission
 
 Found 31 August while testing with a real click. When a browser has
-notifications **blocked** for `dengage-presales.github.io`, the Dengage SDK
+notifications **blocked** for the demo's origin, the Dengage SDK
 opens its blocked-push panel over the page on every load: a full window
 modal, "Catch price drops and new offers", with a close control. It is
 dismissible and then gone for that page, but it lands on top of whatever is
@@ -831,7 +831,7 @@ answers `no device subscribed for this contact` rather than reaching anything.
 To show an offline signal arriving as a notification, open the storefront as
 that persona first:
 
-    https://dengage-presales.github.io/nissanksa/lincoln/?ck=DPS-1
+    https://d-auto.pages.dev/lincoln/?ck=DPS-1
 
 allow notifications, and the browser is then DPS-1's device. Fire the walk in,
 the completed drive or the no-show from the cockpit for DPS-1 and it lands on

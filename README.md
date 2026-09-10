@@ -12,7 +12,7 @@ Live site, once GitHub Pages is enabled for this repository (deploy from
 branch, `main`, root folder):
 
 ```
-https://dengage-presales.github.io/nissanksa/
+https://d-auto.pages.dev/
 ```
 
 ## What is in this repository

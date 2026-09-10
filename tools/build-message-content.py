@@ -574,7 +574,7 @@ def nissan_env(name):
 BRANDS = [
     dict(
         key='lincoln', label='Lincoln', title="The Lincoln demo's messages",
-        origin='https://dengage-presales.github.io/nissanksa/lincoln/',
+        origin='https://d-auto.pages.dev/lincoln/',
         contact='contact-us/',
         at=' at Mohamed Yousuf Naghi Motors', of='Mohamed Yousuf Naghi Motors',
         notice=('A demonstration message from a Dengage sales demo. Vehicle names and imagery come from the '
@@ -588,7 +588,7 @@ BRANDS = [
     ),
     dict(
         key='nissan', label='Nissan', title="The Nissan demo's messages",
-        origin='https://dengage-presales.github.io/nissanksa/',
+        origin='https://d-auto.pages.dev/',
         contact='find-a-showroom/',
         # The Nissan build names no dealer anywhere, so its messages do not
         # either: they say the showroom rather than inventing whose it is.

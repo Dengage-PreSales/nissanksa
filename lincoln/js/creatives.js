@@ -102,14 +102,25 @@
     function financeSignal() { return !!readJson('sessionStorage', 'dps:lincoln:finance', false); }
     function bookingStarted() { return !!readJson('sessionStorage', 'dps:lincoln:started', false); }
 
+    /* Which page this is, independent of where the site is published.
+
+       This read window.location.pathname and tested it against the publication
+       subpath. That worked while the site lived under one, and matched nothing
+       the moment it moved to an origin root: the home page silently became
+       'other' and every creative aimed at it stopped appearing, with no error.
+       data-site-path is stamped on every page by the build and is the path
+       within the site, so it reads the same at a root, under a subpath and on
+       a local server. The leading slash is added so the fragment tests below
+       keep matching a directory boundary. */
     function page() {
-        var path = window.location.pathname;
+        var stamped = document.documentElement.getAttribute('data-site-path');
+        var path = stamped ? '/' + stamped : window.location.pathname;
         if (/forms\/testdrive/.test(path)) return 'booking';
         if (/forms\/quote/.test(path)) return 'quote';
         if (/\/offers\//.test(path) || /\/offers\/?$/.test(path)) return 'offers';
         if (/\/vehicles\//.test(path)) return 'vehicle';
         if (/\/dealer\//.test(path)) return 'cockpit';
-        if (/lincoln\/(index\.html)?$/.test(path)) return 'home';
+        if (/^\/(index\.html)?$/.test(path)) return 'home';
         return 'other';
     }
 
@@ -584,6 +595,11 @@
         show: function (slug, data) { return show(slug, data, false); },
         close: close,
         confirm: function (details) { return show('booking-confirmed', details, false); },
+        /* Exposed so a check can assert it rather than trust it. The page
+           kind decides which creatives a page may draw, and when it was
+           derived from the publication path a wrong answer was invisible
+           until a demo went quiet. */
+        pageKind: page,
         slugs: Object.keys(CREATIVES)
     };
 })(window, document);

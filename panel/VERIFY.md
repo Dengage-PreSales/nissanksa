@@ -17,7 +17,7 @@ wired; that one is the story.
 
 Start here, and keep it open in its own tab throughout:
 
-**<https://dengage-presales.github.io/nissanksa/verify/>**
+**<https://d-auto.pages.dev/verify/>**
 
 It reads the demo's state out of Dengage and writes nothing. It also loads no
 part of the demo, on purpose: a verification tool that fires its own page view
@@ -32,18 +32,18 @@ minutes.
 
 | # | Do this | It worked if |
 |---|---|---|
-| 1 | Open [the home page](https://dengage-presales.github.io/nissanksa/) | The Dengage mark is top left, never Nissan's |
+| 1 | Open [the home page](https://d-auto.pages.dev/) | The Dengage mark is top left, never Nissan's |
 | 2 | Search for `patrol` in the header | Results appear in place, no page reload |
 | 3 | Press a heart on any car in the grid | It fills, and the car is saved |
-| 4 | Open [the X-TRAIL page](https://dengage-presales.github.io/nissanksa/vehicles/x-trail/) and press **Watch the price** | It confirms, and the car joins the watch list |
-| 5 | Open [Build and reserve](https://dengage-presales.github.io/nissanksa/configure/?model=x-trail) | Seven X-TRAIL grades, real prices, one saying **Price on request** |
+| 4 | Open [the X-TRAIL page](https://d-auto.pages.dev/vehicles/x-trail/) and press **Watch the price** | It confirms, and the car joins the watch list |
+| 5 | Open [Build and reserve](https://d-auto.pages.dev/configure/?model=x-trail) | Seven X-TRAIL grades, real prices, one saying **Price on request** |
 | 6 | Choose a grade, then a different one | The summary follows your choice and shows one car, not two |
 | 7 | Press **Reserve this build**, fill it in, confirm | The build is held, and a message arrives in the bell drawer |
-| 8 | Open [Compare](https://dengage-presales.github.io/nissanksa/compare/), pick two cars | They line up with published figures |
-| 9 | Open [Find your Nissan](https://dengage-presales.github.io/nissanksa/find-your-nissan/), answer all three | The range narrows, and TEKTON is named separately as unpriced |
-| 10 | Open [My Showroom](https://dengage-presales.github.io/nissanksa/my-showroom/) | Your saved car, your price watch, what you viewed and the car you built |
+| 8 | Open [Compare](https://d-auto.pages.dev/compare/), pick two cars | They line up with published figures |
+| 9 | Open [Find your Nissan](https://d-auto.pages.dev/find-your-nissan/), answer all three | The range narrows, and TEKTON is named separately as unpriced |
+| 10 | Open [My Showroom](https://d-auto.pages.dev/my-showroom/) | Your saved car, your price watch, what you viewed and the car you built |
 | 11 | Press **Not this one** on the build | It disappears |
-| 12 | Open [the dealer cockpit](https://dengage-presales.github.io/nissanksa/dealer/), pick DPS-1, log a walk in, then cancel the test drive | Each reports what it wrote in the log pane |
+| 12 | Open [the dealer cockpit](https://d-auto.pages.dev/dealer/), pick DPS-1, log a walk in, then cancel the test drive | Each reports what it wrote in the log pane |
 
 Then wait two minutes and press **Read again** on the console.
 
@@ -59,10 +59,10 @@ The demo's whole argument is that it works before anyone has a name, so this is
 worth proving rather than asserting.
 
 1. Open the demo in a **private window**. Browse two models, save one, search.
-2. Open [My Showroom](https://dengage-presales.github.io/nissanksa/my-showroom/)
+2. Open [My Showroom](https://d-auto.pages.dev/my-showroom/)
    in that same private window. Everything you just did is there, and the line
    at the top says nobody knows your name yet.
-3. Now open [the demo as DPS-1](https://dengage-presales.github.io/nissanksa/?ck=DPS-1)
+3. Now open [the demo as DPS-1](https://d-auto.pages.dev/?ck=DPS-1)
    and book a test drive. The confirmation arrives against that contact.
 
 **The one thing to confirm in the panel before claiming it on a call.** Open

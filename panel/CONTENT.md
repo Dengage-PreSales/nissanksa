@@ -21,7 +21,7 @@ is the published X-TRAIL installment offer. All of it is pre-purchase.
 | Content Name | D.auto - Push - Booking confirmed |
 | Title | Your test drive is booked |
 | Message | Your test drive request is in. The branch will call to set the exact time. See you soon. |
-| Target URL | https://dengage-presales.github.io/nissanksa/ |
+| Target URL | https://d-auto.pages.dev/ |
 | Icon | Default |
 
 ### 2. Abandoned booking rescue
@@ -30,7 +30,7 @@ is the published X-TRAIL installment offer. All of it is pre-purchase.
 | Content Name | D.auto - Push - Booking rescue |
 | Title | One step left |
 | Message | Your test drive was almost booked. Finishing takes under a minute. |
-| Target URL | https://dengage-presales.github.io/nissanksa/book-a-test-drive/ |
+| Target URL | https://d-auto.pages.dev/book-a-test-drive/ |
 | Icon | Default |
 
 ### 3. Welcome
@@ -39,7 +39,7 @@ is the published X-TRAIL installment offer. All of it is pre-purchase.
 | Content Name | D.auto - Push - Welcome |
 | Title | Welcome to Nissan KSA |
 | Message | You are set. New offers and arrivals will reach you here first. |
-| Target URL | https://dengage-presales.github.io/nissanksa/ |
+| Target URL | https://d-auto.pages.dev/ |
 | Icon | Default |
 
 ### 4. No-show re-invite
@@ -48,7 +48,7 @@ is the published X-TRAIL installment offer. All of it is pre-purchase.
 | Content Name | D.auto - Push - No-show re-invite |
 | Title | Your drive is still waiting |
 | Message | That time did not work out, no problem. Pick any new time and the keys will be ready. |
-| Target URL | https://dengage-presales.github.io/nissanksa/book-a-test-drive/ |
+| Target URL | https://d-auto.pages.dev/book-a-test-drive/ |
 | Icon | Default |
 
 ### 5. Post test drive, same evening
@@ -57,7 +57,7 @@ is the published X-TRAIL installment offer. All of it is pre-purchase.
 | Content Name | D.auto - Push - Post drive quote |
 | Title | How did it feel? |
 | Message | The car you drove today can be yours. Your quote is one tap away. |
-| Target URL | https://dengage-presales.github.io/nissanksa/request-a-quote/ |
+| Target URL | https://d-auto.pages.dev/request-a-quote/ |
 | Icon | Default |
 
 ### 6. Win-back after quiet days
@@ -66,7 +66,7 @@ is the published X-TRAIL installment offer. All of it is pre-purchase.
 | Content Name | D.auto - Push - Win-back |
 | Title | Still thinking it over? |
 | Message | The car you were looking at is still here. Come take another look. |
-| Target URL | https://dengage-presales.github.io/nissanksa/ |
+| Target URL | https://d-auto.pages.dev/ |
 | Icon | Default |
 
 ### 7. TEKTON launch day (this journey is TEKTON specific)
@@ -75,8 +75,8 @@ is the published X-TRAIL installment offer. All of it is pre-purchase.
 | Content Name | D.auto - Push - TEKTON launch |
 | Title | TEKTON has landed |
 | Message | You asked to be first. Book your look at the all-new TEKTON today. |
-| Target URL | https://dengage-presales.github.io/nissanksa/vehicles/tekton/ |
-| Media, optional | https://dengage-presales.github.io/nissanksa/assets/img/side-tekton.jpg |
+| Target URL | https://d-auto.pages.dev/vehicles/tekton/ |
+| Media, optional | https://d-auto.pages.dev/assets/img/side-tekton.jpg |
 | Icon | Default |
 
 ## SMS (Content > SMS)
@@ -119,7 +119,7 @@ one list from two sources" in README.md.
 | Content Name | D.auto - Inbox - Welcome |
 | Title | Your Nissan inbox |
 | Message | Offers, arrivals and booking updates collect here, so nothing gets lost. |
-| Target URL | https://dengage-presales.github.io/nissanksa/ |
+| Target URL | https://d-auto.pages.dev/ |
 
 ### 12. Offer card, the deliberately specific one
 | Field | Value |
@@ -127,8 +127,8 @@ one list from two sources" in README.md.
 | Content Name | D.auto - Inbox - X-TRAIL 999 |
 | Title | X-TRAIL from SAR 999 monthly |
 | Message | The published installment campaign, with 0% admin fees and 0% down payment. See the offer page for conditions. |
-| Target URL | https://dengage-presales.github.io/nissanksa/offers/x-trail-999/ |
-| Media, optional | https://dengage-presales.github.io/nissanksa/assets/img/side-x-trail.jpg |
+| Target URL | https://d-auto.pages.dev/offers/x-trail-999/ |
+| Media, optional | https://d-auto.pages.dev/assets/img/side-x-trail.jpg |
 
 ## Email subjects (bodies are composer work, later phase unless time allows)
 

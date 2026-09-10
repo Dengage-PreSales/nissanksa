@@ -8,7 +8,7 @@
         campaign written for this demo, pasted into the panel from panel/ in
         this repository. The prefix is deliberately different from the shared
         set, and every one of those campaigns carries a display rule scoped to
-        /nissanksa/, so they can never appear on any other demo sharing this
+        d-auto.pages.dev, so they can never appear on any other demo sharing this
         Dengage application. All ten live in the pre-purchase lifecycle,
         deliberately: this demo ends at the moment the car is sold.
 

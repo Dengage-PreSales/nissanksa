@@ -33,7 +33,12 @@
 import { createRequire } from 'node:module';
 const { chromium } = createRequire('/opt/node22/lib/node_modules/')('playwright');
 
-const ORIGIN = 'https://dengage-presales.github.io/nissanksa/';
+/* The published origin this rehearses against. Overridable, because the
+   origin is set outside this repository and a check that hardcodes it goes
+   stale the first time the site moves:  --origin https://example.pages.dev/  */
+const originArg = process.argv.indexOf('--origin');
+const ORIGIN = originArg === -1 ? 'https://d-auto.pages.dev/'
+                                : process.argv[originArg + 1].replace(/\/?$/, '/');
 const LOCAL = 'http://localhost:8101/';
 const BASE = ORIGIN;
 const arg = (name, fallback) => {
@@ -433,7 +438,7 @@ if (EMAIL) {
 
 /* 10. Everything the pages reached for that was not the demo or Dengage. */
 const strangers = [...new Set(refused
-  .filter((u) => !u.startsWith('https://dengage-presales.github.io/'))
+  .filter((u) => !u.startsWith(new URL(ORIGIN).origin + '/'))
   .map((u) => new URL(u).host))];
 note('nothing reaches a third party host', strangers.length ? 'break' : 'ok', strangers.join(', '));
 if (served.length) note('bytes the local server could not serve', 'break', served[0]);
