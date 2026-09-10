@@ -77,26 +77,15 @@ def brand_block(rel):
 
 HEAD_INJECT = """
 <!-- ORDER IN THE HEAD IS LOAD BEARING. identity.js resolves the contact key
-     synchronously and must run before the SDK snippet initializes; both must
-     run before any stylesheet, because a pending stylesheet blocks every
-     script after it. -->
+     synchronously and must run before config.js starts the SDK; both must run
+     before any stylesheet, because a pending stylesheet blocks every script
+     after it.
+
+     The account id and app guid used to be an inline snippet right here, which
+     meant they were baked into every generated page. They live in js/config.js
+     now, which also starts the SDK, so the account is set in one file. -->
 <script src="{rel}js/identity.js?v={stamp}"></script>
-<!-- DENGAGE SDK START -->
-<script>
-  (function (window, document) {{
-    window.dengage = window.dengage || function () {{
-      (window.dengage.q = window.dengage.q || []).push(arguments);
-    }};
-    var accountId = '28';
-    var appGuid = '99d9b8fb-0c62-5a85-3e43-2402554d93a5';
-    var script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://pcdn.dengage.com/p/push/' + accountId + '/' + appGuid + '/dengage_sdk_loader.js';
-    document.getElementsByTagName('head')[0].appendChild(script);
-    window.__dnInit ? window.dengage('initialize', window.__dnInit) : window.dengage('initialize');
-  }})(window, document);
-</script>
-<!-- DENGAGE SDK END -->
+<script src="{rel}js/config.js?v={stamp}"></script>
 <link rel="icon" type="image/svg+xml" href="{rel}assets/brand/favicon.svg">
 <meta name="robots" content="noindex">
 <!-- The same four lines the Nissan build gained on 2 September, for the same
@@ -164,7 +153,6 @@ SCAFFOLD = """
 MOUNTS = """
 <link rel="stylesheet" href="{rel}assets/css/demo-controls.css?v={stamp}">
 <link rel="stylesheet" href="{rel}assets/css/lincoln-overrides.css?v={stamp}">
-<script src="{rel}js/config.js?v={stamp}"></script>
 <script src="{rel}js/copy.js?v={stamp}"></script>
 <script src="{rel}js/vehicles.js?v={stamp}"></script>
 <script src="{rel}js/dengageEvents.js?v={stamp}"></script>
@@ -494,5 +482,8 @@ def title_for(route):
 
 
 if __name__ == '__main__':
-    build(sys.argv[1] if len(sys.argv) > 1 else
-          '/tmp/claude-0/-home-user/cdf9c424-a457-5163-9b59-ff833a4ee113/scratchpad/lincoln-capture/pages')
+    # The capture lives in the repository so this runs from a fresh clone.
+    # It used to default to a scratch directory outside the repository, which
+    # meant the build worked only on the machine that captured the site.
+    default = pathlib.Path(__file__).resolve().parent.parent / 'reference' / 'lincoln-capture' / 'pages'
+    build(sys.argv[1] if len(sys.argv) > 1 else str(default))

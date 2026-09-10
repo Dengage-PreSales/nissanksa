@@ -3,26 +3,15 @@
 
 <head>
 <!-- ORDER IN THE HEAD IS LOAD BEARING. identity.js resolves the contact key
-     synchronously and must run before the SDK snippet initializes; both must
-     run before any stylesheet, because a pending stylesheet blocks every
-     script after it. -->
-<script src="../../js/identity.js?v=1788374042"></script>
-<!-- DENGAGE SDK START -->
-<script>
-  (function (window, document) {
-    window.dengage = window.dengage || function () {
-      (window.dengage.q = window.dengage.q || []).push(arguments);
-    };
-    var accountId = '28';
-    var appGuid = '99d9b8fb-0c62-5a85-3e43-2402554d93a5';
-    var script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://pcdn.dengage.com/p/push/' + accountId + '/' + appGuid + '/dengage_sdk_loader.js';
-    document.getElementsByTagName('head')[0].appendChild(script);
-    window.__dnInit ? window.dengage('initialize', window.__dnInit) : window.dengage('initialize');
-  })(window, document);
-</script>
-<!-- DENGAGE SDK END -->
+     synchronously and must run before config.js starts the SDK; both must run
+     before any stylesheet, because a pending stylesheet blocks every script
+     after it.
+
+     The account id and app guid used to be an inline snippet right here, which
+     meant they were baked into every generated page. They live in js/config.js
+     now, which also starts the SDK, so the account is set in one file. -->
+<script src="../../js/identity.js?v=1789052994"></script>
+<script src="../../js/config.js?v=1789052994"></script>
 <link rel="icon" type="image/svg+xml" href="../../assets/brand/favicon.svg">
 <meta name="robots" content="noindex">
 <!-- The same four lines the Nissan build gained on 2 September, for the same
@@ -2743,18 +2732,17 @@ background-color: #b45f1a !important;
   </button>
 </div>
 
-<link rel="stylesheet" href="../../assets/css/demo-controls.css?v=1788374042">
-<link rel="stylesheet" href="../../assets/css/lincoln-overrides.css?v=1788374042">
-<script src="../../js/config.js?v=1788374042"></script>
-<script src="../../js/copy.js?v=1788374042"></script>
-<script src="../../js/vehicles.js?v=1788374042"></script>
-<script src="../../js/dengageEvents.js?v=1788374042"></script>
-<script src="../../js/site.js?v=1788374042"></script>
-<script src="../../js/creatives.js?v=1788374042"></script>
-<script src="../../js/panels.js?v=1788374042"></script>
-<script src="../../js/slots.js?v=1788374042"></script>
-<script src="../../js/inbox.js?v=1788374042"></script>
-<script src="../../js/debug.js?v=1788374042"></script>
+<link rel="stylesheet" href="../../assets/css/demo-controls.css?v=1789052994">
+<link rel="stylesheet" href="../../assets/css/lincoln-overrides.css?v=1789052994">
+<script src="../../js/copy.js?v=1789052994"></script>
+<script src="../../js/vehicles.js?v=1789052994"></script>
+<script src="../../js/dengageEvents.js?v=1789052994"></script>
+<script src="../../js/site.js?v=1789052994"></script>
+<script src="../../js/creatives.js?v=1789052994"></script>
+<script src="../../js/panels.js?v=1789052994"></script>
+<script src="../../js/slots.js?v=1789052994"></script>
+<script src="../../js/inbox.js?v=1789052994"></script>
+<script src="../../js/debug.js?v=1789052994"></script>
 </body>
 
 </html>
