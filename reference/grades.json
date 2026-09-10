@@ -1,0 +1,299 @@
+{
+ "x-trail": [
+  {
+   "name": "S 2WD 7 Seats",
+   "version": "2.5 CVT  S 2WD 7 Seats",
+   "power": "181 @ 6,000",
+   "fuel": "Petrol",
+   "specs": [
+    "Paddle Shifter",
+    "LED Headlights",
+    "Driving mode (Sport, Normal)",
+    "7 Seats",
+    "Rear parking sensors"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/x-trail/MY23/Grades/S-2WD-7-Seats.jpg",
+   "price": 107999,
+   "local": "assets/img/trim-x-trail-s-2wd-7-seats.jpg"
+  },
+  {
+   "name": "S 4WD 5 Seats",
+   "version": "2.5 CVT  S 4WD 5 Seats",
+   "power": "181 @ 6,000",
+   "fuel": "Petrol",
+   "specs": [
+    "Paddle Shifter",
+    "Intelligent All-Wheel Drive (4WD)",
+    "Terrain mode",
+    "Roof rails",
+    "Nissan Intelligent Key® with Push Button Ignition"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/x-trail/MY23/Grades/S-4WD-5-Seats.jpg",
+   "price": 109999,
+   "local": "assets/img/trim-x-trail-s-4wd-5-seats.jpg"
+  },
+  {
+   "name": "S 4WD 7 Seats",
+   "version": "2.5 CVT  S 4WD 7 Seats",
+   "power": "181 @ 6,000",
+   "fuel": "Petrol",
+   "specs": [
+    "Paddle Shifter",
+    "Intelligent All-Wheel Drive (4WD)",
+    "Terrain mode",
+    "Roof rails",
+    "Nissan Intelligent Key® with Push Button Ignition"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/x-trail/MY23/Grades/S-4WD-7-Seats.jpg",
+   "price": 116499,
+   "local": "assets/img/trim-x-trail-s-4wd-7-seats.jpg"
+  },
+  {
+   "name": "SV 4WD 7 Seats",
+   "version": "2.5 CVT  SV 4WD 7 Seats",
+   "power": "181 @ 6,000",
+   "fuel": "Petrol",
+   "specs": [
+    "Rear view camera",
+    "Remote Engine Start",
+    "8\" color touch-screen display with Apple CarPlay & Android Auto",
+    "Dual Zone Automatic Temperature Control",
+    "Nissan Intelligent Mobility"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/x-trail/MY23/Grades/SV1-4WD-7-Seats.jpg",
+   "price": 130999,
+   "local": "assets/img/trim-x-trail-sv-4wd-7-seats.jpg"
+  },
+  {
+   "name": "SV+ 4WD 7 Seats",
+   "version": "2.5 CVT  SV+ 4WD 7 Seats",
+   "power": "181 @ 6,000",
+   "fuel": "Petrol",
+   "specs": [
+    "Powered Panoramic Moonroof",
+    "Powered Motion Activated Liftgate with Foot sensor",
+    "12.3\" color touch-screen display with Navigation",
+    "Bose® Premium Audio System",
+    "Nissan Intelligent Mobility",
+    "19\" Alloy Wheels"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/x-trail/MY25/Grades/X-TRAIL-SV%2B.webp",
+   "price": 144999,
+   "local": "assets/img/trim-x-trail-sv-4wd-7-seats.jpg"
+  },
+  {
+   "name": "SL 4WD 7 Seats"
+  },
+  {
+   "name": "N-TREK",
+   "version": "4WD 7 Seats N-TREK",
+   "power": "181 @ 6,000",
+   "fuel": "Petrol",
+   "specs": [
+    "18\" Unique Black Alloy Wheels",
+    "Black V-Motion Grill",
+    "Waterproof Black Leather",
+    "Intelligent Around View Monitor with Moving Object Detection",
+    "12.3” touch-screen display with Apple CarPlay & Android Auto + Bose® Premium Audio System"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/x-trail/MY25/Grades/X-TRAIL-N-TREK.webp",
+   "price": 150999,
+   "local": "assets/img/trim-x-trail-n-trek.jpg"
+  }
+ ],
+ "pathfinder": [
+  {
+   "name": "3.5L V6 S 2WD",
+   "version": "3.5L V6 S 2WD",
+   "power": "271 @ 6,400",
+   "fuel": "Petrol",
+   "specs": [
+    "18” machine finished alloy wheels",
+    "Nissan Connect 8” screen with Apple Carplay",
+    "Rear View Camera",
+    "LED Headlamps & LED Fog Lamps",
+    "Nissan Intelligent Key® with Push Button Ignition"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/pathfinder/MY22/2022-pathfinder-3.5L-V6-S-2WD.jpg",
+   "price": 164999,
+   "local": "assets/img/trim-pathfinder-3-5l-v6-s-2wd.jpg"
+  },
+  {
+   "name": "3.5L V6 S 4WD",
+   "version": "3.5L V6 S 4WD",
+   "power": "271 @ 6,400",
+   "fuel": "Petrol",
+   "specs": [
+    "Intelligent 4x4",
+    "2 additional drive modes (Sand & Mud)",
+    "Hill descent control"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/pathfinder/MY22/2022-pathfinder-3.5L-V6-S-4WD.jpg",
+   "price": 179999,
+   "local": "assets/img/trim-pathfinder-3-5l-v6-s-4wd.jpg"
+  },
+  {
+   "name": "3.5L V6 SV 2WD",
+   "version": "3.5L V6 SV 2WD",
+   "power": "271 @ 6,400",
+   "fuel": "Petrol",
+   "specs": [
+    "20” machine finished alloy wheels",
+    "Nissan Connect 9” screen with wireless Apple Carplay",
+    "Nissan Safety Shield® 360",
+    "Leather seats",
+    "Panoramic Moonroof"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/pathfinder/MY22/2022-pathfinder-3.5L-V6-SV-2WD.jpg",
+   "price": 192999,
+   "local": "assets/img/trim-pathfinder-3-5l-v6-sv-2wd.jpg"
+  },
+  {
+   "name": "3.5L V6 SV 4WD",
+   "version": "3.5L V6 SV 4WD",
+   "power": "271 @ 6,400",
+   "fuel": "Petrol",
+   "specs": [
+    "Intelligent 4x4",
+    "2 additional drive modes (Sand & Mud)",
+    "Hill descent control"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/pathfinder/MY22/2022-pathfinder-3.5L-V6-SV-4WD.jpg",
+   "price": 206999,
+   "local": "assets/img/trim-pathfinder-3-5l-v6-sv-4wd.jpg"
+  },
+  {
+   "name": "3.5L V6 SL 4WD",
+   "version": "3.5L V6 SL 4WD",
+   "power": "271 @ 6,400",
+   "fuel": "Petrol",
+   "specs": [
+    "12.3” Digital Dashboard with fully digital gauges",
+    "Head up display",
+    "Bose sound system – 12 Speakers",
+    "Leather seats with quilted inserts",
+    "Smart Rear View Mirror"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/pathfinder/MY22/2022-pathfinder-3.5L-V6-SL-4WD.jpg",
+   "price": 227999,
+   "local": "assets/img/trim-pathfinder-3-5l-v6-sl-4wd.jpg"
+  }
+ ],
+ "altima": [
+  {
+   "name": "S",
+   "version": "2.5L  S",
+   "power": "188",
+   "fuel": "Petrol",
+   "specs": [
+    "LED Headlamps with Daytime Running Lights",
+    "Intelligent Key with Remote Keyless Entry",
+    "6 Speakers",
+    "Rear Parking Sensors x4",
+    "Cruise Control"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/altima/MY26/grades/ALTIMA-S.webp",
+   "price": 112700,
+   "local": "assets/img/trim-altima-s.jpg"
+  },
+  {
+   "name": "SV",
+   "version": "2.5L  SV",
+   "power": "188",
+   "fuel": "Petrol",
+   "specs": [
+    "ProPILOT (AD1)",
+    "19\" Alloy Wheels",
+    "12.3\" Infotainment Display with Android Auto & Wireless Apple CarPlay",
+    "Sunroof",
+    "Intelligent Forward Emergency Braking",
+    "Navigation"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/altima/MY26/grades/ALTIMA-SV.webp",
+   "price": 127500,
+   "local": "assets/img/trim-altima-sv.jpg"
+  },
+  {
+   "name": "SL",
+   "version": "2.5L  SL",
+   "power": "188",
+   "fuel": "Petrol",
+   "specs": [
+    "19\" Alloy Wheels",
+    "Leather Interior with Memory Seats",
+    "Intelligent Around View Monitor with Moving Object Detection",
+    "ProPILOT (AD1)",
+    "9 Bose Premium Audio System"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/altima/MY26/grades/ALTIMA-SL.webp",
+   "price": 141500,
+   "local": "assets/img/trim-altima-sl.jpg"
+  }
+ ],
+ "x-terra": [
+  {
+   "name": "SE",
+   "version": "2WD SE",
+   "power": "165 @ 6,000",
+   "fuel": "PETROL",
+   "specs": [
+    "17\" Alloy Wheels",
+    "7\" Advanced Driver Assist Display",
+    "Cruise Control",
+    "Intelligent Key with Engine Push Starter"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/X-TERRA/grades/2022/2022%20X-TERRA-SE-2WD-SE-2.5L-I4-165-HP.jpg",
+   "price": 118999,
+   "local": "assets/img/trim-x-terra-se.jpg"
+  },
+  {
+   "name": "TITANIUM",
+   "version": "2WD TITANIUM",
+   "power": "165 @ 6,000",
+   "fuel": "PETROL",
+   "specs": [
+    "8\" Touch-Screen + Apple Carplay/Android Auto",
+    "LED Front Fog Light",
+    "Remote Engine Start",
+    "Chrome Mirrors with Auto Folding"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/X-TERRA/grades/2022/2022%20%20X-TERRA-TITANIUM-2WD-TITANIUM-2.5L-I4-165-HP.jpg",
+   "price": 129999,
+   "local": "assets/img/trim-x-terra-titanium.jpg"
+  },
+  {
+   "name": "PLATINUM",
+   "version": "4WD PLATINUM",
+   "power": "165 @ 6,000",
+   "fuel": "PETROL",
+   "specs": [
+    "18\" Machine Cut Alloy Wheels",
+    "9\" Touch-Screen + Apple Carplay/Android Auto + NAVI",
+    "NISSAN Intelligent Mobility Tech",
+    "Power Adjusted Leather Seats"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/X-TERRA/grades/2022/2022%20X-TERRA-PLATINUM-4WD-PLATINUM-2.5L-I4-165-HP.jpg",
+   "price": 163999,
+   "local": "assets/img/trim-x-terra-platinum.jpg"
+  }
+ ],
+ "z": [
+  {
+   "name": "Performance",
+   "version": "MT  Performance",
+   "power": "400",
+   "fuel": "Petrol",
+   "specs": [
+    "6-speed manual transmission with Synchro Rev Control",
+    "19” Dark Metallic forged alloy wheels by RAYS®",
+    "3 gauge analogue display (boost, turbo fan speed, voltage)",
+    "8-speaker premium Bose audio system",
+    "12.3\" Digital dashboard with Sport Mode display",
+    "NissanConnect® 8\" audio touch-screen display"
+   ],
+   "image": "//www-europe.nissan-cdn.net/content/dam/Nissan/nissan_middle_east/vehicles/All-New-Z/grades/MY25/Nissan-Z-Performance-MT-3d-shot.webp",
+   "price": 261999,
+   "local": "assets/img/trim-z-performance.jpg"
+  }
+ ]
+}

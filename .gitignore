@@ -1,8 +1,9 @@
-# Captured source material: raw page dumps, screenshots and mirrored assets
-# used only while building. Never published in this public repository.
-reference/
+# Build output. tools/build-dist.py assembles the publishable site here, and
+# this is the only directory the hosting platform serves. It is rebuilt from
+# the tracked sources on every deploy, so it is never committed.
+dist/
 
-# Internal pre-sales material: never published in this public repository.
+# Internal pre-sales material.
 docs/
 deck/
 
