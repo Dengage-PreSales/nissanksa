@@ -23,9 +23,15 @@
 //   DENGAGE_API_USERKEY, DENGAGE_API_PASSWORD, DENGAGE_API_BASE,
 //   DENGAGE_EGRESS_PROXY
 
+/* Both published origins, on purpose. The site moved to its own domain and
+   the previous one is still live, so during the changeover a call could be run
+   from either and neither may be refused. The default in the header below is
+   the new one. */
 const ALLOWED_ORIGINS = new Set([
+  'https://d-auto.pages.dev',
   'https://dengage-presales.github.io',
   'http://localhost:8101',
+  'http://localhost:8102',
 ]);
 const API_BASE = Deno.env.get('DENGAGE_API_BASE') ?? 'https://api.dengage.com/rest';
 const EGRESS_PROXY = Deno.env.get('DENGAGE_EGRESS_PROXY') ?? '';
@@ -66,7 +72,7 @@ function egress(): unknown {
 
 function corsHeaders(origin: string): Record<string, string> {
   return {
-    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin) ? origin : 'https://dengage-presales.github.io',
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin) ? origin : 'https://d-auto.pages.dev',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Access-Control-Allow-Headers': 'content-type',
     'Vary': 'Origin',
