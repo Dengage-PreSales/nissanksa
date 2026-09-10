@@ -4,8 +4,8 @@
 
    Why these are not served from Dengage, unlike the shared platform library in
    the same launcher: the brand campaigns on this account were authored for the
-   Nissan demo and carry Nissan model copy, which cannot be shown to a Lincoln
-   audience. Rewriting them in the panel would change what the Nissan demo
+   storefront at the origin root and carry its model copy, which cannot be shown to a Lincoln
+   audience. Rewriting them in the panel would change what that storefront
    shows, so the demo owner's call on 31 August was to render the Lincoln set
    here and leave the account alone.
 
@@ -20,8 +20,8 @@
    every answer writes a row through the one events module, and the booking
    confirmation repeats back exactly what the visitor typed.
 
-   None of them raises a nissan_demo_ data layer event, so nothing here can
-   pull a Nissan campaign onto a Lincoln page, paused or live.
+   None of them raises a dauto_demo_ data layer event, so nothing here can
+   pull one of its campaigns onto a Lincoln page, paused or live.
 
    TRIGGERING. Each creative carries a rule, and the rules run on page view, on
    dwell, on scroll and on exit intent, so the visitor meets them by browsing

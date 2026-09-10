@@ -1,7 +1,7 @@
 {
-  "name": "Nissan KSA, a Dengage demonstration",
-  "short_name": "Nissan Demo",
-  "description": "A Dengage pre purchase demonstration storefront built on the public Nissan Saudi Arabia website. Not Nissan's site.",
+  "name": "D-AUTO",
+  "short_name": "D-AUTO",
+  "description": "D-AUTO, a Dengage pre purchase demonstration storefront. Not a real dealership. Product data comes from the public Nissan Saudi Arabia website.",
   "id": "/",
   "start_url": "./index.html",
   "scope": "./",
@@ -10,8 +10,23 @@
   "background_color": "#111111",
   "theme_color": "#111111",
   "icons": [
-    { "src": "assets/brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "assets/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "assets/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "assets/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

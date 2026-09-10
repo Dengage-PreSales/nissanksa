@@ -121,7 +121,7 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   if (cards < 30) fail(`launcher shows ${cards} cards, expected 30+`);
   else ok(`launcher renders ${cards} cards`);
   /* The brand cards are drawn by js/creatives.js now rather than fired as a
-     nissan_demo_ event, so the whole pre-purchase story runs with nothing
+     dauto_demo_ event, so the whole pre-purchase story runs with nothing
      configured in the panel. Each one is fired twice, the way a presenter
      fires one mid call, and none of them may raise a data layer event: a
      card that both drew and fired would draw twice wherever the campaign
@@ -153,12 +153,12 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
   if (bad.length) fail(`Nissan creatives: ${bad.join('; ')}`);
   else ok(`all ${result.drew.length} Nissan creatives draw, twice in a row`);
   if (result.dl.length) fail(`a brand card raised a data layer event: ${JSON.stringify(result.dl)}`);
-  else ok('brand cards draw locally and raise no nissan_demo_ event');
+  else ok('brand cards draw locally and raise no dauto_demo_ event');
   await page.close();
 }
 
 // 2a. ?onsite=panel hands the same ten to the Dengage on-site engine: the card
-// raises its nissan_demo_ event, nothing is drawn here, and the demo's own
+// raises its dauto_demo_ event, nothing is drawn here, and the demo's own
 // browsing rules stand down so the visitor cannot meet the message twice.
 // ?onsite=local puts it back, which is asserted rather than assumed: the
 // choice is stored, so a stuck panel mode would silently blank every later
@@ -176,11 +176,11 @@ for (const p of ['index.html', 'vehicles/x-trail/index.html', 'vehicles/patrol/i
     const host = document.getElementById('dps-lc-host');
     return { dl: window.__dl, drew: !!(host && host.querySelector('.dps-lc-panel')) };
   });
-  if (!res.dl.includes('nissan_demo_test-drive-invite')) {
+  if (!res.dl.includes('dauto_demo_test-drive-invite')) {
     fail(`panel mode did not raise the campaign event: ${JSON.stringify(res.dl)}`);
   } else if (res.drew) {
     fail('panel mode drew the creative here as well as firing the campaign');
-  } else ok('?onsite=panel fires nissan_demo_ and draws nothing locally');
+  } else ok('?onsite=panel fires dauto_demo_ and draws nothing locally');
   await page.close();
 
   const back = await open('index.html?onsite=local');

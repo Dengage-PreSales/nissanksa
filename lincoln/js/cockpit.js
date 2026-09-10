@@ -7,7 +7,7 @@
    The page says so on its face.
 
    Choosing a persona identifies this browser as that DPS- contact, the same
-   eight contacts the Nissan demo seeded, because a person is one contact
+   eight contacts the storefront at the origin root seeded, because a person is one contact
    however many storefronts they browse; only the model line-up and the
    branch directory here are Lincoln's.
    ========================================================================== */

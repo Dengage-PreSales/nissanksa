@@ -70,9 +70,9 @@ DENGAGE_LOGO_SVG = (
 
 def brand_block(rel):
     return (
-        '<a aria-label="Dengage Auto Demo home" class="dps-brand-link" href="' + rel + 'index.html">'
-        '<span aria-label="Dengage Auto Demo" class="dps-brand">' + DENGAGE_LOGO_SVG +
-        '<span class="dps-brand-text"><b>DENGAGE</b><i>Auto Demo</i></span></span></a>'
+        '<a aria-label="D-AUTO Lincoln home" class="dps-brand-link" href="' + rel + 'index.html">'
+        '<span aria-label="D-AUTO, a Dengage demonstration" class="dps-brand">' + DENGAGE_LOGO_SVG +
+        '<span class="dps-brand-text"><b>D-AUTO</b><i>Dengage demo</i></span></span></a>'
     )
 
 HEAD_INJECT = """
@@ -88,7 +88,7 @@ HEAD_INJECT = """
 <script src="{rel}js/config.js?v={stamp}"></script>
 <link rel="icon" type="image/svg+xml" href="{rel}assets/brand/favicon.svg">
 <meta name="robots" content="noindex">
-<!-- The same four lines the Nissan build gained on 2 September, for the same
+<!-- The same four lines the storefront at the origin root gained on 2 September, for the same
      reason: iOS delivers a web push only to a site added to the Home Screen,
      and only offers that as a real app when the page declares a manifest with
      display standalone. Without them the permission prompt on an iPhone raised
@@ -97,14 +97,14 @@ HEAD_INJECT = """
 <link rel="manifest" href="{rel}manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Lincoln Demo">
+<meta name="apple-mobile-web-app-title" content="D-AUTO Lincoln">
 <link rel="apple-touch-icon" href="{rel}assets/brand/icon-180.png">
 """
 
 SCAFFOLD = """
 <div class="scrim" id="scrim"></div>
 
-<aside class="dps-drawer" id="inbox" aria-label="Lincoln updates">
+<aside class="dps-drawer" id="inbox" aria-label="D-AUTO Lincoln updates">
   <div class="dps-drawer-head dps-modal-head">
     <h2>Lincoln updates</h2>
     <span id="inbox-count" hidden></span>
@@ -140,7 +140,7 @@ SCAFFOLD = """
 </div>
 
 <div class="dps-controls">
-  <button type="button" class="dps-bell dps-floating-bell" data-open="#inbox" aria-label="Lincoln updates">
+  <button type="button" class="dps-bell dps-floating-bell" data-open="#inbox" aria-label="D-AUTO Lincoln updates">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 4a5 5 0 0 1 5 5v4l1.7 2.6H5.3L7 13V9a5 5 0 0 1 5-5z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
     <span class="dps-badge" hidden>0</span>
   </button>
@@ -164,11 +164,75 @@ MOUNTS = """
 <script src="{rel}js/debug.js?v={stamp}"></script>
 """
 
-FOOT_NOTE = ('<div class="dps-demo-notice">A demonstration storefront built by Dengage for a '
-             'sales conversation. Vehicle names and imagery come from the public Lincoln Saudi '
-             'Arabia website of Mohamed Yousuf Naghi Motors; this is not their site, and no '
-             'data entered here reaches Lincoln or the dealer.</div>')
+FOOT_NOTE = ('<div class="dps-demo-notice">D-AUTO is a demonstration storefront built by '
+             'Dengage for a sales conversation. It is not a real dealership and sells nothing. '
+             'Vehicle names and imagery come from the public Lincoln Saudi Arabia website of '
+             'Mohamed Yousuf Naghi Motors; this is not their site, D-AUTO is affiliated with '
+             'neither, and no data entered here reaches Lincoln or the dealer.</div>')
 
+
+# The dealer whose site this was captured from, and the real ways to reach it.
+#
+# The capture is Lincoln Saudi Arabia's site, run by Mohamed Yousuf Naghi
+# Motors. On a storefront branded D-AUTO that company's name is the name of
+# somebody else, and its switchboard, its three inboxes and its social accounts
+# are live routes to a real business that a prospect could take mid call. The
+# marque stays, because a Lincoln Aviator is a Lincoln Aviator whoever sells it.
+# The retailer becomes D-AUTO, and every real contact point is contained.
+#
+# Longest form first, or the shorter ones eat the longer ones.
+DEALER_NAMES = [
+    ('Mohamed Yousuf Naghi Motors Co.', 'D-AUTO Motors Co.'),
+    ('Mohamed Yousuf Naghi Motors', 'D-AUTO Motors'),
+    ('Mohamed Yousuf Naghi', 'D-AUTO Motors'),
+    ('Lincoln Al-Naghi', 'D-AUTO Lincoln'),
+    ('Lincoln Al Naghi', 'D-AUTO Lincoln'),
+    ('Al-Naghi', 'D-AUTO'),
+    ('Al Naghi', 'D-AUTO'),
+    ('MYNaghi', 'D-AUTO'),
+    ('MyNaghi', 'D-AUTO'),
+    ('Mynaghi', 'D-AUTO'),
+    ('NAGHI', 'D-AUTO'),
+    ('Naghi', 'D-AUTO'),
+]
+
+
+def rebrand_dealer(text, rel):
+    """Rename the retailer and contain every real contact point."""
+    # Social accounts belonging to the real dealer, and the marque's global
+    # site. A demonstration sends nobody to either.
+    text = re.sub(r'href="https://(?:www\.)?(?:instagram|facebook|twitter|x)\.com/[^"]*"',
+                  'href="' + rel + 'index.html" data-demo-rerouted="social"', text)
+    text = re.sub(r'href="https://(?:www\.)?youtube\.com/[^"]*"',
+                  'href="' + rel + 'index.html" data-demo-rerouted="social"', text)
+    text = text.replace('href="https://www.lincoln.com/"',
+                        'href="' + rel + 'index.html" data-demo-rerouted="marque"')
+    # The switchboard becomes the showroom finder, which is what a call
+    # control is really asking for and is a page this demo actually has.
+    text = re.sub(r'<a href="tel:[^"]*"([^>]*)>[^<]*</a>',
+                  lambda m: '<a href="' + rel + 'branches/index.html" data-demo-rerouted="tel"'
+                            + m.group(1) + '>Find a showroom</a>', text)
+    text = re.sub(r'href="tel:[^"]*"',
+                  'href="' + rel + 'branches/index.html" data-demo-rerouted="tel"', text)
+    # Three real inboxes. Nothing here may reach them.
+    text = re.sub(r'href="mailto:[^"]*"',
+                  'href="' + rel + 'index.html" data-demo-rerouted="mailto"', text)
+    text = re.sub(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]*mynaghi\.com', 'hello@d-auto.example', text)
+    # Then the name itself, in copy and in descriptive attributes. URL bearing
+    # attributes are masked first: one committed image is called
+    # Naghi-Motors.jpg, and renaming it inside the src turned a working picture
+    # into a 404 on every page. A filename is not copy.
+    held = []
+
+    def hold(match):
+        held.append(match.group(0))
+        return "\x00" + str(len(held) - 1) + "\x00"
+
+    text = re.sub(r'(?:src|href|poster|data-src|srcset|data-bg)="[^"]*"', hold, text)
+    for old, new in DEALER_NAMES:
+        text = text.replace(old, new)
+    text = re.sub(r'\x00(\d+)\x00', lambda m: held[int(m.group(1))], text)
+    return text
 
 def rewrite_urls(text, rel):
     # The dealer's CMS CDN and both language mirrors collapse onto the local tree.
@@ -304,7 +368,7 @@ def swap_logos(text, rel):
 
 BELL = (
     '<button type="button" class="dps-bell dps-header-bell" data-open="#inbox" '
-    'aria-label="Lincoln updates">'
+    'aria-label="D-AUTO Lincoln updates">'
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">'
     '<path d="M12 4a5 5 0 0 1 5 5v4l1.7 2.6H5.3L7 13V9a5 5 0 0 1 5-5z"/>'
     '<path d="M10 19a2 2 0 0 0 4 0"/></svg>'
@@ -371,8 +435,10 @@ def inject_branches(text, capture):
         if addr:
             bits.append('<p class="dps-branch-addr">' + html_text.escape(addr) + '</p>')
         links = []
-        if tel:
-            links.append('<a href="tel:' + tel + '">' + tel + '</a>')
+        # The captured dealer list carries the real switchboard number. A
+        # demonstration cannot answer it and must not publish it, and the
+        # directions link below is the control on this card that can act.
+        _ = tel
         if directions.startswith('https://'):
             links.append('<a href="' + html_text.escape(directions) +
                          '" target="_blank" rel="noopener">Directions</a>')
@@ -407,6 +473,7 @@ def build(capture_dir):
         text = neutralize_site_config(text, rel)
         text = drop_out_of_scope(text)
         text = rewrite_urls(text, rel)
+        text = rebrand_dealer(text, rel)
         text = unwrap_leftover_links(text)
         text = swap_logos(text, rel)
         text = inject_slots(text, route)
@@ -466,7 +533,7 @@ def build(capture_dir):
 
 def title_for(route):
     names = {
-        '': 'Lincoln KSA x Dengage demo',
+        '': 'D-AUTO Lincoln',
         'vehicles/navigator': 'Navigator', 'vehicles/aviator': 'Aviator', 'vehicles/corsair': 'Corsair',
         'forms/testdrive': 'Book a Test Drive', 'forms/quote': 'Request a Quote',
         'download-specifications': 'Download Specifications', 'offers': 'Offers',
@@ -478,7 +545,7 @@ def title_for(route):
         'submit-a-complaint': 'Submit a Complaint',
     }
     base = names.get(route, route)
-    return base if route == '' else base + ' | Lincoln KSA x Dengage demo'
+    return base if route == '' else base + ' | D-AUTO Lincoln'
 
 
 if __name__ == '__main__':

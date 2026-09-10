@@ -420,7 +420,7 @@
         { to: 'index.html#models',            label: 'All models' },
         { to: 'configure/index.html',         label: 'Build and reserve' },
         { to: 'compare/index.html',           label: 'Compare models' },
-        { to: 'find-your-nissan/index.html',  label: 'Find your Nissan' },
+        { to: 'find-your-nissan/index.html',  label: 'Find your car' },
         { to: 'my-showroom/index.html',       label: 'My Showroom' },
         { to: 'offers/index.html',            label: 'Offers' },
         { to: 'book-a-test-drive/index.html', label: 'Book a test drive' },
@@ -891,7 +891,7 @@
                     model: car ? car.name : undefined,
                     model_id: car ? car.id : undefined
                 }, 'brochure');
-                toast(t('brochureSaved', { model: car ? car.name : 'Nissan' }));
+                toast(t('brochureSaved', { model: car ? car.name : 'your car' }));
             });
         });
 

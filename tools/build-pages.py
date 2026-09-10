@@ -5,7 +5,7 @@ Reads reference/hydrated/*.html and reference/assets-manifest.json, and emits
 the site's pages at the repository root. Per page: strip every script and
 tracker, remove the furniture a static demo cannot honour (cookie banner,
 My Showroom, corporate news), rewrite every asset to its committed local copy,
-contain every link inside the demo, swap the Nissan logo for the Dengage one,
+contain every link inside the demo, swap the source logo for the D-AUTO one,
 stamp the metadata the engagement layer reads, inject the Dengage mounts and
 the five inline slots, and add the footer notice that this is a demonstration.
 
@@ -29,7 +29,7 @@ MANIFEST = json.loads((ROOT / "reference" / "assets-manifest.json").read_text())
 # The page map: capture -> published path, with the stamps each page carries.
 
 PAGES = {
-    "index.html":                     {"src": "home.en",              "type": "home",      "title": "Nissan KSA x Dengage demo"},
+    "index.html":                     {"src": "home.en",              "type": "home",      "title": "D-AUTO"},
     "vehicles/x-trail/index.html":    {"src": "x-trail.en",           "type": "product",   "product": "x-trail",      "title": "X-TRAIL"},
     "vehicles/pathfinder/index.html": {"src": "pathfinder.en",        "type": "product",   "product": "pathfinder",   "title": "PATHFINDER"},
     "vehicles/altima/index.html":     {"src": "altima.en",            "type": "product",   "product": "altima",       "title": "ALTIMA"},
@@ -58,7 +58,7 @@ PAGES = {
     # model grid, which answers none of them.
     "my-showroom/index.html":         {"src": "shop-at-home.en",      "type": "other",     "authored": "showroom", "title": "My Showroom"},
     "compare/index.html":             {"src": "shop-at-home.en",      "type": "other",     "authored": "compare",  "title": "Compare models"},
-    "find-your-nissan/index.html":    {"src": "shop-at-home.en",      "type": "other",     "authored": "chooser",  "title": "Find your Nissan"},
+    "find-your-nissan/index.html":    {"src": "shop-at-home.en",      "type": "other",     "authored": "chooser",  "title": "Find your car"},
 }
 
 # Exact internal routes: the source site's href -> this demo's path.
@@ -143,9 +143,9 @@ def _wa_glyph():
 
 WA_GLYPH = _wa_glyph()
 
-DENGAGE_LOGO = """<span class="dps-brand" aria-label="Dengage Auto Demo">
+DENGAGE_LOGO = """<span class="dps-brand" aria-label="D-AUTO, a Dengage demonstration">
 <svg viewBox="0 0 38 38" role="img" aria-hidden="true"><path fill="currentColor" d="M11.3821 34.8307H6.61521V28.0187H11.3821C16.4408 27.824 20.4293 23.6395 20.2348 18.5791C20.1375 13.7133 16.1489 9.82066 11.3821 9.72334H6.61521V15.5623H12.3549V22.3744H0V2.91125H11.3821C20.2348 3.2032 27.1418 10.5019 26.85 19.3576C26.6554 27.824 19.8456 34.6361 11.3821 34.8307Z"/><path fill="currentColor" d="M36.9964 15.9687C38.288 17.303 38.3802 19.5905 36.9964 20.9248C35.6126 22.2591 33.3986 22.2591 32.0148 20.9248C31.369 20.2576 31 19.3045 31 18.4468C31 16.5406 32.476 14.9203 34.4134 14.9203C34.4134 14.9203 34.4134 14.9203 34.5056 14.9203C35.4281 14.9203 36.3507 15.3015 36.9964 15.9687Z"/></svg>
-<span class="dps-brand-text"><b>DENGAGE</b><i>Auto Demo</i></span></span>"""
+<span class="dps-brand-text"><b>D-AUTO</b><i>Dengage demo</i></span></span>"""
 
 
 def rel_root(out_path: str) -> str:
@@ -394,7 +394,37 @@ def collect_css(soup, rel, host="en.nissan-saudiarabia.com"):
     return "\n".join(links)
 
 
+def contain_contacts(soup, rel):
+    """Real phone lines and real inboxes do not belong on a demonstration.
+
+    The capture carries the source company's switchboard number and its
+    recruitment address, on every page. While the site wore that company's
+    name they were merely inert. On a storefront branded D-AUTO they put a
+    prospect through to somebody else mid call, and the footer link had
+    already become the worst version of the problem: the label read "Careers
+    at D-AUTO" while the address behind it belonged to another company.
+
+    A demonstration cannot answer a phone, so the call control becomes the
+    thing it was really asking for, the showroom finder. The unbuilt footer
+    links in this capture already point home, so the careers link joins them
+    rather than becoming a dead control."""
+    for a in soup.select('a[href^="tel:"]'):
+        a["href"] = rel + "find-a-showroom/index.html"
+        a["data-demo-rerouted"] = "tel"
+        # The label carries the number, and in this capture it sits inside a
+        # span rather than directly in the anchor, so a.string is None and a
+        # naive rewrite leaves a real switchboard number printed on the page
+        # under a link that goes somewhere else entirely.
+        labels = [n for n in a.find_all(string=True) if n.strip()]
+        for index, node in enumerate(labels):
+            node.replace_with("FIND A SHOWROOM" if index == 0 else "")
+    for a in soup.select('a[href^="mailto:"]'):
+        a["href"] = rel + "index.html"
+        a["data-demo-rerouted"] = "mailto"
+
+
 def rewrite_links(soup, rel):
+    contain_contacts(soup, rel)
     for a in soup.find_all("a", href=True):
         target = map_route(a["href"], rel)
         if target == "POSTSALE":
@@ -433,7 +463,7 @@ def swap_logo(soup, rel):
         a = holder.find_parent("a")
         if a:
             a["href"] = rel + "index.html"
-            a["aria-label"] = "Dengage Auto Demo home"
+            a["aria-label"] = "D-AUTO home"
     return done
 
 
@@ -592,7 +622,7 @@ def replace_offers_listing(soup, rel):
 MAGNITE_MAIN = """
 <main class="dps-mini-pdp">
   <section class="mini-hero">
-    <img src="{rel}assets/img/a3b81f83b4369a8f.jpg" alt="Nissan MAGNITE">
+    <img src="{rel}assets/img/a3b81f83b4369a8f.jpg" alt="MAGNITE">
   </section>
   <section class="mini-head">
     <p class="mini-kicker">ALL-NEW NISSAN</p>
@@ -607,8 +637,8 @@ MAGNITE_MAIN = """
     </div>
   </section>
   <section class="mini-gallery">
-    <img src="{rel}assets/img/side-magnite.jpg" alt="Nissan MAGNITE side view">
-    <img src="{rel}assets/img/78d0c9cf038dd5b9.jpg" alt="Nissan MAGNITE August offer">
+    <img src="{rel}assets/img/side-magnite.jpg" alt="MAGNITE side view">
+    <img src="{rel}assets/img/78d0c9cf038dd5b9.jpg" alt="MAGNITE August offer">
   </section>
 </main>
 """
@@ -683,7 +713,7 @@ def configurator_main(rel):
     return '''<main id="container" class="cfg-page" data-dps-owned>
   <section class="cfg-head">
     <p class="cfg-eyebrow">Build and reserve</p>
-    <h1 class="cfg-title">Choose your Nissan, then hold it</h1>
+    <h1 class="cfg-title">Choose your car, then hold it</h1>
     <p class="cfg-lede">Every grade, price, engine and feature on this page is the
       one Nissan Saudi Arabia publishes. Pick a model, pick a grade, and the
       build is yours to reserve without leaving the page.</p>
@@ -739,7 +769,7 @@ def configurator_main(rel):
         </label>
       </div>
       <label class="cfg-consent"><input type="checkbox" name="allOptIn" value="yes">
-        Keep me posted about this build and Nissan offers.</label>
+        Keep me posted about this build and D-AUTO offers.</label>
       <button type="submit" class="cfg-go">Confirm the reservation</button>
     </form>
   </section>
@@ -750,7 +780,7 @@ def configurator_main(rel):
 
 
 # ---------------------------------------------------------------------------
-# My Showroom, Compare, Find your Nissan.
+# My Showroom, Compare, Find your car.
 #
 # The shell of each is written here and the content is drawn by js/showroom.js
 # from what the visitor has actually done, because none of it is knowable at
@@ -829,7 +859,7 @@ def profile_main(kind, rel):
         for h in HORIZONS)
     return '''<main id="container" class="sr-page" data-dps-owned>
   <section class="sr-head">
-    <p class="sr-eyebrow">Find your Nissan</p>
+    <p class="sr-eyebrow">Find your car</p>
     <h1 class="sr-title">Three questions, and the range narrows</h1>
     <p class="sr-lede">No scoring and no recommendation engine behind this: a
       match is a match on what you answer. The third question is the one the
@@ -923,8 +953,8 @@ def replace_showroom(soup, rel):
         if el.find_parent("header") is None and el.find_parent("footer") is None:
             dead = dead or el
     cards = "".join(
-        f'<div class="dps-branch"><b>{name}</b><span>{city} · Petromin Nissan network</span>'
-        f'<a href="https://www.google.com/maps/search/?api=1&query={("Petromin Nissan " + city).replace(" ", "+")}"'
+        f'<div class="dps-branch"><b>{name}</b><span>{city} · D-AUTO dealer network</span>'
+        f'<a href="https://www.google.com/maps/search/?api=1&query={(city + " car showroom").replace(" ", "+")}"'
         f' target="_blank" rel="noopener">Get directions</a></div>'
         for name, city, _ in BRANCHES)
     block = BeautifulSoup(
@@ -977,6 +1007,105 @@ def replace_finance_calculator(soup):
         soup.body.insert(0, host)
 
 
+# ---------------------------------------------------------------------------
+# The rebrand pass.
+#
+# The captured pages use one word, Nissan, for two different things, and this
+# demonstration keeps one of them and not the other.
+#
+#   The MARQUE on the product.  A car is a Nissan X-TRAIL whoever sells it, and
+#   Nissan Intelligent Mobility is the name of a thing Nissan built. Renaming
+#   either would be inventing a product, which this repository never does.
+#   These survive untouched.
+#
+#   The OWNER of the website.  "Why Nissan?", "Careers at Nissan", "FIND A
+#   NISSAN CENTER", "(c) Nissan 2026", the marketing consent text. On a site
+#   branded D-AUTO every one of these is wrong, and leaving them in would have
+#   the demo quietly claiming to be Nissan's own site.
+#
+# So the rule is positional: Nissan followed by a model or a Nissan technology
+# name stays, and Nissan standing for the retailer becomes D-AUTO. KEEP_AFTER
+# is the list of words that make it the first kind, and it was built by reading
+# every "Nissan <word>" pair in the capture rather than guessed at.
+#
+# This runs BEFORE any authored content is injected, so the provenance lines
+# this build writes itself ("the figure Nissan Saudi Arabia publishes") are not
+# rewritten by it. Those sentences have to keep naming the real source.
+# ---------------------------------------------------------------------------
+
+# Words after which Nissan is naming a product, not a shop.
+KEEP_AFTER = {
+    "patrol", "altima", "x-terra", "x-trail", "xtrail", "kicks", "magnite",
+    "pathfinder", "z", "tekton", "nismo", "pro-4x", "qashqai", "sunny",
+    "intelligent", "genuine", "connect", "safety", "formula", "propilot",
+}
+
+# Where a straight word swap reads wrong, the whole phrase is rewritten. The
+# site is a dealership now, so a visitor chooses a car rather than a brand.
+REBRAND_PHRASES = [
+    ("find your perfect nissan",        "FIND YOUR PERFECT CAR"),
+    ("nissan model matchmaker",         "MODEL MATCHMAKER"),
+    ("compare nissan models",           "COMPARE MODELS"),
+    ("discover the nissan range",       "DISCOVER THE RANGE"),
+    ("the nissan range",                "the range"),
+    ("nissan saudi arabia",             "D-AUTO"),
+    ("interested in nissan",            "INTERESTED IN A CAR"),
+    ("i own a nissan",                  "I OWN A CAR"),
+    ("choose your nissan",              "Choose your car"),
+    ("your ideal new nissan",           "your ideal new car"),
+    ("the right nissan for you",        "the right car for you"),
+    ("the complete nissan model lineup", "the complete model lineup"),
+    ("full nissan model lineup",        "full model lineup"),
+]
+
+
+def _match_case(sample: str, replacement: str) -> str:
+    """Keep the shouting. Captured navigation is upper case and body copy is not."""
+    if sample.isupper():
+        return replacement.upper()
+    if sample.islower():
+        return replacement.lower()
+    return replacement
+
+
+def _rebrand_text(text: str) -> str:
+    for needle, replacement in REBRAND_PHRASES:
+        idx = text.lower().find(needle)
+        while idx != -1:
+            found = text[idx:idx + len(needle)]
+            text = text[:idx] + _match_case(found, replacement) + text[idx + len(needle):]
+            idx = text.lower().find(needle, idx + len(replacement))
+
+    def one(m):
+        marque, tail = m.group(1), m.group(2) or ""
+        if tail.strip().lower().strip(".,:;!?()’") in KEEP_AFTER:
+            return m.group(0)
+        return _match_case(marque, "D-AUTO") + tail
+
+    return re.sub(r"(?i)\b(nissan)\b(\s+[A-Za-z0-9@®'’-]+)?", one, text)
+
+
+REBRAND_ATTRS = ("alt", "title", "aria-label", "placeholder", "value")
+
+
+def rebrand(soup):
+    """Turn the captured site's owner into D-AUTO, leaving the product alone."""
+    for node in soup.find_all(string=re.compile(r"(?i)nissan")):
+        if node.parent and node.parent.name in ("script", "style"):
+            continue
+        new = _rebrand_text(str(node))
+        if new != str(node):
+            node.replace_with(new)
+    for el in soup.find_all(True):
+        for attr in REBRAND_ATTRS:
+            val = el.get(attr)
+            if isinstance(val, str) and "nissan" in val.lower():
+                el[attr] = _rebrand_text(val)
+        if el.name == "meta" and isinstance(el.get("content"), str) \
+                and "nissan" in el["content"].lower():
+            el["content"] = _rebrand_text(el["content"])
+
+
 def strip_dashes(soup):
     """House style for everything published: no em or en dashes. Captured
     copy gets the same treatment so the whole site reads one way."""
@@ -986,10 +1115,11 @@ def strip_dashes(soup):
 
 def footer_notice(soup):
     note = BeautifulSoup(
-        '<div class="dps-notice">A demonstration storefront built by Dengage for a '
-        'sales conversation. Vehicle names, imagery and prices come from the public '
-        'Nissan Saudi Arabia website; this is not Nissan’s site and no data here '
-        'reaches Nissan.</div>', "html.parser")
+        '<div class="dps-notice">D-AUTO is a demonstration storefront built by '
+        'Dengage for a sales conversation. It is not a real dealership and sells '
+        'nothing. Vehicle names, imagery and prices come from the public Nissan '
+        'Saudi Arabia website; this is not Nissan’s site, D-AUTO is not '
+        'affiliated with Nissan, and no data here reaches Nissan.</div>', "html.parser")
     footer = soup.select_one("footer")
     (footer or soup.body).append(note)
 
@@ -997,11 +1127,11 @@ def footer_notice(soup):
 def head_block(spec, rel, css_links):
     title = spec["title"]
     if spec.get("type") != "home":
-        title = f"{title} | Nissan KSA x Dengage demo"
+        title = f"{title} | D-AUTO"
     return f"""<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
-<meta name="description" content="A Dengage demonstration built on the public Nissan Saudi Arabia website.">
+<meta name="description" content="D-AUTO, a Dengage demonstration storefront built on published Nissan Saudi Arabia product data.">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="{rel}assets/brand/favicon.svg">
 <meta name="theme-color" content="#111111">
@@ -1017,7 +1147,7 @@ def head_block(spec, rel, css_links):
 <link rel="manifest" href="{rel}manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Nissan Demo">
+<meta name="apple-mobile-web-app-title" content="D-AUTO">
 <link rel="apple-touch-icon" href="{rel}assets/brand/icon-180.png">
 
 <!-- ORDER IN THE HEAD IS LOAD BEARING. identity.js resolves the contact key
@@ -1048,9 +1178,9 @@ def mounts_block(rel):
 <!-- ==================== Dengage demo layer ==================== -->
 <div class="scrim" id="scrim"></div>
 
-<aside class="dps-drawer" id="inbox" aria-label="Nissan KSA updates">
+<aside class="dps-drawer" id="inbox" aria-label="D-AUTO updates">
   <div class="dps-drawer-head dps-modal-head">
-    <h2>Nissan KSA updates</h2>
+    <h2>D-AUTO updates</h2>
     <span id="inbox-count" hidden></span>
     <button type="button" id="inbox-refresh">Refresh</button>
     <button type="button" class="dps-x" data-close="1" aria-label="Close">&times;</button>
@@ -1085,7 +1215,7 @@ def mounts_block(rel):
 </div>
 
 <div class="dps-controls">
-  <button type="button" class="dps-bell" data-open="#inbox" aria-label="Nissan KSA updates">
+  <button type="button" class="dps-bell" data-open="#inbox" aria-label="D-AUTO updates">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4a5 5 0 0 1 5 5v4l1.7 2.6H5.3L7 13V9a5 5 0 0 1 5-5z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
     <span class="dps-badge" id="inbox-badge" hidden>0</span>
   </button>
@@ -1139,6 +1269,7 @@ def build(out_path: str, spec: dict):
 
     strip_scripts(soup)
     strip_furniture(soup)
+    rebrand(soup)
     if out_path == "finance-calculator/index.html":
         replace_finance_calculator(soup)
     if out_path == "offers/index.html":

@@ -1,10 +1,10 @@
 /* ============================================================================
    The scenario launcher and the event panel, adapted from the Dengage demo
-   factory for the Nissan KSA demo site.
+   factory for the D-AUTO demo site.
 
    TWO GROUPS OF TRIGGER CARDS, and the order is deliberate:
 
-     1. Nissan scenarios fire nissan_demo_<slug> events. Each is a one-off
+     1. D-AUTO scenarios fire dauto_demo_<slug> events. Each is a one-off
         campaign written for this demo, pasted into the panel from panel/ in
         this repository. The prefix is deliberately different from the shared
         set, and every one of those campaigns carries a display rule scoped to
@@ -29,7 +29,7 @@
     var $ = function (sel) { return document.querySelector(sel); };
 
     var SCENARIOS = [
-        /* Nissan one-off campaigns, all pre-purchase. hy: true switches the
+        /* D-AUTO one-off campaigns, all pre-purchase. hy: true switches the
            fired prefix to the brand one. */
         { slug: 'test-drive-invite',  name: 'Test drive invite',  group: 'brand', local: true },
         { slug: 'test-drive-rescue',  name: 'Test drive rescue',  group: 'brand', local: true,
@@ -138,7 +138,7 @@
 
     function dcfg() { return (window.DEMO_CONFIG && window.DEMO_CONFIG.dengage) || {}; }
     function scenarioPrefix() { return dcfg().scenarioPrefix || 'dengage_demo_'; }
-    function brandPrefix() { return dcfg().brandPrefix || 'nissan_demo_'; }
+    function brandPrefix() { return dcfg().brandPrefix || 'dauto_demo_'; }
     /* True when this demo has been switched to the Dengage on-site campaigns
        with ?onsite=panel, so a brand card prints the event name it will raise
        rather than saying the demo draws it. */
@@ -162,7 +162,7 @@
         return !installed;
     }
 
-    /* The brand cards carry the nissan_demo_ prefix whether they are drawn
+    /* The brand cards carry the dauto_demo_ prefix whether they are drawn
        here or served from the panel, because that is the campaign name a
        reader would go looking for. Everything else is the shared library. */
     function prefixFor(spec) {

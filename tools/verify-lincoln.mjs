@@ -113,7 +113,7 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
 }
 
 // 2. The launcher renders; the Lincoln cards draw their own creative and
-// raise no nissan_demo_ event, so a Nissan campaign can never answer one.
+// raise no dauto_demo_ event, so a Nissan campaign can never answer one.
 {
   const page = await open('index.html');
   await page.click('.dps-launch');
@@ -154,7 +154,7 @@ for (const p of ['index.html', 'vehicles/navigator/index.html', 'vehicles/aviato
   if (bad.length) fail(`Lincoln creatives: ${bad.join('; ')}`);
   else ok(`all ${result.drew.length} Lincoln creatives draw, twice in a row`);
   if (result.dl.length) fail(`a Lincoln card raised data layer events: ${JSON.stringify(result.dl)}`);
-  else ok('Lincoln cards raise no nissan_demo_ event');
+  else ok('Lincoln cards raise no dauto_demo_ event');
   await page.close();
 }
 

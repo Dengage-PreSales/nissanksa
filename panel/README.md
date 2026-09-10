@@ -174,7 +174,7 @@ doing if the audience wants to see the on-site engine control the message, and
 it changes nothing about the story if it is skipped.
 
 **If you do paste them, switch the demo over with `?onsite=panel`.** Add it to
-any demo URL and the ten brand cards raise their `nissan_demo_` event for the
+any demo URL and the ten brand cards raise their `dauto_demo_` event for the
 engine to answer, the demo's own browsing rules stand down so nobody sees the
 same message twice, and each launcher card prints the campaign name it fires.
 `?onsite=local` puts it back. The choice is remembered for that browser, so it
@@ -199,16 +199,16 @@ the matching file from `panel/creatives/`.
 
 | Event name | File | Type | Native trigger instead? |
 |---|---|---|---|
-| `nissan_demo_test-drive-invite` | `test-drive-invite.html` | Popup | optional: page-view frequency rule if offered |
-| `nissan_demo_test-drive-rescue` | `test-drive-rescue.html` | Popup | CHOSEN: exit intent. The launcher card shows the gesture; move the pointer out of the top of the window to fire it |
-| `nissan_demo_finance-teaser` | `finance-teaser.html` | Sticky bar, bottom | no |
-| `nissan_demo_national-day` | `national-day.html` | Popup | no |
-| `nissan_demo_ramadan-offer` | `ramadan-offer.html` | Popup | no |
-| `nissan_demo_tekton-launch-bar` | `tekton-launch-bar.html` | Sticky bar, top | no |
-| `nissan_demo_arrival-alert` | `arrival-alert.html` | Popup, capture | no |
-| `nissan_demo_newsletter-capture` | `newsletter-capture.html` | Popup, capture | no |
-| `nissan_demo_comeback-offer` | `comeback-offer.html` | Popup | no |
-| `nissan_demo_shopping-survey` | `shopping-survey.html` | Popup, survey | CHOSEN: scroll depth. The launcher card shows the gesture; scroll down the page to fire it |
+| `dauto_demo_test-drive-invite` | `test-drive-invite.html` | Popup | optional: page-view frequency rule if offered |
+| `dauto_demo_test-drive-rescue` | `test-drive-rescue.html` | Popup | CHOSEN: exit intent. The launcher card shows the gesture; move the pointer out of the top of the window to fire it |
+| `dauto_demo_finance-teaser` | `finance-teaser.html` | Sticky bar, bottom | no |
+| `dauto_demo_national-day` | `national-day.html` | Popup | no |
+| `dauto_demo_ramadan-offer` | `ramadan-offer.html` | Popup | no |
+| `dauto_demo_tekton-launch-bar` | `tekton-launch-bar.html` | Sticky bar, top | no |
+| `dauto_demo_arrival-alert` | `arrival-alert.html` | Popup, capture | no |
+| `dauto_demo_newsletter-capture` | `newsletter-capture.html` | Popup, capture | no |
+| `dauto_demo_comeback-offer` | `comeback-offer.html` | Popup | no |
+| `dauto_demo_shopping-survey` | `shopping-survey.html` | Popup, survey | CHOSEN: scroll depth. The launcher card shows the gesture; scroll down the page to fire it |
 
 **Paste each file WHOLE**, doctype to closing tag: every file now carries
 its own panel settings in a comment at the top, including layout and width.
@@ -238,7 +238,7 @@ disk.
    event.
 2. **Abandoned booking rescue**: `beginCheckout` with no `order` within the
    wait window, Web Push step with the rescue copy. The on-site half is the
-   `nissan_demo_test-drive-rescue` campaign.
+   `dauto_demo_test-drive-rescue` campaign.
 3. **Welcome**: first identification, one push or inbox message.
 
 The standing rule from the run of show: a journey unverified by the Sunday
@@ -406,7 +406,7 @@ curl -s "https://pcdn.dengage.com/p/push/28/99d9b8fb-0c62-5a85-3e43-2402554d93a5
 
 A response proves the application serves. After pasting, download the on-site
 campaign manifest the loader names (grep the loader body for the `/onsite/`
-path) and `grep -c nissan_demo_` it: ten means all ten are live.
+path) and `grep -c dauto_demo_` it: ten means all ten are live.
 
 Three hosts must be reachable from the machine that presents:
 `pcdn.dengage.com` (widgets render), `event.dengage.com` (events store,
@@ -517,7 +517,7 @@ sections 1 to 8 already covers it:
 
 - **Same application, same display rules.** Lincoln pages sit under
   `d-auto.pages.dev`, so every campaign whose display rule matches that host serves
-  there too. Verified live on 30 August: firing `nissan_demo_test-drive-invite`
+  there too. Verified live on 30 August: firing `dauto_demo_test-drive-invite`
   on a Lincoln page fetched and drew the campaign with zero panel edits.
 - **Same tables, same journeys.** The Lincoln booking funnel writes the same
   rows: `page_view_events`, `shopping_cart_events`, `order_events` (order ids
@@ -562,11 +562,11 @@ Added 31 August, and this section is the one to read before a Lincoln call.
 
 ### The eight Lincoln scenarios are page creatives, not campaigns
 
-The `nissan_demo_` campaigns carry Nissan model copy, so a Lincoln audience
+The `dauto_demo_` campaigns carry Nissan model copy, so a Lincoln audience
 cannot be shown them, and rewriting them in the panel would change what the
 Nissan demo shows. The Lincoln launcher's eight cards therefore render from
 `lincoln/js/creatives.js` in the site's own palette, and none of them raises a
-`nissan_demo_` data layer event. A Nissan campaign can never answer one of
+`dauto_demo_` data layer event. A Nissan campaign can never answer one of
 these cards, whether those campaigns are paused or live.
 
 The thirteen cards under On-site messaging are unchanged: they are the shared

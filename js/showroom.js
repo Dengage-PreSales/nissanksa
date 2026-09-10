@@ -1,11 +1,11 @@
 /* ============================================================================
-   My Showroom, Compare, and Find your Nissan.
+   My Showroom, Compare, and Find your car.
 
    WHY THESE THREE. The demo was audited against every internal link on the
    captured source site, counted rather than remembered, and these were the
    three most linked pre purchase surfaces it did not hold: My Showroom at 69
    links, which is the most linked pre purchase page on their entire site,
-   Find your Nissan at 50, and Compare at 34. All three were routed to the
+   Find your car at 50, and Compare at 34. All three were routed to the
    model grid, which answers none of them.
 
    They matter more here than their link counts suggest, because each one is a
@@ -19,7 +19,7 @@
      Compare          two or three models side by side. Comparing is the
                       behaviour that separates a browser from a shortlist,
                       and it is a segment worth having.
-     Find your Nissan asks what kind of car, what budget, and how soon. The
+     Find your car asks what kind of car, what budget, and how soon. The
                       third answer is the purchase horizon, which is the
                       single most valuable pre purchase field there is, and
                       this asks an anonymous visitor for it before any form
@@ -198,7 +198,7 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /* Find your Nissan                                                    */
+    /* Find your car                                                    */
 
     var answers = { body: null, budget: null, horizon: null };
 

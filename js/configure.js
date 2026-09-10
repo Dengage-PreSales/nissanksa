@@ -122,7 +122,7 @@
         if (priceEl) {
             priceEl.textContent = state.price
                 ? money(state.price)
-                : 'Nissan does not publish a price for this grade. The showroom confirms it.';
+                : 'The manufacturer does not publish a price for this grade. The showroom confirms it.';
         }
         var summary = $('[data-cfg-summary]');
         if (summary) {

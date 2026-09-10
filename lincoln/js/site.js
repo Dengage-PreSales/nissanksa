@@ -1,7 +1,7 @@
 /* ============================================================================
    The Lincoln storefront's own behavior layer.
 
-   Unlike the Nissan replica, this capture keeps the source site's original
+   Unlike the replica at the origin root, this capture keeps the source site's original
    JavaScript alive, so menus, carousels and field validation are the site's
    own. This module adds only what the demo needs on top:
 

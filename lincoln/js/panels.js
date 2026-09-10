@@ -1,10 +1,10 @@
 /* ============================================================================
    The scenario launcher and the event panel, adapted from the Dengage demo
-   factory for the Nissan KSA demo site.
+   factory for the D-AUTO demo site.
 
    TWO GROUPS OF TRIGGER CARDS, and the order is deliberate:
 
-     1. Nissan scenarios fire nissan_demo_<slug> events. Each is a one-off
+     1. D-AUTO scenarios fire dauto_demo_<slug> events. Each is a one-off
         campaign written for this demo, pasted into the panel from panel/ in
         this repository. The prefix is deliberately different from the shared
         set, and every one of those campaigns carries a display rule scoped to
@@ -29,7 +29,7 @@
     var $ = function (sel) { return document.querySelector(sel); };
 
     var SCENARIOS = [
-        /* Nissan one-off campaigns, all pre-purchase. hy: true switches the
+        /* D-AUTO one-off campaigns, all pre-purchase. hy: true switches the
            fired prefix to the brand one. */
         { slug: 'test-drive-invite',  name: 'Test drive invite',  group: 'brand', local: true },
         { slug: 'test-drive-rescue',  name: 'Test drive rescue',  group: 'brand', local: true,
@@ -38,7 +38,7 @@
         { slug: 'national-day',       name: 'National Day offer', group: 'brand', local: true },
         { slug: 'ramadan-offer',      name: 'Seasonal offer',     group: 'brand', local: true },
         /* tekton-launch-bar and arrival-alert exist in the panel but carry
-           Nissan model copy, so this launcher does not offer them. */
+           model copy from the other storefront, so this launcher does not offer them. */
         { slug: 'newsletter-capture', name: 'Newsletter capture', group: 'brand', local: true },
         { slug: 'comeback-offer',     name: 'Welcome back offer', group: 'brand', local: true },
         { slug: 'shopping-survey',    name: 'Shopping survey',    group: 'brand', local: true,
@@ -124,7 +124,7 @@
 
     function dcfg() { return (window.DEMO_CONFIG && window.DEMO_CONFIG.dengage) || {}; }
     function scenarioPrefix() { return dcfg().scenarioPrefix || 'dengage_demo_'; }
-    function brandPrefix() { return dcfg().brandPrefix || 'nissan_demo_'; }
+    function brandPrefix() { return dcfg().brandPrefix || 'dauto_demo_'; }
     function prefixFor(spec) { return spec && spec.hy ? brandPrefix() : scenarioPrefix(); }
 
     /* An iPhone or iPad running this in a browser tab rather than from the
@@ -468,8 +468,8 @@
                 }
 
                 if (spec && spec.local) {
-                    /* Drawn by this demo, with Lincoln copy. No nissan_demo_
-                       event is raised, so a Nissan campaign can never answer
+                    /* Drawn by this demo, with Lincoln copy. No dauto_demo_
+                       event is raised, so the other storefront's campaign can never answer
                        one of these cards on a Lincoln page. */
                     var drew = window.LincolnCreatives && window.LincolnCreatives.show(fired);
                     log(drew

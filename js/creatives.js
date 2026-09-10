@@ -1,10 +1,10 @@
 /* ============================================================================
-   The Nissan experiences, drawn by this demo, and the rules that decide when
+   The D-AUTO experiences, drawn by this demo, and the rules that decide when
    each one appears.
 
    WHY THESE ARE DRAWN HERE. panel/creatives/ holds the same ten as Dengage
    panel content, and they still work if they are pasted in. But until they
-   are, every brand card in the launcher fired a nissan_demo_ event that
+   are, every brand card in the launcher fired a dauto_demo_ event that
    nothing listened to, so the on-site half of the demonstration depended on
    panel work that had not been done. Drawing them here means the whole
    pre-purchase story runs on a fresh clone with nothing configured, which is
@@ -48,7 +48,7 @@
        The demo draws them itself by default, so the whole story runs on a
        fresh clone with nothing configured. Adding ?onsite=panel to any demo
        URL hands the same ten to the Dengage on-site engine instead: the
-       launcher raises the nissan_demo_ data layer event, the automatic rules
+       launcher raises the dauto_demo_ data layer event, the automatic rules
        further down stand down, and what a visitor sees is whatever the panel
        serves. ?onsite=local puts it back. The choice is remembered for this
        browser and this demo, so it survives a click through to a model page.
@@ -164,7 +164,7 @@
 
     function modelName(id) {
         var car = window.Catalog && window.Catalog.get ? window.Catalog.get(id) : null;
-        return car ? car.name : 'Nissan';
+        return car ? car.name : 'your car';
     }
 
     /* The starting price this site publishes for a model, or nothing. Never a
@@ -210,7 +210,7 @@
            carries no scrim; only the modals dim what is behind them. */
         return (o.shape === 'bar' ? '' : '<div class="dps-lc-scrim" data-lc-close="1"></div>') +
             '<div class="dps-lc-panel dps-lc-' + (o.shape || 'modal') + '" role="dialog" aria-modal="true" ' +
-                 'aria-label="' + esc(o.label || 'Nissan') + '">' +
+                 'aria-label="' + esc(o.label || 'D-AUTO') + '">' +
                 '<button type="button" class="dps-lc-x" data-lc-close="1" aria-label="Close">&times;</button>' +
                 inner +
             '</div>';
@@ -241,13 +241,13 @@
             var id = currentModel();
             return card(body(
                 'Take the ' + modelName(id) + ' out',
-                'You have spent time with it here. The next step is the driver seat, at a Nissan ' +
-                'showroom near you, at a time that suits you.',
+                'You have spent time with it here. The next step is the driver seat, at a ' +
+                'D-AUTO showroom near you, at a time that suits you.',
                 '<div class="dps-lc-actions">' +
                     cta('Book a test drive', rel() + 'book-a-test-drive/index.html?model=' + encodeURIComponent(id)) +
                     dismiss('Maybe later') +
                 '</div>',
-                'Nissan'
+                'D-AUTO'
             ), { label: 'Test drive invitation' });
         },
 
@@ -284,9 +284,9 @@
 
         'national-day': function () {
             return card(body(
-                'National Day at Nissan',
+                'National Day at D-AUTO',
                 'Saudi National Day falls on 23 September. Showrooms across the Kingdom mark it ' +
-                'with a season of offers across the Nissan range.',
+                'with a season of offers across the range.',
                 '<div class="dps-lc-actions">' +
                     cta('See the offers', rel() + 'offers/index.html') +
                     dismiss('Not now') +
@@ -298,7 +298,7 @@
         'ramadan-offer': function () {
             return card(body(
                 'A season to arrive well',
-                'Seasonal offers across the Patrol, the X-Trail and the Kicks, at Nissan showrooms ' +
+                'Seasonal offers across the Patrol, the X-Trail and the Kicks, at D-AUTO showrooms ' +
                 'across the Kingdom.',
                 '<div class="dps-lc-actions">' +
                     cta('See the offers', rel() + 'offers/index.html') +
@@ -313,7 +313,7 @@
         'tekton-launch-bar': function () {
             return card(
                 '<div class="dps-lc-bar-inner">' +
-                    '<div><strong>The Nissan TEKTON is coming</strong>' +
+                    '<div><strong>The TEKTON is coming</strong>' +
                     '<span>Register your interest and you hear the launch date before it is public.</span></div>' +
                     '<div class="dps-lc-actions">' +
                         '<a class="dps-lc-cta" href="' + rel() + 'vehicles/tekton/index.html">Register interest</a>' +
@@ -343,7 +343,7 @@
         'newsletter-capture': function () {
             return card(
                 '<form class="dps-lc-body dps-lc-form" data-lc-form="newsletter">' +
-                    '<span class="dps-lc-kicker">Nissan</span>' +
+                    '<span class="dps-lc-kicker">D-AUTO</span>' +
                     '<h2>News from the range, first</h2>' +
                     '<p>New arrivals, seasonal offers and showroom events, straight to you.</p>' +
                     '<label class="dps-lc-field">' +
@@ -352,7 +352,7 @@
                     '</label>' +
                     '<label class="dps-lc-check">' +
                         '<input type="checkbox" name="privacyconsent" required>' +
-                        '<span>Yes, keep me posted about Nissan models and offers.</span>' +
+                        '<span>Yes, keep me posted about D-AUTO models and offers.</span>' +
                     '</label>' +
                     '<div class="dps-lc-actions">' +
                         '<button type="submit" class="dps-lc-cta">Keep me posted</button>' +

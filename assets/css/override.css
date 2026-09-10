@@ -59,6 +59,10 @@
   letter-spacing: .3em;
   text-transform: uppercase;
   opacity: .72;
+  /* The subtext is two words and the header gives it no room to be two lines.
+     It fitted while it read AUTO DEMO and wrapped the moment it became
+     DENGAGE DEMO, which put the second word under the brand name. */
+  white-space: nowrap;
 }
 /* Interior headers are light with dark text; the home header floats over the
    hero and is light-on-dark. The mark follows the header's own theme. */
