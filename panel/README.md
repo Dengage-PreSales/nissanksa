@@ -187,9 +187,24 @@ screen came from. The one exception is the booking confirmation, which is drawn
 either way. It answers a form the visitor just submitted rather than a trigger,
 and no panel content draws it.
 
-The thirteen cards under On-site messaging are a separate matter and are not
-optional in the same way: they are the shared `dengage_demo_` library, already
-live, and they are where the on-site engine itself is demonstrated.
+### The shared platform cards are hidden until their campaigns exist
+
+Twenty two launcher cards fire a `dengage_demo_` event and need the shared
+platform campaign library to answer it: thirteen under On-site messaging, the
+five inline slots, the three games and the A/B test. That library lives in the
+account it was built in. In a fresh account those cards fire and nothing
+appears. The launcher says so honestly rather than pretending, but on a call
+twenty two controls that do nothing read as a broken demo, so they are hidden.
+
+`platformCards: false` in `js/config.js` is what hides them, and setting it to
+`true` brings all twenty two back in one edit. Until then the launcher offers
+fourteen cards, every one of which acts with nothing configured anywhere: the
+ten experiences this storefront draws itself, web push, the app inbox, the
+dealer cockpit and the verification console. The Lincoln storefront offers ten
+on the same rule.
+
+So the order of work in a new account is: author the campaigns you want, then
+flip the flag. Not the other way round.
 
 Every campaign: content type **Custom HTML**, trigger **Data Layer Event**
 with the exact event name below (native trigger noted where it should be used
@@ -569,7 +584,8 @@ Nissan demo shows. The Lincoln launcher's eight cards therefore render from
 `dauto_demo_` data layer event. A Nissan campaign can never answer one of
 these cards, whether those campaigns are paused or live.
 
-The thirteen cards under On-site messaging are unchanged: they are the shared
+The thirteen cards under On-site messaging are hidden with the rest of the
+shared platform set until `platformCards` is turned on. When it is, they are the shared
 `dengage_demo_` library, brand neutral by design, and still served live from
 Dengage. That is where the on-site engine itself is demonstrated.
 

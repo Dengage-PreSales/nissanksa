@@ -174,14 +174,38 @@
     }
 
     /* ------------------------------------------------------------------ */
+    /* What the launcher may offer                                         */
+
+    /* A card that fires a scenarioPrefix event needs the shared platform
+       campaign library to answer it. The demo's own cards carry local, the
+       controls that do something in the page carry action, and everything
+       else is asking a campaign in the panel to appear.
+
+       In an account without that library those cards fire and nothing
+       happens. The log says so honestly, which is why they are not a faked
+       control, but on a call they read as broken. So they are hidden until
+       the campaigns exist, and DEMO_CONFIG.platformCards turns them back on
+       in one edit. Twenty two cards are affected: thirteen on-site, five
+       inline slots, three games and the A/B test. */
+    function needsSharedLibrary(spec) {
+        return !(spec.hy || spec.local || spec.action);
+    }
+
+    function offered() {
+        if ((window.DEMO_CONFIG || {}).platformCards) return SCENARIOS;
+        return SCENARIOS.filter(function (spec) { return !needsSharedLibrary(spec); });
+    }
+
+    /* ------------------------------------------------------------------ */
     /* Launcher                                                            */
 
     function renderLauncher() {
         var host = $('#launcher-grid');
         if (!host) return;
 
+        var available = offered();
         host.innerHTML = GROUPS.map(function (g) {
-            var members = SCENARIOS.filter(function (s) { return s.group === g.id; });
+            var members = available.filter(function (s) { return s.group === g.id; });
             if (!members.length) return '';
 
             return '<h3 class="launcher-group">' + text(g.copy) +
@@ -537,5 +561,6 @@
     }
 
     window.Panels = { init: init, SCENARIOS: SCENARIOS, GROUPS: GROUPS,
+                      offered: offered,
                       EVENTS: EVENTS, fire: fire };
 })(window, document);
