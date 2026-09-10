@@ -22,7 +22,7 @@ account existing. The site is at the origin root, branded D-AUTO, publishing
 only the site rather than the repository, with the Dengage account reduced to
 two values in one file.
 
-**What is left.** Four things only, and three of them need a human.
+**What is left.** Five steps, and three of them need a human.
 
 ---
 
@@ -93,12 +93,37 @@ that state, and refuses again if the account is `28`.
 
 ### Step 4. Set the Supabase secrets and deploy the functions
 
-The Supabase project does not change: same project, same tables, same
-`ni_*` data. What changes is which Dengage account the functions talk to.
+The Supabase project does not change: **project ref `raextqlludkagdntyzwn`**,
+same tables, same `ni_*` data, same `dengage_reader` login. What changes is
+which Dengage account the functions talk to.
 
-Section 5 below is the full list. Set them in the Supabase dashboard, then
-deploy the five functions in `supabase/functions/`. Their code is already
-correct for the new origin and has not been deployed.
+Section 5 below is the full secret list. Set them in the Supabase dashboard,
+then deploy. Their code is already correct for the new origin and has not been
+deployed.
+
+**Read `supabase/functions/DEPLOY.md` before deploying.** Four of the five are
+called from the browser by a page with no Supabase session, and are deployed
+with JWT verification off. That setting lives in the Supabase project and in no
+file here, so a deploy with the default makes every call from the site return
+401: forms stop recording, no message sends, and the site otherwise looks
+completely normal. The file has the flag per function and the one curl that
+proves a deploy worked.
+
+### Step 4a. Recreate the remote data source in the new Dengage account
+
+Easy to miss, because nothing about it lives in this repository.
+
+Dengage reads the `ni_*` tables over a direct Postgres connection to Supabase,
+and that connection is configured **per Dengage account**. Without it the
+remote segments have nothing behind them, the dealer stock story has no table,
+and the 500,000 customer import has nowhere to read from.
+
+**Data Space > Remote Data Sources > New**, type PostgreSQL, pointing at the
+same Supabase database with the `dengage_reader` login. `panel/README.md`
+section 4a has the host, port, database and the one setting that silently
+breaks it, plus section 4b on the eight views that turn a segment into one
+filter rather than a join. The password is not in this repository and never
+will be; the demo owner has it.
 
 ### Step 5. Connect Cloudflare Pages
 
@@ -267,6 +292,11 @@ Then, from the repository root:
 | `node tools/mobile-check.mjs --base http://localhost:8102` | 32 assertions, 16 each on iPhone 13 and Pixel 7, including the menu, the shortcuts and a full booking on a phone |
 | `node tools/asset-sweep.mjs --base http://localhost:8102` | every request on every page, and what the server could not serve |
 
+All of this runs from a clone with nothing but git. That was tested rather than
+assumed: a fresh clone of this repository rebuilds all 48 pages reproducibly
+(the only difference is the cache-busting timestamp), builds `dist/`, and
+passes 181 assertions with no failures.
+
 Once the site is live and the account is set:
 
 ```
@@ -330,3 +360,5 @@ Recorded so you do not spend an afternoon discovering they are not yours.
 | `panel/CONTENT.md` | the copy for every message |
 | `panel/creatives/` | the ten creative files to paste, each carrying its own panel settings |
 | `reference/README.md` | the capture material and which build reads what |
+| `supabase/functions/DEPLOY.md` | the JWT setting that is not in this repository and breaks every call if missed |
+| `CLAUDE.md` | the rules that bind every session in this repository |
