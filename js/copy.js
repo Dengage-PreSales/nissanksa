@@ -78,7 +78,7 @@
             tdSubmit: 'Confirm booking',
             tdThanks: 'Your test drive request is in. A confirmation is on its way, and our team will call to agree the time.',
             tdContinue: 'Continue',
-            brochureSaved: 'Noted. Your interest in the {model} brochure is on your demo profile.',
+            brochureSaved: 'The {model} details are on their way to you by email, and the request is on your profile.',
             waNote: 'WhatsApp runs on Value First’s channel. Its intent signals land on this profile in real time; the dealer cockpit fires one.',
             postSale: 'Ownership and service journeys are a later phase. This demonstration covers the pre-purchase lifecycle.',
             notPart: 'This link is outside the scope of this demo.'
@@ -150,7 +150,7 @@
             tdSubmit: 'تأكيد الحجز',
             tdThanks: 'تم استلام طلب تجربة القيادة. التأكيد في طريقه إليك، وسيتصل بك فريقنا للاتفاق على الموعد.',
             tdContinue: 'متابعة',
-            brochureSaved: 'تم التسجيل. اهتمامك بكتيب {model} أصبح على ملفك في هذا العرض.',
+            brochureSaved: 'تفاصيل {model} في طريقها إليك بالبريد، والطلب مسجَّل في ملفك.',
             waNote: 'واتساب يعمل عبر قناة Value First. إشاراته تصل إلى هذا الملف مباشرة، ولوحة الوكيل ترسل واحدة.',
             postSale: 'رحلات ما بعد البيع والصيانة مرحلة لاحقة. هذا العرض يغطي مرحلة ما قبل الشراء.',
             notPart: 'هذا الرابط خارج نطاق هذا العرض.'
